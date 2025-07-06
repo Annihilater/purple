@@ -3,7 +3,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::api::{
     response::UserResponse,
-    user::{CreateUserRequest, UpdateUserRequest},
+    user::{CreateUserRequest, GetUsersQuery, UpdateUserRequest, UpdateUserStatusRequest},
 };
 use crate::models::{
     auth::{Claims, LoginRequest, RegisterRequest, TokenResponse},
@@ -17,11 +17,35 @@ use crate::models::{
 
 #[derive(OpenApi)]
 #[openapi(
+    paths(
+        crate::api::health::health_check,
+        crate::api::auth::register,
+        crate::api::auth::login,
+        crate::api::user::create_user,
+        crate::api::user::get_users,
+        crate::api::user::get_user,
+        crate::api::user::update_user,
+        crate::api::user::delete_user,
+        crate::api::user::update_user_status,
+        crate::api::plan::create_plan,
+        crate::api::plan::list_plans,
+        crate::api::plan::get_plan,
+        crate::api::plan::update_plan,
+        crate::api::plan::delete_plan,
+        crate::api::coupon::create_coupon,
+        crate::api::coupon::list_coupons,
+        crate::api::coupon::get_coupon,
+        crate::api::coupon::update_coupon,
+        crate::api::coupon::delete_coupon,
+        crate::api::coupon::verify_coupon,
+    ),
     components(
         schemas(
             User,
             CreateUserRequest,
             UpdateUserRequest,
+            UpdateUserStatusRequest,
+            GetUsersQuery,
             UserResponse,
             UserModel,
             Plan,
