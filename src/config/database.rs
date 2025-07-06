@@ -18,8 +18,7 @@ pub struct DatabaseConfig {
 impl DatabaseConfig {
     pub fn from_env() -> anyhow::Result<Self> {
         Ok(Self {
-            url: env::var("DATABASE_URL")
-                .expect("DATABASE_URL must be set"),
+            url: env::var("DATABASE_URL").expect("DATABASE_URL must be set"),
             max_connections: env::var("DATABASE_MAX_CONNECTIONS")
                 .unwrap_or_else(|_| "5".to_string())
                 .parse()?,
@@ -29,17 +28,17 @@ impl DatabaseConfig {
             connect_timeout: Duration::from_secs(
                 env::var("DATABASE_CONNECT_TIMEOUT")
                     .unwrap_or_else(|_| "10".to_string())
-                    .parse()?
+                    .parse()?,
             ),
             max_lifetime: Duration::from_secs(
                 env::var("DATABASE_MAX_LIFETIME")
                     .unwrap_or_else(|_| "1800".to_string())
-                    .parse()?
+                    .parse()?,
             ),
             idle_timeout: Duration::from_secs(
                 env::var("DATABASE_IDLE_TIMEOUT")
                     .unwrap_or_else(|_| "300".to_string())
-                    .parse()?
+                    .parse()?,
             ),
         })
     }
@@ -56,4 +55,4 @@ impl DatabaseConfig {
 
         Ok(pool)
     }
-} 
+}

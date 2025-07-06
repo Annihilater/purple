@@ -1,6 +1,6 @@
 use crate::models::user::{CreateUser, User};
-use sqlx::PgPool;
 use anyhow::Result;
+use sqlx::PgPool;
 
 #[derive(Clone)]
 pub struct UserRepository {
@@ -143,4 +143,4 @@ impl UserRepository {
 
         Ok(result.rows_affected() > 0)
     }
-} 
+}

@@ -1,30 +1,49 @@
-use std::env;
+use anyhow::Result;
+use config;
 use dotenv::dotenv;
+use std::env;
 
 mod database;
 pub use database::{DatabaseConfig, DbPool};
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
+pub struct LogConfig {
+    pub level: String,
+    pub with_thread_ids: bool,
+    pub with_line_number: bool,
+    pub with_file: bool,
+    pub with_target: bool,
+}
+
+#[derive(Debug)]
 pub struct Config {
     pub server_addr: String,
     pub server_port: u16,
     pub database: DatabaseConfig,
+    pub log: LogConfig,
 }
 
 impl Config {
-    pub fn from_env() -> anyhow::Result<Self> {
-        dotenv().ok();
-        
-        let server_addr = env::var("SERVER_ADDR").unwrap_or_else(|_| "127.0.0.1".to_string());
-        let server_port = env::var("SERVER_PORT")
-            .unwrap_or_else(|_| "8080".to_string())
-            .parse::<u16>()?;
-        let database = DatabaseConfig::from_env()?;
+    pub fn from_env() -> Result<Self> {
+        let config = config::Config::builder()
+            .add_source(config::Environment::default())
+            .build()?;
 
         Ok(Self {
-            server_addr,
-            server_port,
-            database,
+            server_addr: config
+                .get_string("SERVER_ADDR")
+                .unwrap_or_else(|_| "127.0.0.1".to_string()),
+            server_port: config.get_int("SERVER_PORT").unwrap_or(8080) as u16,
+            database: DatabaseConfig::from_env()?,
+            log: LogConfig {
+                level: config
+                    .get_string("LOG_LEVEL")
+                    .unwrap_or_else(|_| "info".to_string()),
+                with_thread_ids: config.get_bool("LOG_WITH_THREAD_IDS").unwrap_or(true),
+                with_line_number: config.get_bool("LOG_WITH_LINE_NUMBER").unwrap_or(true),
+                with_file: config.get_bool("LOG_WITH_FILE").unwrap_or(true),
+                with_target: config.get_bool("LOG_WITH_TARGET").unwrap_or(false),
+            },
         })
     }
-} 
+}

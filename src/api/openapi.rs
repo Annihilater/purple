@@ -26,4 +26,4 @@ use crate::models::user::User;
         (name = "users", description = "用户管理接口")
     )
 )]
-pub struct ApiDoc; 
+pub struct ApiDoc;

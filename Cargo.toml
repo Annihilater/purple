@@ -21,6 +21,10 @@ uuid = { version = "1.6", features = ["v4", "serde"] }
 time = { version = "0.3", features = ["serde"] }
 utoipa = { version = "4.2", features = ["actix_extras"] }
 utoipa-swagger-ui = { version = "6.0", features = ["actix-web"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+config = "0.14"
 
 [dev-dependencies]
 tokio-test = "0.4"

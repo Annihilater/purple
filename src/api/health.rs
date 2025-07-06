@@ -1,6 +1,6 @@
+use crate::api::response::ApiResponse;
 use actix_web::{get, HttpResponse};
 use serde_json::json;
-use crate::api::response::ApiResponse;
 
 #[utoipa::path(
     get,
@@ -13,4 +13,4 @@ use crate::api::response::ApiResponse;
 #[get("/health")]
 pub async fn health_check() -> HttpResponse {
     HttpResponse::Ok().json(ApiResponse::success("Service is healthy".to_string()))
-} 
+}

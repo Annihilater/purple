@@ -38,17 +38,15 @@ pub async fn create_user(
     let user = CreateUser {
         email: req.email.clone(),
         password: req.password.clone(), // 注意：实际使用时需要对密码进行哈希处理
-        invite_user_id: None, // 这里需要根据invite_code查询邀请人ID
+        invite_user_id: None,           // 这里需要根据invite_code查询邀请人ID
         uuid,
         token,
     };
 
     match repo.create(user).await {
         Ok(user) => HttpResponse::Ok().json(ApiResponse::success(user)),
-        Err(_) => HttpResponse::InternalServerError().json(ApiResponse::<()>::error(
-            500,
-            "创建用户失败".to_string(),
-        )),
+        Err(_) => HttpResponse::InternalServerError()
+            .json(ApiResponse::<()>::error(500, "创建用户失败".to_string())),
     }
 }
 
@@ -66,19 +64,15 @@ pub async fn create_user(
     tag = "users"
 )]
 #[get("/users/{id}")]
-pub async fn get_user(
-    repo: web::Data<UserRepository>,
-    id: web::Path<i32>,
-) -> HttpResponse {
+pub async fn get_user(repo: web::Data<UserRepository>, id: web::Path<i32>) -> HttpResponse {
     match repo.find_by_id(id.into_inner()).await {
         Ok(Some(user)) => HttpResponse::Ok().json(ApiResponse::success(user)),
-        Ok(None) => HttpResponse::NotFound().json(ApiResponse::<()>::error(
-            404,
-            "用户不存在".to_string(),
-        )),
+        Ok(None) => {
+            HttpResponse::NotFound().json(ApiResponse::<()>::error(404, "用户不存在".to_string()))
+        }
         Err(_) => HttpResponse::InternalServerError().json(ApiResponse::<()>::error(
             500,
             "获取用户信息失败".to_string(),
         )),
     }
-} 
+}

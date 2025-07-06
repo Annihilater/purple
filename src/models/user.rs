@@ -46,4 +46,4 @@ pub struct CreateUser {
     pub invite_user_id: Option<i32>,
     pub uuid: String,
     pub token: String,
-} 
+}
