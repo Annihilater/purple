@@ -3,24 +3,15 @@ use argon2::{
     password_hash::{rand_core::OsRng, PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
     Argon2,
 };
-use jsonwebtoken::{encode, EncodingKey, Header};
-use serde::{Deserialize, Serialize};
-use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
 use crate::{
     models::{
-        auth::{LoginRequest, RegisterRequest},
-        user::CreateUser,
+        auth::{Claims, LoginRequest, RegisterRequest, TokenResponse},
+        user::{CreateUser, User},
     },
     repositories::UserRepository,
 };
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Claims {
-    sub: i32, // 用户ID
-    exp: i64, // 过期时间
-}
 
 #[derive(Clone)]
 pub struct AuthService {
@@ -36,10 +27,10 @@ impl AuthService {
         }
     }
 
-    pub async fn register(&self, req: RegisterRequest) -> Result<i32> {
+    pub async fn register(&self, req: RegisterRequest) -> Result<User> {
         // 检查邮箱是否已存在
         if let Some(_) = self.user_repo.find_by_email(&req.email).await? {
-            anyhow::bail!("Email already exists");
+            anyhow::bail!("邮箱已存在");
         }
 
         // 生成密码哈希
@@ -47,7 +38,7 @@ impl AuthService {
         let argon2 = Argon2::default();
         let password_hash = argon2
             .hash_password(req.password.as_bytes(), &salt)
-            .map_err(|e| anyhow::anyhow!(e.to_string()))?
+            .map_err(|e| anyhow::anyhow!("密码加密失败: {}", e))?
             .to_string();
 
         // 创建用户
@@ -60,44 +51,39 @@ impl AuthService {
         };
 
         let user = self.user_repo.create(user).await?;
-        Ok(user.id)
+        Ok(user)
     }
 
-    pub async fn login(&self, req: LoginRequest) -> Result<(String, i32)> {
-        // 查找用户
+    pub async fn login(&self, req: LoginRequest) -> Result<TokenResponse> {
+        // 查找用户（支持用户名或邮箱登录）
         let user = match self.user_repo.find_by_email(&req.username).await? {
             Some(user) => user,
-            None => anyhow::bail!("Invalid username or password"),
+            None => anyhow::bail!("用户名或密码错误"),
         };
 
         // 验证密码
-        let parsed_hash =
-            PasswordHash::new(&user.password).map_err(|e| anyhow::anyhow!(e.to_string()))?;
+        let parsed_hash = PasswordHash::new(&user.password)
+            .map_err(|e| anyhow::anyhow!("密码哈希解析失败: {}", e))?;
         if !Argon2::default()
             .verify_password(req.password.as_bytes(), &parsed_hash)
             .is_ok()
         {
-            anyhow::bail!("Invalid username or password");
+            anyhow::bail!("用户名或密码错误");
         }
 
         // 检查账号状态
         if user.banned.unwrap_or(false) {
-            anyhow::bail!("Account is banned");
+            anyhow::bail!("账号已被禁用");
         }
 
         // 生成JWT
-        let exp = SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs() as i64 + 24 * 3600; // 24小时过期
-        let claims = Claims { sub: user.id, exp };
+        let claims = Claims::new(user.id);
+        let token = claims.encode()?;
 
-        let token = encode(
-            &Header::default(),
-            &claims,
-            &EncodingKey::from_secret(self.jwt_secret.as_bytes()),
-        )?;
-
-        Ok((
-            token,
-            (exp - SystemTime::now().duration_since(UNIX_EPOCH)?.as_secs() as i64) as i32,
-        ))
+        Ok(TokenResponse {
+            access_token: token,
+            token_type: "Bearer".to_string(),
+            expires_in: claims.exp - chrono::Utc::now().timestamp(),
+        })
     }
 }
