@@ -1,6 +1,8 @@
 use actix_web::{web, App, HttpServer};
+use sqlx::postgres::PgPoolOptions;
 use tracing::{info, Level};
 use tracing_subscriber::EnvFilter;
+use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -11,10 +13,26 @@ mod repositories;
 mod services;
 mod utils;
 
-use crate::{api::openapi::ApiDoc, config::Config, repositories::UserRepository};
+use crate::{
+    api::openapi::ApiDoc,
+    config::{database::DatabaseConfig, Config},
+    repositories::{CouponRepository, PlanRepository, UserRepository},
+    services::AuthService,
+};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // 加载环境变量
+    dotenv::dotenv().ok();
+
+    // 初始化日志
+    tracing_subscriber::registry()
+        .with(tracing_subscriber::EnvFilter::new(
+            std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
+        ))
+        .with(tracing_subscriber::fmt::layer())
+        .init();
+
     // 加载配置
     let config = Config::from_env().expect("Failed to load configuration");
 
@@ -36,26 +54,38 @@ async fn main() -> std::io::Result<()> {
         .with_target(config.log.with_target)
         .init();
 
-    let addr = format!("{}:{}", config.server_addr, config.server_port);
+    // 加载数据库配置
+    let database_config = DatabaseConfig::from_env().expect("Failed to load database config");
 
     // 创建数据库连接池
-    let db_pool = config
-        .database
-        .create_pool()
+    let pool = PgPoolOptions::new()
+        .max_connections(5)
+        .connect(&database_config.url)
         .await
-        .expect("Failed to create database pool");
+        .expect("Failed to create pool");
 
-    // 创建用户仓库
-    let user_repository = UserRepository::new(db_pool.clone());
+    // 初始化仓库
+    let user_repository = UserRepository::new(pool.clone());
+    let plan_repository = PlanRepository::new(pool.clone());
+    let coupon_repository = CouponRepository::new(pool.clone());
+
+    // 创建服务实例
+    let auth_service = AuthService::new(
+        user_repository.clone(),
+        std::env::var("JWT_SECRET").expect("JWT_SECRET must be set"),
+    );
 
     info!("数据库连接成功");
-    info!("API服务启动于: http://{}", addr);
-    info!("Swagger文档地址: http://{}/swagger-ui/", addr);
+    info!("API服务启动于: http://{}", config.server_addr);
+    info!("Swagger文档地址: http://{}/swagger-ui/", config.server_addr);
 
     // 启动服务器
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(user_repository.clone()))
+            .app_data(web::Data::new(plan_repository.clone()))
+            .app_data(web::Data::new(coupon_repository.clone()))
+            .app_data(web::Data::new(auth_service.clone()))
             // API文档
             .service(
                 SwaggerUi::new("/swagger-ui/{_:.*}")
@@ -63,14 +93,41 @@ async fn main() -> std::io::Result<()> {
             )
             // API路由
             .service(api::health_check)
-            .service(api::create_user)
-            .service(api::get_users)
-            .service(api::get_user)
-            .service(api::update_user)
-            .service(api::delete_user)
-            .service(api::update_user_status)
+            // 认证接口
+            .service(api::register)
+            .service(api::login)
+            // 用户接口
+            .service(
+                web::scope("/api/users")
+                    .service(api::create_user)
+                    .service(api::get_users)
+                    .service(api::get_user)
+                    .service(api::update_user)
+                    .service(api::delete_user)
+                    .service(api::update_user_status),
+            )
+            // 套餐接口
+            .service(
+                web::scope("/api/plans")
+                    .service(api::create_plan)
+                    .service(api::list_plans)
+                    .service(api::get_plan)
+                    .service(api::update_plan)
+                    .service(api::delete_plan)
+                    .service(api::get_enabled_plans),
+            )
+            // 优惠券接口
+            .service(
+                web::scope("/api/coupons")
+                    .service(api::create_coupon)
+                    .service(api::list_coupons)
+                    .service(api::get_coupon)
+                    .service(api::update_coupon)
+                    .service(api::delete_coupon)
+                    .service(api::verify_coupon),
+            )
     })
-    .bind(&addr)?
+    .bind((config.server_addr.as_str(), config.server_port))?
     .run()
     .await
 }

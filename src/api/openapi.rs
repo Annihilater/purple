@@ -1,42 +1,56 @@
 use utoipa::OpenApi;
+use utoipa_swagger_ui::SwaggerUi;
 
 use crate::api::{
-    health::HealthResponse,
     response::UserResponse,
-    user::{
-        CreateUserRequest, ErrorResponse, GetUsersQuery, UpdateUserRequest,
-        UpdateUserStatusRequest, UsersListResponse,
-    },
+    user::{CreateUserRequest, UpdateUserRequest},
 };
-use crate::models::user::User;
+use crate::models::{
+    auth::{Claims, LoginRequest, RegisterRequest, TokenResponse},
+    coupon::{
+        Coupon, CouponListResponse, CouponResponse, CreateCouponRequest,
+        UpdateCouponRequest, ValidateCouponResponse,
+    },
+    plan::{CreatePlanRequest, Plan, PlanListResponse, PlanResponse, UpdatePlanRequest},
+    user::{User, UserResponse as UserModel},
+};
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(
-        crate::api::health::health_check,
-        crate::api::user::create_user,
-        crate::api::user::get_users,
-        crate::api::user::get_user,
-        crate::api::user::update_user,
-        crate::api::user::delete_user,
-        crate::api::user::update_user_status,
-    ),
     components(
         schemas(
-            UserResponse,
-            UsersListResponse,
+            User,
             CreateUserRequest,
             UpdateUserRequest,
-            UpdateUserStatusRequest,
-            GetUsersQuery,
-            User,
-            HealthResponse,
-            ErrorResponse,
+            UserResponse,
+            UserModel,
+            Plan,
+            CreatePlanRequest,
+            UpdatePlanRequest,
+            PlanResponse,
+            PlanListResponse,
+            Coupon,
+            CreateCouponRequest,
+            UpdateCouponRequest,
+            CouponResponse,
+            CouponListResponse,
+            ValidateCouponResponse,
+            RegisterRequest,
+            LoginRequest,
+            TokenResponse,
+            Claims,
         )
     ),
     tags(
-        (name = "health", description = "健康检查接口"),
-        (name = "users", description = "用户管理接口")
+        (name = "health", description = "Health check endpoints"),
+        (name = "users", description = "User management endpoints"),
+        (name = "plans", description = "Plan management endpoints"),
+        (name = "coupons", description = "Coupon management endpoints"),
+        (name = "auth", description = "Authentication endpoints"),
     )
 )]
 pub struct ApiDoc;
+
+pub fn swagger_ui() -> SwaggerUi {
+    SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-doc/openapi.json", ApiDoc::openapi())
+}

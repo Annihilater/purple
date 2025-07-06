@@ -1,7 +1,19 @@
+mod auth;
+mod coupon;
 mod health;
+pub mod middleware;
 pub mod openapi;
-mod response;
-mod user;
+mod plan;
+pub mod response;
+pub mod user;
 
+pub use auth::{login, register};
+pub use coupon::{
+    create_coupon, delete_coupon, get_coupon, list_coupons, update_coupon, verify_coupon,
+};
 pub use health::health_check;
-pub use user::{create_user, delete_user, get_user, get_users, update_user, update_user_status};
+pub use middleware::Auth;
+pub use openapi::*;
+pub use plan::{create_plan, delete_plan, get_enabled_plans, get_plan, list_plans, update_plan};
+pub use response::*;
+pub use user::*;

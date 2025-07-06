@@ -1,7 +1,7 @@
 use anyhow::Result;
 use config;
 
-mod database;
+pub mod database;
 pub use database::DatabaseConfig;
 
 #[derive(Debug)]
