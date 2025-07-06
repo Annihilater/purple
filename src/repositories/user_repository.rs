@@ -162,4 +162,33 @@ impl UserRepository {
 
         Ok(result.rows_affected() > 0)
     }
+
+    pub async fn find_all(&self, page: i32, page_size: i32) -> Result<(Vec<User>, i64)> {
+        let offset = (page - 1) * page_size;
+
+        let users = sqlx::query_as!(
+            User,
+            r#"
+            SELECT * FROM purple_user
+            ORDER BY id DESC
+            LIMIT $1 OFFSET $2
+            "#,
+            page_size as i64,
+            offset as i64
+        )
+        .fetch_all(&self.pool)
+        .await?;
+
+        let total = sqlx::query!(
+            r#"
+            SELECT COUNT(*) as count FROM purple_user
+            "#
+        )
+        .fetch_one(&self.pool)
+        .await?
+        .count
+        .unwrap_or(0);
+
+        Ok((users, total))
+    }
 }

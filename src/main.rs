@@ -64,7 +64,11 @@ async fn main() -> std::io::Result<()> {
             // API路由
             .service(api::health_check)
             .service(api::create_user)
+            .service(api::get_users)
             .service(api::get_user)
+            .service(api::update_user)
+            .service(api::delete_user)
+            .service(api::update_user_status)
     })
     .bind(&addr)?
     .run()
