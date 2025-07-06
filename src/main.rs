@@ -1,4 +1,5 @@
 use actix_web::{web, App, HttpServer};
+
 use sqlx::postgres::PgPoolOptions;
 use tracing::{info, Level};
 use tracing_subscriber::EnvFilter;
@@ -38,13 +39,64 @@ async fn main() -> std::io::Result<()> {
         _ => Level::INFO,
     };
 
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env().add_directive(env_filter.into()))
+    // 创建日志文件目录
+    let log_file_path = std::path::Path::new(&config.log.file_path);
+    if let Some(parent) = log_file_path.parent() {
+        std::fs::create_dir_all(parent).expect("Failed to create log directory");
+    }
+
+    // 创建文件日志输出器，支持自定义文件名格式
+    let log_directory = log_file_path
+        .parent()
+        .unwrap_or_else(|| std::path::Path::new("logs"));
+
+    let file_name = log_file_path
+        .file_name()
+        .unwrap_or_else(|| std::ffi::OsStr::new("app.log"))
+        .to_string_lossy();
+
+    // 解析文件名，获取基础名称和扩展名
+    let (base_name, extension) = if let Some(pos) = file_name.rfind('.') {
+        (&file_name[..pos], &file_name[pos..])
+    } else {
+        (file_name.as_ref(), "")
+    };
+
+    // 创建自定义格式的日志文件名: app-2025-07-06.log
+    // 使用 RollingFileAppender 来精确控制文件名格式
+    use tracing_appender::rolling::{RollingFileAppender, Rotation};
+
+    let file_appender = RollingFileAppender::new(
+        Rotation::DAILY,
+        log_directory,
+        format!("{}{}", base_name, extension),
+    );
+
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+
+    // 创建分层日志订阅器
+    let console_layer = tracing_subscriber::fmt::layer()
         .with_thread_ids(config.log.with_thread_ids)
         .with_line_number(config.log.with_line_number)
         .with_file(config.log.with_file)
-        .with_target(config.log.with_target)
+        .with_target(config.log.with_target);
+
+    let file_layer = tracing_subscriber::fmt::layer()
+        .with_writer(non_blocking)
+        .with_ansi(false)
+        .with_thread_ids(config.log.with_thread_ids)
+        .with_line_number(config.log.with_line_number)
+        .with_file(config.log.with_file)
+        .with_target(config.log.with_target);
+
+    tracing_subscriber::registry()
+        .with(EnvFilter::from_default_env().add_directive(env_filter.into()))
+        .with(console_layer)
+        .with(file_layer)
         .init();
+
+    // 必须保持_guard活跃以确保日志文件写入
+    let _guard = Box::leak(Box::new(_guard));
 
     // 加载数据库配置
     let database_config = DatabaseConfig::from_env().expect("Failed to load database config");

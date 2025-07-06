@@ -11,6 +11,7 @@ pub struct LogConfig {
     pub with_line_number: bool,
     pub with_file: bool,
     pub with_target: bool,
+    pub file_path: String,
 }
 
 #[derive(Debug)]
@@ -41,6 +42,9 @@ impl Config {
                 with_line_number: config.get_bool("log_with_line_number").unwrap_or(true),
                 with_file: config.get_bool("log_with_file").unwrap_or(true),
                 with_target: config.get_bool("log_with_target").unwrap_or(false),
+                file_path: config
+                    .get_string("log_file_path")
+                    .unwrap_or_else(|_| "logs/app.log".to_string()),
             },
         })
     }
