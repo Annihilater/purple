@@ -41,6 +41,7 @@ pub struct CouponsListResponse {
 #[utoipa::path(
     post,
     path = "/api/coupons",
+    tag = "coupons",
     request_body = CreateCouponRequest,
     responses(
         (status = 200, description = "Coupon created successfully", body = CouponResponse),
@@ -69,6 +70,7 @@ pub async fn create_coupon(
 #[utoipa::path(
     get,
     path = "/api/coupons",
+    tag = "coupons",
     responses(
         (status = 200, description = "Coupons retrieved successfully", body = CouponListResponse),
         (status = 500, description = "Internal server error", body = ResponseError)
@@ -104,6 +106,7 @@ pub async fn list_coupons(
 #[utoipa::path(
     get,
     path = "/api/coupons/{id}",
+    tag = "coupons",
     responses(
         (status = 200, description = "Coupon found", body = CouponResponse),
         (status = 404, description = "Coupon not found", body = ResponseError),
@@ -141,6 +144,7 @@ pub async fn get_coupon(
 #[utoipa::path(
     put,
     path = "/api/coupons/{id}",
+    tag = "coupons",
     request_body = UpdateCouponRequest,
     responses(
         (status = 200, description = "Coupon updated successfully", body = CouponResponse),
@@ -174,6 +178,7 @@ pub async fn update_coupon(
 #[utoipa::path(
     delete,
     path = "/api/coupons/{id}",
+    tag = "coupons",
     responses(
         (status = 200, description = "Coupon deleted successfully"),
         (status = 404, description = "Coupon not found", body = ResponseError),

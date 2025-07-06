@@ -36,6 +36,7 @@ pub struct ListPlansQuery {
 #[utoipa::path(
     post,
     path = "/api/plans",
+    tag = "plans",
     request_body = CreatePlanRequest,
     responses(
         (status = 200, description = "Plan created successfully", body = PlanResponse),
@@ -65,6 +66,7 @@ pub async fn create_plan(
 #[utoipa::path(
     get,
     path = "/api/plans",
+    tag = "plans",
     responses(
         (status = 200, description = "Plans retrieved successfully", body = PlanListResponse),
         (status = 500, description = "Internal server error", body = ResponseError)
@@ -110,6 +112,7 @@ pub async fn list_plans(
 #[utoipa::path(
     get,
     path = "/api/plans/{id}",
+    tag = "plans",
     responses(
         (status = 200, description = "Plan found", body = PlanResponse),
         (status = 404, description = "Plan not found", body = ResponseError),
@@ -144,6 +147,7 @@ pub async fn get_plan(
 #[utoipa::path(
     put,
     path = "/api/plans/{id}",
+    tag = "plans",
     request_body = UpdatePlanRequest,
     responses(
         (status = 200, description = "Plan updated successfully", body = PlanResponse),
@@ -178,6 +182,7 @@ pub async fn update_plan(
 #[utoipa::path(
     delete,
     path = "/api/plans/{id}",
+    tag = "plans",
     responses(
         (status = 200, description = "Plan deleted successfully"),
         (status = 404, description = "Plan not found", body = ResponseError),
@@ -206,6 +211,7 @@ pub async fn delete_plan(
 #[utoipa::path(
     get,
     path = "/api/plans/enabled",
+    tag = "plans",
     responses(
         (status = 200, description = "Plans retrieved successfully", body = PlanListResponse),
         (status = 500, description = "Internal server error", body = ResponseError)

@@ -32,6 +32,7 @@ use crate::models::{
         crate::api::plan::get_plan,
         crate::api::plan::update_plan,
         crate::api::plan::delete_plan,
+        crate::api::plan::get_enabled_plans,
         crate::api::coupon::create_coupon,
         crate::api::coupon::list_coupons,
         crate::api::coupon::get_coupon,

@@ -13,6 +13,7 @@ use crate::{
 #[utoipa::path(
     post,
     path = "/api/auth/register",
+    tag = "auth",
     request_body = RegisterRequest,
     responses(
         (status = 200, description = "用户注册成功", body = crate::common::ApiResponse<i32>),
@@ -84,6 +85,7 @@ pub async fn register(
 #[utoipa::path(
     post,
     path = "/api/auth/login",
+    tag = "auth",
     request_body = LoginRequest,
     responses(
         (status = 200, description = "用户登录成功", body = crate::common::ApiResponse<TokenResponse>),
