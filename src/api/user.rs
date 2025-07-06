@@ -4,6 +4,7 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use crate::{
+    api::openapi::{EmptyApiResponse, UserApiResponse, UserPageApiResponse},
     common::{ErrorCode, PageResponse, ResponseBuilder},
     models::user::{CreateUser, User},
     repositories::UserRepository,
@@ -54,8 +55,8 @@ fn default_page_size() -> u64 {
     tag = "users",
     request_body = CreateUserRequest,
     responses(
-        (status = 200, description = "创建用户成功", body = crate::common::ApiResponse<User>),
-        (status = 400, description = "创建用户失败", body = crate::common::ApiResponse<()>),
+        (status = 200, description = "创建用户成功", body = UserApiResponse),
+        (status = 400, description = "创建用户失败", body = EmptyApiResponse),
     )
 )]
 #[post("/users")]
@@ -100,8 +101,8 @@ pub async fn create_user(
         GetUsersQuery
     ),
     responses(
-        (status = 200, description = "获取用户列表成功", body = crate::common::ApiResponse<PageResponse<User>>),
-        (status = 500, description = "服务器内部错误", body = crate::common::ApiResponse<()>),
+        (status = 200, description = "获取用户列表成功", body = UserPageApiResponse),
+        (status = 500, description = "服务器内部错误", body = EmptyApiResponse),
     )
 )]
 #[get("/users")]
@@ -136,9 +137,9 @@ pub async fn get_users(
         ("id" = i32, Path, description = "用户ID"),
     ),
     responses(
-        (status = 200, description = "获取用户成功", body = crate::common::ApiResponse<User>),
-        (status = 404, description = "用户不存在", body = crate::common::ApiResponse<()>),
-        (status = 500, description = "服务器内部错误", body = crate::common::ApiResponse<()>),
+        (status = 200, description = "获取用户成功", body = UserApiResponse),
+        (status = 404, description = "用户不存在", body = EmptyApiResponse),
+        (status = 500, description = "服务器内部错误", body = EmptyApiResponse),
     )
 )]
 #[get("/users/{id}")]
@@ -168,9 +169,9 @@ pub async fn get_user(user_repo: web::Data<UserRepository>, id: web::Path<i32>) 
     ),
     request_body = UpdateUserRequest,
     responses(
-        (status = 200, description = "更新用户成功", body = crate::common::ApiResponse<User>),
-        (status = 404, description = "用户不存在", body = crate::common::ApiResponse<()>),
-        (status = 500, description = "服务器内部错误", body = crate::common::ApiResponse<()>),
+        (status = 200, description = "更新用户成功", body = UserApiResponse),
+        (status = 404, description = "用户不存在", body = EmptyApiResponse),
+        (status = 500, description = "服务器内部错误", body = EmptyApiResponse),
     )
 )]
 #[put("/users/{id}")]
@@ -233,9 +234,9 @@ pub async fn update_user(
         ("id" = i32, Path, description = "用户ID"),
     ),
     responses(
-        (status = 200, description = "删除用户成功", body = crate::common::ApiResponse<()>),
-        (status = 404, description = "用户不存在", body = crate::common::ApiResponse<()>),
-        (status = 500, description = "服务器内部错误", body = crate::common::ApiResponse<()>),
+        (status = 200, description = "删除用户成功", body = EmptyApiResponse),
+        (status = 404, description = "用户不存在", body = EmptyApiResponse),
+        (status = 500, description = "服务器内部错误", body = EmptyApiResponse),
     )
 )]
 #[delete("/users/{id}")]
@@ -274,9 +275,9 @@ pub async fn delete_user(user_repo: web::Data<UserRepository>, id: web::Path<i32
     ),
     request_body = UpdateUserStatusRequest,
     responses(
-        (status = 200, description = "更新用户状态成功", body = crate::common::ApiResponse<User>),
-        (status = 404, description = "用户不存在", body = crate::common::ApiResponse<()>),
-        (status = 500, description = "服务器内部错误", body = crate::common::ApiResponse<()>),
+        (status = 200, description = "更新用户状态成功", body = UserApiResponse),
+        (status = 404, description = "用户不存在", body = EmptyApiResponse),
+        (status = 500, description = "服务器内部错误", body = EmptyApiResponse),
     )
 )]
 #[patch("/users/{id}/status")]
