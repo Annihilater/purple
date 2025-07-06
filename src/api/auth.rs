@@ -34,7 +34,10 @@ pub async fn register(
 ) -> Response<HttpResponse> {
     request.validate().map_err(ApiError::from)?;
 
-    let user = service.register(request.into_inner()).await.map_err(ApiError::from)?;
+    let user = service
+        .register(request.into_inner())
+        .await
+        .map_err(ApiError::from)?;
     Ok(HttpResponse::Ok().json(ApiResponse::success(user)))
 }
 
@@ -56,6 +59,9 @@ pub async fn login(
 ) -> Response<HttpResponse> {
     request.validate().map_err(ApiError::from)?;
 
-    let token = service.login(request.into_inner()).await.map_err(ApiError::from)?;
+    let token = service
+        .login(request.into_inner())
+        .await
+        .map_err(ApiError::from)?;
     Ok(HttpResponse::Ok().json(ApiResponse::success(token)))
 }

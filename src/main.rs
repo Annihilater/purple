@@ -25,14 +25,6 @@ async fn main() -> std::io::Result<()> {
     // 加载环境变量
     dotenv::dotenv().ok();
 
-    // 初始化日志
-    tracing_subscriber::registry()
-        .with(tracing_subscriber::EnvFilter::new(
-            std::env::var("RUST_LOG").unwrap_or_else(|_| "info".into()),
-        ))
-        .with(tracing_subscriber::fmt::layer())
-        .init();
-
     // 加载配置
     let config = Config::from_env().expect("Failed to load configuration");
 
@@ -76,8 +68,8 @@ async fn main() -> std::io::Result<()> {
     );
 
     info!("数据库连接成功");
-    info!("API服务启动于: http://{}", config.server_addr);
-    info!("Swagger文档地址: http://{}/swagger-ui/", config.server_addr);
+    info!("API服务启动于: http://{}:{}", config.server_addr, config.server_port);
+    info!("Swagger文档地址: http://{}:{}/swagger-ui/", config.server_addr, config.server_port);
 
     // 启动服务器
     HttpServer::new(move || {

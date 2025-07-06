@@ -8,8 +8,8 @@ use crate::api::{
 use crate::models::{
     auth::{Claims, LoginRequest, RegisterRequest, TokenResponse},
     coupon::{
-        Coupon, CouponListResponse, CouponResponse, CreateCouponRequest,
-        UpdateCouponRequest, ValidateCouponResponse,
+        Coupon, CouponListResponse, CouponResponse, CreateCouponRequest, UpdateCouponRequest,
+        ValidateCouponResponse,
     },
     plan::{CreatePlanRequest, Plan, PlanListResponse, PlanResponse, UpdatePlanRequest},
     user::{User, UserResponse as UserModel},
