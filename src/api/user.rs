@@ -4,7 +4,7 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    api::response::UserResponse,
+    common::{ErrorCode, ResponseBuilder, PageResponse},
     models::user::{CreateUser, User},
     repositories::UserRepository,
 };
@@ -34,33 +34,17 @@ pub struct UpdateUserStatusRequest {
 #[derive(Debug, Deserialize, ToSchema, IntoParams)]
 pub struct GetUsersQuery {
     #[serde(default = "default_page")]
-    pub page: i32,
+    pub page: u64,
     #[serde(default = "default_page_size")]
-    pub page_size: i32,
+    pub page_size: u64,
 }
 
-fn default_page() -> i32 {
+fn default_page() -> u64 {
     1
 }
 
-fn default_page_size() -> i32 {
+fn default_page_size() -> u64 {
     10
-}
-
-#[derive(Debug, Serialize, ToSchema)]
-pub struct UsersListResponse {
-    pub code: i32,
-    pub message: String,
-    pub data: Option<Vec<User>>,
-    pub total: i64,
-    pub page: i32,
-    pub page_size: i32,
-}
-
-#[derive(Debug, Serialize, ToSchema)]
-pub struct ErrorResponse {
-    pub code: i32,
-    pub message: String,
 }
 
 /// 创建用户
@@ -70,8 +54,8 @@ pub struct ErrorResponse {
     tag = "users",
     request_body = CreateUserRequest,
     responses(
-        (status = 200, description = "创建用户成功", body = UserResponse),
-        (status = 400, description = "创建用户失败", body = ErrorResponse),
+        (status = 200, description = "创建用户成功", body = crate::common::ApiResponse<User>),
+        (status = 400, description = "创建用户失败", body = crate::common::ApiResponse<()>),
     )
 )]
 #[post("/users")]
@@ -88,15 +72,16 @@ pub async fn create_user(
     };
 
     match user_repo.create(user).await {
-        Ok(user) => HttpResponse::Ok().json(UserResponse {
-            code: 200,
-            message: "success".to_string(),
-            data: Some(user),
-        }),
-        Err(e) => HttpResponse::BadRequest().json(ErrorResponse {
-            code: 400,
-            message: e.to_string(),
-        }),
+        Ok(user) => ResponseBuilder::success_with_message(user, "用户创建成功".to_string()),
+        Err(e) => {
+            tracing::error!("创建用户失败: {}", e);
+            // 根据错误类型选择适当的错误代码
+            if e.to_string().contains("duplicate") || e.to_string().contains("already exists") {
+                ResponseBuilder::error_with_message(ErrorCode::UserAlreadyExists, "用户已存在".to_string())
+            } else {
+                ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "数据库操作失败".to_string())
+            }
+        }
     }
 }
 
@@ -109,8 +94,8 @@ pub async fn create_user(
         GetUsersQuery
     ),
     responses(
-        (status = 200, description = "获取用户列表成功", body = UsersListResponse),
-        (status = 500, description = "服务器内部错误", body = ErrorResponse),
+        (status = 200, description = "获取用户列表成功", body = crate::common::ApiResponse<PageResponse<User>>),
+        (status = 500, description = "服务器内部错误", body = crate::common::ApiResponse<()>),
     )
 )]
 #[get("/users")]
@@ -118,19 +103,15 @@ pub async fn get_users(
     user_repo: web::Data<UserRepository>,
     query: web::Query<GetUsersQuery>,
 ) -> HttpResponse {
-    match user_repo.find_all(query.page, query.page_size).await {
-        Ok((users, total)) => HttpResponse::Ok().json(UsersListResponse {
-            code: 200,
-            message: "success".to_string(),
-            data: Some(users),
-            total,
-            page: query.page,
-            page_size: query.page_size,
-        }),
-        Err(e) => HttpResponse::InternalServerError().json(ErrorResponse {
-            code: 500,
-            message: e.to_string(),
-        }),
+    match user_repo.find_all(query.page as i32, query.page_size as i32).await {
+        Ok((users, total)) => {
+            let page_response = PageResponse::new(users, total as u64, query.page, query.page_size);
+            ResponseBuilder::success_with_message(page_response, "获取用户列表成功".to_string())
+        }
+        Err(e) => {
+            tracing::error!("获取用户列表失败: {}", e);
+            ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "获取用户列表失败".to_string())
+        }
     }
 }
 
@@ -143,27 +124,20 @@ pub async fn get_users(
         ("id" = i32, Path, description = "用户ID"),
     ),
     responses(
-        (status = 200, description = "获取用户成功", body = UserResponse),
-        (status = 404, description = "用户不存在", body = ErrorResponse),
-        (status = 500, description = "服务器内部错误", body = ErrorResponse),
+        (status = 200, description = "获取用户成功", body = crate::common::ApiResponse<User>),
+        (status = 404, description = "用户不存在", body = crate::common::ApiResponse<()>),
+        (status = 500, description = "服务器内部错误", body = crate::common::ApiResponse<()>),
     )
 )]
 #[get("/users/{id}")]
 pub async fn get_user(user_repo: web::Data<UserRepository>, id: web::Path<i32>) -> HttpResponse {
     match user_repo.find_by_id(*id).await {
-        Ok(Some(user)) => HttpResponse::Ok().json(UserResponse {
-            code: 200,
-            message: "success".to_string(),
-            data: Some(user),
-        }),
-        Ok(None) => HttpResponse::NotFound().json(ErrorResponse {
-            code: 404,
-            message: format!("User {} not found", id),
-        }),
-        Err(e) => HttpResponse::InternalServerError().json(ErrorResponse {
-            code: 500,
-            message: e.to_string(),
-        }),
+        Ok(Some(user)) => ResponseBuilder::success_with_message(user, "获取用户成功".to_string()),
+        Ok(None) => ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string()),
+        Err(e) => {
+            tracing::error!("查询用户失败: {}", e);
+            ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "查询用户失败".to_string())
+        }
     }
 }
 
@@ -177,9 +151,9 @@ pub async fn get_user(user_repo: web::Data<UserRepository>, id: web::Path<i32>) 
     ),
     request_body = UpdateUserRequest,
     responses(
-        (status = 200, description = "更新用户成功", body = UserResponse),
-        (status = 404, description = "用户不存在", body = ErrorResponse),
-        (status = 500, description = "服务器内部错误", body = ErrorResponse),
+        (status = 200, description = "更新用户成功", body = crate::common::ApiResponse<User>),
+        (status = 404, description = "用户不存在", body = crate::common::ApiResponse<()>),
+        (status = 500, description = "服务器内部错误", body = crate::common::ApiResponse<()>),
     )
 )]
 #[put("/users/{id}")]
@@ -210,25 +184,18 @@ pub async fn update_user(
             }
 
             match user_repo.update(&user).await {
-                Ok(updated_user) => HttpResponse::Ok().json(UserResponse {
-                    code: 200,
-                    message: "success".to_string(),
-                    data: Some(updated_user),
-                }),
-                Err(e) => HttpResponse::InternalServerError().json(ErrorResponse {
-                    code: 500,
-                    message: e.to_string(),
-                }),
+                Ok(user) => ResponseBuilder::success_with_message(user, "更新用户成功".to_string()),
+                Err(e) => {
+                    tracing::error!("更新用户失败: {}", e);
+                    ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "更新用户失败".to_string())
+                }
             }
         }
-        Ok(None) => HttpResponse::NotFound().json(ErrorResponse {
-            code: 404,
-            message: format!("User {} not found", id),
-        }),
-        Err(e) => HttpResponse::InternalServerError().json(ErrorResponse {
-            code: 500,
-            message: e.to_string(),
-        }),
+        Ok(None) => ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string()),
+        Err(e) => {
+            tracing::error!("查询用户失败: {}", e);
+            ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "查询用户失败".to_string())
+        }
     }
 }
 
@@ -241,27 +208,26 @@ pub async fn update_user(
         ("id" = i32, Path, description = "用户ID"),
     ),
     responses(
-        (status = 200, description = "删除用户成功", body = UserResponse),
-        (status = 404, description = "用户不存在", body = ErrorResponse),
-        (status = 500, description = "服务器内部错误", body = ErrorResponse),
+        (status = 200, description = "删除用户成功", body = crate::common::ApiResponse<()>),
+        (status = 404, description = "用户不存在", body = crate::common::ApiResponse<()>),
+        (status = 500, description = "服务器内部错误", body = crate::common::ApiResponse<()>),
     )
 )]
 #[delete("/users/{id}")]
 pub async fn delete_user(user_repo: web::Data<UserRepository>, id: web::Path<i32>) -> HttpResponse {
-    match user_repo.delete(*id).await {
-        Ok(true) => HttpResponse::Ok().json(UserResponse {
-            code: 200,
-            message: "success".to_string(),
-            data: None,
-        }),
-        Ok(false) => HttpResponse::NotFound().json(ErrorResponse {
-            code: 404,
-            message: format!("User {} not found", id),
-        }),
-        Err(e) => HttpResponse::InternalServerError().json(ErrorResponse {
-            code: 500,
-            message: e.to_string(),
-        }),
+    match user_repo.find_by_id(*id).await {
+        Ok(Some(_)) => match user_repo.delete(*id).await {
+            Ok(_) => ResponseBuilder::success_with_message((), "删除用户成功".to_string()),
+            Err(e) => {
+                tracing::error!("删除用户失败: {}", e);
+                ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "删除用户失败".to_string())
+            }
+        },
+        Ok(None) => ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string()),
+        Err(e) => {
+            tracing::error!("查询用户失败: {}", e);
+            ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "查询用户失败".to_string())
+        }
     }
 }
 
@@ -275,9 +241,9 @@ pub async fn delete_user(user_repo: web::Data<UserRepository>, id: web::Path<i32
     ),
     request_body = UpdateUserStatusRequest,
     responses(
-        (status = 200, description = "更新用户状态成功", body = UserResponse),
-        (status = 404, description = "用户不存在", body = ErrorResponse),
-        (status = 500, description = "服务器内部错误", body = ErrorResponse),
+        (status = 200, description = "更新用户状态成功", body = crate::common::ApiResponse<User>),
+        (status = 404, description = "用户不存在", body = crate::common::ApiResponse<()>),
+        (status = 500, description = "服务器内部错误", body = crate::common::ApiResponse<()>),
     )
 )]
 #[patch("/users/{id}/status")]
@@ -291,24 +257,17 @@ pub async fn update_user_status(
             user.banned = Some(status.banned);
 
             match user_repo.update(&user).await {
-                Ok(updated_user) => HttpResponse::Ok().json(UserResponse {
-                    code: 200,
-                    message: "success".to_string(),
-                    data: Some(updated_user),
-                }),
-                Err(e) => HttpResponse::InternalServerError().json(ErrorResponse {
-                    code: 500,
-                    message: e.to_string(),
-                }),
+                Ok(user) => ResponseBuilder::success_with_message(user, "更新用户状态成功".to_string()),
+                Err(e) => {
+                    tracing::error!("更新用户状态失败: {}", e);
+                    ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "更新用户状态失败".to_string())
+                }
             }
         }
-        Ok(None) => HttpResponse::NotFound().json(ErrorResponse {
-            code: 404,
-            message: format!("User {} not found", id),
-        }),
-        Err(e) => HttpResponse::InternalServerError().json(ErrorResponse {
-            code: 500,
-            message: e.to_string(),
-        }),
+        Ok(None) => ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string()),
+        Err(e) => {
+            tracing::error!("查询用户失败: {}", e);
+            ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "查询用户失败".to_string())
+        }
     }
 }

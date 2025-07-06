@@ -1,5 +1,6 @@
 mod api;
 mod app_state;
+mod common;
 mod config;
 mod logging;
 mod models;
