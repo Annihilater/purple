@@ -1,9 +1,9 @@
 use utoipa::OpenApi;
 
 use crate::api::{
-    health::{health_check, HealthResponse},
-    response::ApiResponse,
-    user::{create_user, get_user, CreateUserRequest},
+    health::HealthResponse,
+    response::UserResponse,
+    user::{CreateUserRequest, ErrorResponse},
 };
 use crate::models::user::User;
 
@@ -16,10 +16,11 @@ use crate::models::user::User;
     ),
     components(
         schemas(
-            ApiResponse<User>,
+            UserResponse,
             CreateUserRequest,
             User,
             HealthResponse,
+            ErrorResponse,
         )
     ),
     tags(

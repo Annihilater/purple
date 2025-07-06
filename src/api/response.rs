@@ -1,15 +1,21 @@
 use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
+use crate::models::user::User;
+
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
-#[aliases(
-    UserResponse = ApiResponse<User>,
-)]
 pub struct ApiResponse<T> {
     pub code: i32,
     pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<T>,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct UserResponse {
+    pub code: i32,
+    pub message: String,
+    pub data: Option<User>,
 }
 
 impl<T> ApiResponse<T> {
@@ -29,6 +35,3 @@ impl<T> ApiResponse<T> {
         }
     }
 }
-
-// 为了OpenAPI文档生成，需要导入User类型
-use crate::models::user::User;

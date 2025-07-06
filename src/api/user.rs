@@ -3,17 +3,19 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-use crate::{
-    api::response::ApiResponse,
-    models::user::{CreateUser, User},
-    repositories::UserRepository,
-};
+use crate::{api::response::UserResponse, models::user::CreateUser, repositories::UserRepository};
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateUserRequest {
     pub email: String,
     pub password: String,
     pub invite_user_id: Option<i32>,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+pub struct ErrorResponse {
+    pub code: i32,
+    pub message: String,
 }
 
 /// 创建用户
@@ -24,7 +26,7 @@ pub struct CreateUserRequest {
     request_body = CreateUserRequest,
     responses(
         (status = 200, description = "创建用户成功", body = UserResponse),
-        (status = 400, description = "创建用户失败", body = ApiResponse<()>),
+        (status = 400, description = "创建用户失败", body = ErrorResponse),
     )
 )]
 #[post("/users")]
@@ -41,10 +43,15 @@ pub async fn create_user(
     };
 
     match user_repo.create(user).await {
-        Ok(user) => HttpResponse::Ok().json(ApiResponse::success(user)),
-        Err(e) => {
-            HttpResponse::BadRequest().json(ApiResponse::<()>::error(400, e.to_string()))
-        }
+        Ok(user) => HttpResponse::Ok().json(UserResponse {
+            code: 200,
+            message: "success".to_string(),
+            data: Some(user),
+        }),
+        Err(e) => HttpResponse::BadRequest().json(ErrorResponse {
+            code: 400,
+            message: e.to_string(),
+        }),
     }
 }
 
@@ -58,23 +65,25 @@ pub async fn create_user(
     ),
     responses(
         (status = 200, description = "获取用户成功", body = UserResponse),
-        (status = 404, description = "用户不存在", body = ApiResponse<()>),
+        (status = 404, description = "用户不存在", body = ErrorResponse),
+        (status = 500, description = "服务器内部错误", body = ErrorResponse),
     )
 )]
 #[get("/users/{id}")]
-pub async fn get_user(
-    user_repo: web::Data<UserRepository>,
-    id: web::Path<i32>,
-) -> HttpResponse {
+pub async fn get_user(user_repo: web::Data<UserRepository>, id: web::Path<i32>) -> HttpResponse {
     match user_repo.find_by_id(*id).await {
-        Ok(Some(user)) => HttpResponse::Ok().json(ApiResponse::success(user)),
-        Ok(None) => HttpResponse::NotFound().json(ApiResponse::<()>::error(
-            404,
-            format!("User {} not found", id),
-        )),
-        Err(e) => HttpResponse::InternalServerError().json(ApiResponse::<()>::error(
-            500,
-            e.to_string(),
-        )),
+        Ok(Some(user)) => HttpResponse::Ok().json(UserResponse {
+            code: 200,
+            message: "success".to_string(),
+            data: Some(user),
+        }),
+        Ok(None) => HttpResponse::NotFound().json(ErrorResponse {
+            code: 404,
+            message: format!("User {} not found", id),
+        }),
+        Err(e) => HttpResponse::InternalServerError().json(ErrorResponse {
+            code: 500,
+            message: e.to_string(),
+        }),
     }
 }

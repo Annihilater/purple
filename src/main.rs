@@ -1,6 +1,6 @@
 use actix_web::{web, App, HttpServer};
 use tracing::{info, Level};
-use tracing_subscriber::{fmt, EnvFilter};
+use tracing_subscriber::EnvFilter;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 

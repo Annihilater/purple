@@ -1,10 +1,8 @@
 use anyhow::Result;
 use config;
-use dotenv::dotenv;
-use std::env;
 
 mod database;
-pub use database::{DatabaseConfig, DbPool};
+pub use database::DatabaseConfig;
 
 #[derive(Debug)]
 pub struct LogConfig {
