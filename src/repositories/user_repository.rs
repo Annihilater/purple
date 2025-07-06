@@ -2,6 +2,7 @@ use crate::models::user::{CreateUser, User};
 use sqlx::PgPool;
 use anyhow::Result;
 
+#[derive(Clone)]
 pub struct UserRepository {
     pool: PgPool,
 }
