@@ -3,6 +3,7 @@ mod app_state;
 mod common;
 mod config;
 mod logging;
+mod middleware;
 mod models;
 mod repositories;
 mod routes;

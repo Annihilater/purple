@@ -4,7 +4,7 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    common::{ErrorCode, ResponseBuilder, PageResponse},
+    common::{ErrorCode, PageResponse, ResponseBuilder},
     models::user::{CreateUser, User},
     repositories::UserRepository,
 };
@@ -77,9 +77,15 @@ pub async fn create_user(
             tracing::error!("创建用户失败: {}", e);
             // 根据错误类型选择适当的错误代码
             if e.to_string().contains("duplicate") || e.to_string().contains("already exists") {
-                ResponseBuilder::error_with_message(ErrorCode::UserAlreadyExists, "用户已存在".to_string())
+                ResponseBuilder::error_with_message(
+                    ErrorCode::UserAlreadyExists,
+                    "用户已存在".to_string(),
+                )
             } else {
-                ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "数据库操作失败".to_string())
+                ResponseBuilder::error_with_message(
+                    ErrorCode::DatabaseError,
+                    "数据库操作失败".to_string(),
+                )
             }
         }
     }
@@ -103,14 +109,20 @@ pub async fn get_users(
     user_repo: web::Data<UserRepository>,
     query: web::Query<GetUsersQuery>,
 ) -> HttpResponse {
-    match user_repo.find_all(query.page as i32, query.page_size as i32).await {
+    match user_repo
+        .find_all(query.page as i32, query.page_size as i32)
+        .await
+    {
         Ok((users, total)) => {
             let page_response = PageResponse::new(users, total as u64, query.page, query.page_size);
             ResponseBuilder::success_with_message(page_response, "获取用户列表成功".to_string())
         }
         Err(e) => {
             tracing::error!("获取用户列表失败: {}", e);
-            ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "获取用户列表失败".to_string())
+            ResponseBuilder::error_with_message(
+                ErrorCode::DatabaseError,
+                "获取用户列表失败".to_string(),
+            )
         }
     }
 }
@@ -133,10 +145,15 @@ pub async fn get_users(
 pub async fn get_user(user_repo: web::Data<UserRepository>, id: web::Path<i32>) -> HttpResponse {
     match user_repo.find_by_id(*id).await {
         Ok(Some(user)) => ResponseBuilder::success_with_message(user, "获取用户成功".to_string()),
-        Ok(None) => ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string()),
+        Ok(None) => {
+            ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string())
+        }
         Err(e) => {
             tracing::error!("查询用户失败: {}", e);
-            ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "查询用户失败".to_string())
+            ResponseBuilder::error_with_message(
+                ErrorCode::DatabaseError,
+                "查询用户失败".to_string(),
+            )
         }
     }
 }
@@ -187,14 +204,22 @@ pub async fn update_user(
                 Ok(user) => ResponseBuilder::success_with_message(user, "更新用户成功".to_string()),
                 Err(e) => {
                     tracing::error!("更新用户失败: {}", e);
-                    ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "更新用户失败".to_string())
+                    ResponseBuilder::error_with_message(
+                        ErrorCode::DatabaseError,
+                        "更新用户失败".to_string(),
+                    )
                 }
             }
         }
-        Ok(None) => ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string()),
+        Ok(None) => {
+            ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string())
+        }
         Err(e) => {
             tracing::error!("查询用户失败: {}", e);
-            ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "查询用户失败".to_string())
+            ResponseBuilder::error_with_message(
+                ErrorCode::DatabaseError,
+                "查询用户失败".to_string(),
+            )
         }
     }
 }
@@ -220,13 +245,21 @@ pub async fn delete_user(user_repo: web::Data<UserRepository>, id: web::Path<i32
             Ok(_) => ResponseBuilder::success_with_message((), "删除用户成功".to_string()),
             Err(e) => {
                 tracing::error!("删除用户失败: {}", e);
-                ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "删除用户失败".to_string())
+                ResponseBuilder::error_with_message(
+                    ErrorCode::DatabaseError,
+                    "删除用户失败".to_string(),
+                )
             }
         },
-        Ok(None) => ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string()),
+        Ok(None) => {
+            ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string())
+        }
         Err(e) => {
             tracing::error!("查询用户失败: {}", e);
-            ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "查询用户失败".to_string())
+            ResponseBuilder::error_with_message(
+                ErrorCode::DatabaseError,
+                "查询用户失败".to_string(),
+            )
         }
     }
 }
@@ -257,17 +290,27 @@ pub async fn update_user_status(
             user.banned = Some(status.banned);
 
             match user_repo.update(&user).await {
-                Ok(user) => ResponseBuilder::success_with_message(user, "更新用户状态成功".to_string()),
+                Ok(user) => {
+                    ResponseBuilder::success_with_message(user, "更新用户状态成功".to_string())
+                }
                 Err(e) => {
                     tracing::error!("更新用户状态失败: {}", e);
-                    ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "更新用户状态失败".to_string())
+                    ResponseBuilder::error_with_message(
+                        ErrorCode::DatabaseError,
+                        "更新用户状态失败".to_string(),
+                    )
                 }
             }
         }
-        Ok(None) => ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string()),
+        Ok(None) => {
+            ResponseBuilder::error_with_message(ErrorCode::UserNotFound, "用户不存在".to_string())
+        }
         Err(e) => {
             tracing::error!("查询用户失败: {}", e);
-            ResponseBuilder::error_with_message(ErrorCode::DatabaseError, "查询用户失败".to_string())
+            ResponseBuilder::error_with_message(
+                ErrorCode::DatabaseError,
+                "查询用户失败".to_string(),
+            )
         }
     }
 }

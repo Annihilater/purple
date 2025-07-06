@@ -23,7 +23,7 @@ impl ResponseError for ApiError {
     fn error_response(&self) -> HttpResponse {
         crate::common::ResponseBuilder::error_with_message(
             crate::common::ErrorCode::InternalError,
-            self.0.to_string()
+            self.0.to_string(),
         )
     }
 }
@@ -79,9 +79,9 @@ impl<T> ApiResponse<T> {
 
 /// 便捷的响应构建函数
 pub mod response_helpers {
-    use serde::Serialize;
-    use actix_web::HttpResponse;
     use crate::common;
+    use actix_web::HttpResponse;
+    use serde::Serialize;
 
     /// 构建成功响应
     pub fn success<T: Serialize>(data: T) -> HttpResponse {
@@ -104,7 +104,12 @@ pub mod response_helpers {
     }
 
     /// 构建分页响应
-    pub fn page<T: Serialize>(items: Vec<T>, total: u64, page: u64, page_size: u64) -> HttpResponse {
+    pub fn page<T: Serialize>(
+        items: Vec<T>,
+        total: u64,
+        page: u64,
+        page_size: u64,
+    ) -> HttpResponse {
         common::ResponseBuilder::page(items, total, page, page_size)
     }
 }
@@ -112,11 +117,7 @@ pub mod response_helpers {
 /// 重新导出新的通用响应类型，推荐使用这些
 pub mod common_types {
     pub use crate::common::{
-        ApiError as NewApiError,
-        ApiResponse as NewApiResponse,
-        ApiResult,
-        ErrorCode,
-        PageResponse,
+        ApiError as NewApiError, ApiResponse as NewApiResponse, ApiResult, ErrorCode, PageResponse,
         ResponseBuilder,
     };
 }

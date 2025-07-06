@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt;
 use utoipa::ToSchema;
 
-use crate::common::{ErrorCode, BusinessStatus};
+use crate::common::{BusinessStatus, ErrorCode};
 
 /// 通用API响应结构
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -136,7 +136,10 @@ impl ApiError {
     }
 
     /// 创建带原因的API错误
-    pub fn with_cause(error_code: ErrorCode, cause: Box<dyn std::error::Error + Send + Sync>) -> Self {
+    pub fn with_cause(
+        error_code: ErrorCode,
+        cause: Box<dyn std::error::Error + Send + Sync>,
+    ) -> Self {
         Self {
             error_code,
             message: None,
@@ -160,14 +163,15 @@ impl fmt::Display for ApiError {
 
 impl std::error::Error for ApiError {
     fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
-        self.cause.as_ref().map(|e| e.as_ref() as &dyn std::error::Error)
+        self.cause
+            .as_ref()
+            .map(|e| e.as_ref() as &dyn std::error::Error)
     }
 }
 
 impl ResponseError for ApiError {
     fn error_response(&self) -> HttpResponse {
-        ApiResponse::<()>::error_with_message(self.error_code, Some(self.message()))
-            .into_response()
+        ApiResponse::<()>::error_with_message(self.error_code, Some(self.message())).into_response()
     }
 }
 
@@ -197,18 +201,25 @@ impl From<sqlx::Error> for ApiError {
 
 impl From<validator::ValidationErrors> for ApiError {
     fn from(err: validator::ValidationErrors) -> Self {
-        let message = err.field_errors()
+        let message = err
+            .field_errors()
             .iter()
             .map(|(field, errors)| {
-                let error_msgs = errors.iter()
-                    .map(|e| e.message.as_ref().unwrap_or(&std::borrow::Cow::Borrowed("validation error")).to_string())
+                let error_msgs = errors
+                    .iter()
+                    .map(|e| {
+                        e.message
+                            .as_ref()
+                            .unwrap_or(&std::borrow::Cow::Borrowed("validation error"))
+                            .to_string()
+                    })
                     .collect::<Vec<_>>()
                     .join(", ");
                 format!("{}: {}", field, error_msgs)
             })
             .collect::<Vec<_>>()
             .join("; ");
-        
+
         Self::with_message(ErrorCode::ValidationError, message)
     }
 }
@@ -241,7 +252,12 @@ impl ResponseBuilder {
     }
 
     /// 构建分页响应
-    pub fn page<T: Serialize>(items: Vec<T>, total: u64, page: u64, page_size: u64) -> HttpResponse {
+    pub fn page<T: Serialize>(
+        items: Vec<T>,
+        total: u64,
+        page: u64,
+        page_size: u64,
+    ) -> HttpResponse {
         let page_data = PageResponse::new(items, total, page, page_size);
         Self::success(page_data)
     }
@@ -254,7 +270,10 @@ macro_rules! success_response {
         Ok(crate::common::ResponseBuilder::success($data))
     };
     ($data:expr, $message:expr) => {
-        Ok(crate::common::ResponseBuilder::success_with_message($data, $message.to_string()))
+        Ok(crate::common::ResponseBuilder::success_with_message(
+            $data,
+            $message.to_string(),
+        ))
     };
 }
 
@@ -264,6 +283,9 @@ macro_rules! error_response {
         Ok(crate::common::ResponseBuilder::error($error_code))
     };
     ($error_code:expr, $message:expr) => {
-        Ok(crate::common::ResponseBuilder::error_with_message($error_code, $message.to_string()))
+        Ok(crate::common::ResponseBuilder::error_with_message(
+            $error_code,
+            $message.to_string(),
+        ))
     };
-} 
+}

@@ -4,4 +4,4 @@ pub mod status;
 
 pub use error::*;
 pub use response::*;
-pub use status::*; 
+pub use status::*;
