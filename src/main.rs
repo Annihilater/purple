@@ -68,8 +68,18 @@ async fn main() -> std::io::Result<()> {
     );
 
     info!("数据库连接成功");
-    info!("API服务启动于: http://{}:{}", config.server_addr, config.server_port);
-    info!("Swagger文档地址: http://{}:{}/swagger-ui/", config.server_addr, config.server_port);
+    info!(
+        "API服务启动于: http://{}:{}/",
+        config.server_addr, config.server_port
+    );
+    info!(
+        "Swagger文档地址: http://{}:{}/swagger-ui/",
+        config.server_addr, config.server_port
+    );
+    info!(
+        "OpenAPI规范地址: http://{}:{}/api-docs/openapi.json",
+        config.server_addr, config.server_port
+    );
 
     // 启动服务器
     HttpServer::new(move || {
@@ -78,7 +88,16 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(plan_repository.clone()))
             .app_data(web::Data::new(coupon_repository.clone()))
             .app_data(web::Data::new(auth_service.clone()))
-            // API文档
+            // OpenAPI JSON 端点
+            .route(
+                "/api-docs/openapi.json",
+                web::get().to(|| async {
+                    actix_web::HttpResponse::Ok()
+                        .content_type("application/json")
+                        .json(ApiDoc::openapi())
+                }),
+            )
+            // Swagger UI
             .service(
                 SwaggerUi::new("/swagger-ui/{_:.*}")
                     .url("/api-docs/openapi.json", ApiDoc::openapi()),

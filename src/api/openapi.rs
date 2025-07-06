@@ -52,5 +52,5 @@ use crate::models::{
 pub struct ApiDoc;
 
 pub fn swagger_ui() -> SwaggerUi {
-    SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-doc/openapi.json", ApiDoc::openapi())
+    SwaggerUi::new("/swagger-ui/{_:.*}").url("/api-docs/openapi.json", ApiDoc::openapi())
 }
