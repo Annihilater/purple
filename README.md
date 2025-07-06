@@ -13,6 +13,8 @@
 - 🏗️ 模块化架构设计
 - ⚙️ 灵活的环境配置管理
 - 🔍 健康检查接口
+- 🛡️ 完善的中间件系统（认证、CORS、日志）
+- 📦 统一的响应格式和错误处理
 
 ## 项目架构
 
@@ -29,9 +31,18 @@ src/
 │   ├── plan.rs       # 套餐管理API
 │   ├── coupon.rs     # 优惠券管理API
 │   ├── health.rs     # 健康检查API
-│   ├── middleware.rs # 中间件
 │   ├── openapi.rs    # OpenAPI文档配置
-│   └── response.rs   # 响应结构体
+│   └── response.rs   # 响应结构体（已弃用）
+├── middleware/       # 中间件模块
+│   ├── auth.rs       # 认证中间件
+│   ├── cors.rs       # CORS中间件
+│   ├── logging.rs    # 请求日志中间件
+│   └── mod.rs        # 中间件模块声明
+├── common/           # 通用组件
+│   ├── error.rs      # 错误代码定义
+│   ├── response.rs   # 通用响应结构
+│   ├── status.rs     # 状态码映射
+│   └── mod.rs        # 通用模块声明
 ├── config/           # 配置管理
 │   ├── database.rs   # 数据库配置
 │   └── mod.rs        # 应用配置
@@ -45,21 +56,43 @@ src/
 │   ├── plan_repository.rs    # 套餐数据访问
 │   └── coupon_repository.rs  # 优惠券数据访问
 ├── services/         # 业务逻辑服务
-│   ├── auth_service.rs # 认证服务
-│   └── auth.rs       # 认证逻辑
+│   └── auth.rs       # 认证服务
 └── utils/            # 工具函数
 ```
+
+## 架构设计原则
+
+### 分层架构
+
+- **API层**: 处理HTTP请求和响应
+- **服务层**: 业务逻辑处理
+- **仓库层**: 数据访问抽象
+- **模型层**: 数据结构定义
+
+### 中间件系统
+
+- **认证中间件**: JWT token验证和用户身份确认
+- **CORS中间件**: 跨域资源共享配置
+- **日志中间件**: 请求/响应日志记录
+
+### 通用响应系统
+
+- **统一错误代码**: 业务相关的标准化错误代码
+- **标准响应格式**: 包含状态码、消息、数据和时间戳
+- **分页响应**: 统一的分页数据结构
+- **响应构建器**: 便捷的响应构建工具
 
 ## 技术栈
 
 - **Web框架**: Actix-web 4.x
 - **数据库**: PostgreSQL + SQLx
 - **认证**: JWT (jsonwebtoken)
-- **日志**: tracing + tracing-subscriber
-- **文档**: OpenAPI 3.0 + Swagger UI
+- **日志**: tracing + tracing-subscriber + tracing-appender
+- **文档**: OpenAPI 3.0 + Swagger UI (utoipa)
 - **序列化**: Serde
 - **配置**: config + dotenv
 - **异步运行时**: Tokio
+- **CORS**: actix-cors
 
 ## 开发环境要求
 
@@ -142,6 +175,31 @@ open http://localhost:8080/swagger-ui/
 - `GET /api/plans` - 获取套餐列表
 - `GET /api/coupons` - 获取优惠券列表
 
+### 响应格式
+
+所有API响应都遵循统一的格式：
+
+```json
+{
+  "code": 1000,
+  "status": "Success",
+  "message": "操作成功",
+  "data": { ... },
+  "timestamp": 1640995200
+}
+```
+
+### 错误代码系统
+
+应用使用标准化的错误代码系统：
+
+- **1000-1999**: 通用错误（成功、内部错误、参数错误等）
+- **2000-2999**: 认证相关错误
+- **3000-3999**: 用户相关错误
+- **4000-4999**: 套餐相关错误
+- **5000-5999**: 优惠券相关错误
+- **6000-6999**: 订单相关错误
+
 ## 配置说明
 
 ### 环境变量配置
@@ -177,7 +235,7 @@ open http://localhost:8080/swagger-ui/
 
 ## 开发指南
 
-### 代码结构
+### 代码结构原则
 
 本项目采用模块化架构，遵循Rust最佳实践：
 
@@ -185,6 +243,7 @@ open http://localhost:8080/swagger-ui/
 2. **依赖注入**: 通过应用状态管理依赖
 3. **错误处理**: 使用`Result<T, E>`进行显式错误处理
 4. **类型安全**: 利用Rust类型系统确保编译时安全
+5. **异步处理**: 全面使用async/await进行异步编程
 
 ### 添加新功能
 
@@ -193,6 +252,30 @@ open http://localhost:8080/swagger-ui/
 3. 在`services/`中实现业务逻辑
 4. 在`api/`中实现API处理器
 5. 在`routes.rs`中注册路由
+6. 使用`common/`模块的响应系统
+
+### 中间件开发
+
+在`src/middleware/`目录下添加新的中间件：
+
+```rust
+// src/middleware/my_middleware.rs
+use actix_web::{
+    dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform},
+    Error,
+};
+
+pub struct MyMiddleware;
+
+impl<S, B> Transform<S, ServiceRequest> for MyMiddleware
+where
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error>,
+    S::Future: 'static,
+    B: 'static,
+{
+    // 实现中间件逻辑
+}
+```
 
 ### 运行测试
 
@@ -241,6 +324,18 @@ EXPOSE 8080
 CMD ["./purple"]
 ```
 
+### 环境变量配置
+
+生产环境需要设置的关键环境变量：
+
+```bash
+# 必须修改的配置
+export JWT_SECRET="your-production-secret-key"
+export DATABASE_URL="postgresql://user:pass@host:5432/db"
+export RUST_LOG="warn"
+export LOG_LEVEL="warn"
+```
+
 ## 许可证
 
 本项目基于 MIT 许可证开源 - 查看 [LICENSE](LICENSE) 文件了解更多信息。
@@ -253,6 +348,14 @@ CMD ["./purple"]
 4. 推送到分支 (`git push origin feature/amazing-feature`)
 5. 创建 Pull Request
 
+### 代码贡献规范
+
+- 遵循项目的代码风格和架构原则
+- 添加适当的单元测试
+- 更新相关文档
+- 确保所有测试通过
+- 提供清晰的提交信息
+
 ## 技术支持
 
 如果遇到问题，请通过以下方式寻求帮助：
@@ -261,6 +364,18 @@ CMD ["./purple"]
 2. 搜索已有的Issues
 3. 创建新的Issue详细描述问题
 4. 联系项目维护者
+
+## 更新日志
+
+### v0.1.0 (Current)
+
+- 完成基础架构设计
+- 实现用户、套餐、优惠券管理API
+- 添加JWT认证系统
+- 实现OpenAPI文档
+- 完成中间件系统重构
+- 添加通用响应系统
+- 实现双输出日志系统
 
 ---
 
