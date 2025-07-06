@@ -31,18 +31,18 @@ impl Config {
 
         Ok(Self {
             server_addr: config
-                .get_string("SERVER_ADDR")
+                .get_string("server_addr")
                 .unwrap_or_else(|_| "127.0.0.1".to_string()),
-            server_port: config.get_int("SERVER_PORT").unwrap_or(8080) as u16,
+            server_port: config.get_int("server_port").unwrap_or(8080) as u16,
             database: DatabaseConfig::from_env()?,
             log: LogConfig {
                 level: config
-                    .get_string("LOG_LEVEL")
+                    .get_string("log_level")
                     .unwrap_or_else(|_| "info".to_string()),
-                with_thread_ids: config.get_bool("LOG_WITH_THREAD_IDS").unwrap_or(true),
-                with_line_number: config.get_bool("LOG_WITH_LINE_NUMBER").unwrap_or(true),
-                with_file: config.get_bool("LOG_WITH_FILE").unwrap_or(true),
-                with_target: config.get_bool("LOG_WITH_TARGET").unwrap_or(false),
+                with_thread_ids: config.get_bool("log_with_thread_ids").unwrap_or(true),
+                with_line_number: config.get_bool("log_with_line_number").unwrap_or(true),
+                with_file: config.get_bool("log_with_file").unwrap_or(true),
+                with_target: config.get_bool("log_with_target").unwrap_or(false),
             },
         })
     }

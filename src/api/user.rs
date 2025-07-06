@@ -1,6 +1,7 @@
 use actix_web::{get, post, web, HttpResponse};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
+use uuid::Uuid;
 
 use crate::{
     api::response::ApiResponse,
@@ -12,41 +13,38 @@ use crate::{
 pub struct CreateUserRequest {
     pub email: String,
     pub password: String,
-    pub invite_code: Option<String>,
+    pub invite_user_id: Option<i32>,
 }
 
-/// 创建新用户
+/// 创建用户
 #[utoipa::path(
     post,
     path = "/users",
+    tag = "users",
     request_body = CreateUserRequest,
     responses(
-        (status = 200, description = "创建用户成功", body = ApiResponse<User>),
-        (status = 400, description = "创建用户失败", body = ApiResponse<String>)
-    ),
-    tag = "users"
+        (status = 200, description = "创建用户成功", body = UserResponse),
+        (status = 400, description = "创建用户失败", body = ApiResponse<()>),
+    )
 )]
 #[post("/users")]
 pub async fn create_user(
-    repo: web::Data<UserRepository>,
-    req: web::Json<CreateUserRequest>,
+    user_repo: web::Data<UserRepository>,
+    user: web::Json<CreateUserRequest>,
 ) -> HttpResponse {
-    // 生成UUID和Token
-    let uuid = uuid::Uuid::new_v4().to_string();
-    let token = uuid::Uuid::new_v4().to_string().replace("-", "");
-
     let user = CreateUser {
-        email: req.email.clone(),
-        password: req.password.clone(), // 注意：实际使用时需要对密码进行哈希处理
-        invite_user_id: None,           // 这里需要根据invite_code查询邀请人ID
-        uuid,
-        token,
+        email: user.email.clone(),
+        password: user.password.clone(),
+        invite_user_id: user.invite_user_id,
+        uuid: Uuid::new_v4().to_string(),
+        token: Uuid::new_v4().to_string(),
     };
 
-    match repo.create(user).await {
+    match user_repo.create(user).await {
         Ok(user) => HttpResponse::Ok().json(ApiResponse::success(user)),
-        Err(_) => HttpResponse::InternalServerError()
-            .json(ApiResponse::<()>::error(500, "创建用户失败".to_string())),
+        Err(e) => {
+            HttpResponse::BadRequest().json(ApiResponse::<()>::error(400, e.to_string()))
+        }
     }
 }
 
@@ -54,25 +52,29 @@ pub async fn create_user(
 #[utoipa::path(
     get,
     path = "/users/{id}",
+    tag = "users",
     params(
-        ("id" = i32, Path, description = "用户ID")
+        ("id" = i32, Path, description = "用户ID"),
     ),
     responses(
-        (status = 200, description = "获取用户成功", body = ApiResponse<User>),
-        (status = 404, description = "用户不存在", body = ApiResponse<String>)
-    ),
-    tag = "users"
+        (status = 200, description = "获取用户成功", body = UserResponse),
+        (status = 404, description = "用户不存在", body = ApiResponse<()>),
+    )
 )]
 #[get("/users/{id}")]
-pub async fn get_user(repo: web::Data<UserRepository>, id: web::Path<i32>) -> HttpResponse {
-    match repo.find_by_id(id.into_inner()).await {
+pub async fn get_user(
+    user_repo: web::Data<UserRepository>,
+    id: web::Path<i32>,
+) -> HttpResponse {
+    match user_repo.find_by_id(*id).await {
         Ok(Some(user)) => HttpResponse::Ok().json(ApiResponse::success(user)),
-        Ok(None) => {
-            HttpResponse::NotFound().json(ApiResponse::<()>::error(404, "用户不存在".to_string()))
-        }
-        Err(_) => HttpResponse::InternalServerError().json(ApiResponse::<()>::error(
+        Ok(None) => HttpResponse::NotFound().json(ApiResponse::<()>::error(
+            404,
+            format!("User {} not found", id),
+        )),
+        Err(e) => HttpResponse::InternalServerError().json(ApiResponse::<()>::error(
             500,
-            "获取用户信息失败".to_string(),
+            e.to_string(),
         )),
     }
 }

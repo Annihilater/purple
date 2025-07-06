@@ -1,7 +1,7 @@
 use sqlx::postgres::PgPoolOptions;
 use sqlx::{Pool, Postgres};
-use std::env;
 use std::time::Duration;
+use config::Config;
 
 pub type DbPool = Pool<Postgres>;
 
@@ -17,28 +17,27 @@ pub struct DatabaseConfig {
 
 impl DatabaseConfig {
     pub fn from_env() -> anyhow::Result<Self> {
+        let config = Config::builder()
+            .add_source(config::Environment::default())
+            .build()?;
+
         Ok(Self {
-            url: env::var("DATABASE_URL").expect("DATABASE_URL must be set"),
-            max_connections: env::var("DATABASE_MAX_CONNECTIONS")
-                .unwrap_or_else(|_| "5".to_string())
-                .parse()?,
-            min_connections: env::var("DATABASE_MIN_CONNECTIONS")
-                .unwrap_or_else(|_| "1".to_string())
-                .parse()?,
+            url: config.get_string("database_url")?,
+            max_connections: config.get_int("database_max_connections")
+                .unwrap_or(5) as u32,
+            min_connections: config.get_int("database_min_connections")
+                .unwrap_or(1) as u32,
             connect_timeout: Duration::from_secs(
-                env::var("DATABASE_CONNECT_TIMEOUT")
-                    .unwrap_or_else(|_| "10".to_string())
-                    .parse()?,
+                config.get_int("database_connect_timeout")
+                    .unwrap_or(10) as u64
             ),
             max_lifetime: Duration::from_secs(
-                env::var("DATABASE_MAX_LIFETIME")
-                    .unwrap_or_else(|_| "1800".to_string())
-                    .parse()?,
+                config.get_int("database_max_lifetime")
+                    .unwrap_or(1800) as u64
             ),
             idle_timeout: Duration::from_secs(
-                env::var("DATABASE_IDLE_TIMEOUT")
-                    .unwrap_or_else(|_| "300".to_string())
-                    .parse()?,
+                config.get_int("database_idle_timeout")
+                    .unwrap_or(300) as u64
             ),
         })
     }

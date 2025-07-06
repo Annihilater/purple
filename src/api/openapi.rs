@@ -1,7 +1,7 @@
 use utoipa::OpenApi;
 
 use crate::api::{
-    health::health_check,
+    health::{health_check, HealthResponse},
     response::ApiResponse,
     user::{create_user, get_user, CreateUserRequest},
 };
@@ -19,6 +19,7 @@ use crate::models::user::User;
             ApiResponse<User>,
             CreateUserRequest,
             User,
+            HealthResponse,
         )
     ),
     tags(
