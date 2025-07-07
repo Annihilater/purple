@@ -3,7 +3,9 @@
     "allow": [
       "Bash(rg:*)",
       "Bash(cargo check:*)",
-      "Bash(cargo:*)"
+      "Bash(cargo:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)"
     ]
   },
   "enableAllProjectMcpServers": false

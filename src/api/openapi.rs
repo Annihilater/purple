@@ -7,8 +7,8 @@ use crate::api::{
     user::{CreateUserRequest, GetUsersQuery, UpdateUserRequest, UpdateUserStatusRequest},
 };
 use crate::common::{
-    EmptyApiResponse, ErrorCode, HealthApiResponse, TokenApiResponse, UserApiResponse,
-    UserIdApiResponse, UserPageApiResponse, UserPageData,
+    EmptyApiResponse, ErrorCode, HealthApiResponse, ProjectInfoApiResponse, TokenApiResponse,
+    UserApiResponse, UserIdApiResponse, UserPageApiResponse, UserPageData,
 };
 use crate::models::{
     auth::{Claims, LoginRequest, RegisterRequest, TokenResponse},
@@ -16,6 +16,7 @@ use crate::models::{
         Coupon, CouponListResponse, CouponResponse, CreateCouponRequest, UpdateCouponRequest,
         ValidateCouponResponse,
     },
+    info::ProjectInfo,
     plan::{CreatePlanRequest, Plan, PlanListResponse, PlanResponse, UpdatePlanRequest},
     user::{User, UserResponse as UserModel},
 };
@@ -23,6 +24,7 @@ use crate::models::{
 #[derive(OpenApi)]
 #[openapi(
     paths(
+        crate::api::info::get_project_info,
         crate::api::health::health_check,
         crate::api::auth::register,
         crate::api::auth::login,
@@ -78,9 +80,12 @@ use crate::models::{
             UserApiResponse,
             UserPageApiResponse,
             UserPageData,
+            ProjectInfo,
+            ProjectInfoApiResponse,
         )
     ),
     tags(
+        (name = "项目信息", description = "Project information endpoints"),
         (name = "health", description = "Health check endpoints"),
         (name = "users", description = "User management endpoints"),
         (name = "plans", description = "Plan management endpoints"),

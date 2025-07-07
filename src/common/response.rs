@@ -291,7 +291,7 @@ macro_rules! error_response {
 }
 
 // 为OpenAPI文档定义具体的响应类型
-use crate::models::{auth::TokenResponse, user::User};
+use crate::models::{auth::TokenResponse, info::ProjectInfo, user::User};
 
 /// 健康检查响应类型
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -394,5 +394,16 @@ pub struct UserPageApiResponse {
     pub message: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub data: Option<UserPageData>,
+    pub timestamp: i64,
+}
+
+/// 项目信息响应类型
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ProjectInfoApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<ProjectInfo>,
     pub timestamp: i64,
 }
