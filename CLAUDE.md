@@ -8,6 +8,153 @@
 
 **Rust 最佳实践规则**: 总是从 Rust 最佳项目实践的方向思考和解决问题，保持整个项目代码风格一致，逻辑自洽和闭合。遵循 Rust 社区的惯用法和设计模式，确保代码质量和可维护性。
 
+## 统一响应格式规范
+
+本项目采用标准化的 RESTful API 响应格式，确保所有接口返回数据的一致性和可维护性。
+
+### 核心设计原则
+
+1. **语义明确**: `success` 字段明确表示操作是否成功
+2. **类型安全**: 错误代码使用字符串枚举，便于维护和理解
+3. **RESTful 兼容**: 配合 HTTP 状态码使用
+4. **扩展性**: `meta` 字段可包含时间戳、请求ID等元数据
+5. **调试友好**: 可选的 `request_id` 便于问题追踪
+
+### 响应格式标准
+
+#### 成功响应
+```json
+{
+  "success": true,
+  "data": { /* 实际数据 */ },
+  "meta": {
+    "timestamp": 1751886867,
+    "request_id": "uuid-here"
+  }
+}
+```
+
+#### 错误响应
+```json
+{
+  "success": false,
+  "error": {
+    "code": "USER_NOT_FOUND",
+    "message": "用户未找到",
+    "details": "详细错误信息（可选）",
+    "field": "user_id（字段级验证错误，可选）"
+  },
+  "meta": {
+    "timestamp": 1751886867,
+    "request_id": "uuid-here"
+  }
+}
+```
+
+#### 分页响应
+```json
+{
+  "success": true,
+  "data": [ /* 数据数组 */ ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 100,
+    "total_pages": 5,
+    "has_next": true,
+    "has_prev": false
+  },
+  "meta": {
+    "timestamp": 1751886867,
+    "request_id": "uuid-here"
+  }
+}
+```
+
+### 实现指南
+
+#### 1. 使用新的响应系统
+```rust
+use crate::common::response_new::{ApiResponse, IntoHttpResponse};
+use crate::common::ErrorCode;
+
+// 成功响应
+let response = ApiResponse::success(data);
+Ok(response.into_http_response())
+
+// 错误响应
+let response = ApiResponse::error(ErrorCode::UserNotFound);
+Ok(response.into_http_response())
+
+// 分页响应
+let response = ApiResponse::page(items, page, page_size, total);
+Ok(response.into_http_response())
+```
+
+#### 2. 便捷宏
+```rust
+// 成功响应宏
+success_response!(data)
+
+// 分页响应宏
+page_response!(data, page, page_size, total)
+
+// 错误响应宏
+error_response!(ErrorCode::UserNotFound)
+error_response!(ErrorCode::ValidationError, "详细错误信息")
+error_response!(ErrorCode::InvalidParams, "参数无效", "field_name")
+```
+
+#### 3. 错误处理最佳实践
+```rust
+// 使用 ? 操作符进行错误传播
+pub async fn create_user(data: CreateUserRequest) -> Result<HttpResponse, ApiError> {
+    let user = user_service.create(data).await?;
+    success_response!(user)
+}
+
+// 自定义错误处理
+pub async fn validate_user(id: i32) -> Result<HttpResponse, ApiError> {
+    let user = user_repo.find_by_id(id).await
+        .map_err(|_| ApiError::with_details(
+            ErrorCode::UserNotFound,
+            format!("用户ID {} 不存在", id)
+        ))?;
+    
+    success_response!(user)
+}
+```
+
+### 错误代码规范
+
+错误代码采用分类管理，便于维护和扩展：
+
+- **1000-1999**: 通用错误
+- **2000-2999**: 认证相关错误  
+- **3000-3999**: 用户相关错误
+- **4000-4999**: 套餐相关错误
+- **5000-5999**: 优惠券相关错误
+- **6000-6999**: 订单相关错误
+
+### HTTP 状态码映射
+
+响应系统会自动根据错误类型映射相应的 HTTP 状态码：
+
+- 成功响应: `200 OK`
+- 认证错误: `401 Unauthorized` 或 `403 Forbidden`
+- 客户端错误: `400 Bad Request`
+- 资源不存在: `404 Not Found`
+- 服务器错误: `500 Internal Server Error`
+
+### 迁移指南
+
+对于现有接口，建议渐进式迁移：
+
+1. 新接口直接使用新的响应格式
+2. 现有接口可以保持兼容性，逐步迁移
+3. 重要接口优先迁移
+4. 统一更新 OpenAPI 文档
+
 ## 常用开发命令
 
 ### 构建和测试

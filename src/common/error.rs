@@ -194,7 +194,100 @@ impl ErrorCode {
 
 impl fmt::Display for ErrorCode {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}: {}", self.code(), self.message())
+        let string_repr = match self {
+            // 通用错误
+            ErrorCode::Success => "SUCCESS",
+            ErrorCode::InternalError => "INTERNAL_ERROR",
+            ErrorCode::InvalidParams => "INVALID_PARAMS",
+            ErrorCode::ValidationError => "VALIDATION_ERROR",
+            ErrorCode::DatabaseError => "DATABASE_ERROR",
+            ErrorCode::NetworkError => "NETWORK_ERROR",
+
+            // 认证相关错误
+            ErrorCode::Unauthorized => "UNAUTHORIZED",
+            ErrorCode::InvalidToken => "INVALID_TOKEN",
+            ErrorCode::TokenExpired => "TOKEN_EXPIRED",
+            ErrorCode::InvalidCredentials => "INVALID_CREDENTIALS",
+            ErrorCode::AccountLocked => "ACCOUNT_LOCKED",
+            ErrorCode::PermissionDenied => "PERMISSION_DENIED",
+
+            // 用户相关错误
+            ErrorCode::UserNotFound => "USER_NOT_FOUND",
+            ErrorCode::UserAlreadyExists => "USER_ALREADY_EXISTS",
+            ErrorCode::InvalidEmail => "INVALID_EMAIL",
+            ErrorCode::InvalidPassword => "INVALID_PASSWORD",
+            ErrorCode::UserDisabled => "USER_DISABLED",
+
+            // 套餐相关错误
+            ErrorCode::PlanNotFound => "PLAN_NOT_FOUND",
+            ErrorCode::PlanUnavailable => "PLAN_UNAVAILABLE",
+            ErrorCode::PlanQuotaExceeded => "PLAN_QUOTA_EXCEEDED",
+
+            // 优惠券相关错误
+            ErrorCode::CouponNotFound => "COUPON_NOT_FOUND",
+            ErrorCode::CouponExpired => "COUPON_EXPIRED",
+            ErrorCode::CouponUsed => "COUPON_USED",
+            ErrorCode::CouponInvalid => "COUPON_INVALID",
+
+            // 订单相关错误
+            ErrorCode::OrderNotFound => "ORDER_NOT_FOUND",
+            ErrorCode::OrderAlreadyPaid => "ORDER_ALREADY_PAID",
+            ErrorCode::OrderExpired => "ORDER_EXPIRED",
+            ErrorCode::PaymentFailed => "PAYMENT_FAILED",
+            ErrorCode::InsufficientBalance => "INSUFFICIENT_BALANCE",
+        };
+        write!(f, "{}", string_repr)
+    }
+}
+
+impl std::str::FromStr for ErrorCode {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            // 通用错误
+            "SUCCESS" => Ok(ErrorCode::Success),
+            "INTERNAL_ERROR" => Ok(ErrorCode::InternalError),
+            "INVALID_PARAMS" => Ok(ErrorCode::InvalidParams),
+            "VALIDATION_ERROR" => Ok(ErrorCode::ValidationError),
+            "DATABASE_ERROR" => Ok(ErrorCode::DatabaseError),
+            "NETWORK_ERROR" => Ok(ErrorCode::NetworkError),
+
+            // 认证相关错误
+            "UNAUTHORIZED" => Ok(ErrorCode::Unauthorized),
+            "INVALID_TOKEN" => Ok(ErrorCode::InvalidToken),
+            "TOKEN_EXPIRED" => Ok(ErrorCode::TokenExpired),
+            "INVALID_CREDENTIALS" => Ok(ErrorCode::InvalidCredentials),
+            "ACCOUNT_LOCKED" => Ok(ErrorCode::AccountLocked),
+            "PERMISSION_DENIED" => Ok(ErrorCode::PermissionDenied),
+
+            // 用户相关错误
+            "USER_NOT_FOUND" => Ok(ErrorCode::UserNotFound),
+            "USER_ALREADY_EXISTS" => Ok(ErrorCode::UserAlreadyExists),
+            "INVALID_EMAIL" => Ok(ErrorCode::InvalidEmail),
+            "INVALID_PASSWORD" => Ok(ErrorCode::InvalidPassword),
+            "USER_DISABLED" => Ok(ErrorCode::UserDisabled),
+
+            // 套餐相关错误
+            "PLAN_NOT_FOUND" => Ok(ErrorCode::PlanNotFound),
+            "PLAN_UNAVAILABLE" => Ok(ErrorCode::PlanUnavailable),
+            "PLAN_QUOTA_EXCEEDED" => Ok(ErrorCode::PlanQuotaExceeded),
+
+            // 优惠券相关错误
+            "COUPON_NOT_FOUND" => Ok(ErrorCode::CouponNotFound),
+            "COUPON_EXPIRED" => Ok(ErrorCode::CouponExpired),
+            "COUPON_USED" => Ok(ErrorCode::CouponUsed),
+            "COUPON_INVALID" => Ok(ErrorCode::CouponInvalid),
+
+            // 订单相关错误
+            "ORDER_NOT_FOUND" => Ok(ErrorCode::OrderNotFound),
+            "ORDER_ALREADY_PAID" => Ok(ErrorCode::OrderAlreadyPaid),
+            "ORDER_EXPIRED" => Ok(ErrorCode::OrderExpired),
+            "PAYMENT_FAILED" => Ok(ErrorCode::PaymentFailed),
+            "INSUFFICIENT_BALANCE" => Ok(ErrorCode::InsufficientBalance),
+
+            _ => Err(format!("Unknown error code: {}", s)),
+        }
     }
 }
 

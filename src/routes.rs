@@ -10,6 +10,8 @@ use crate::{api, api::openapi::ApiDoc};
 /// 包括OpenAPI文档、Swagger UI和各种业务API
 pub fn configure_routes(cfg: &mut web::ServiceConfig) {
     cfg
+        // 项目信息根路径端点
+        .service(api::get_project_info)
         // OpenAPI JSON 端点
         .route("/api-docs/openapi.json", web::get().to(serve_openapi_spec))
         // Swagger UI
