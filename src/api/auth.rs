@@ -15,12 +15,13 @@ use crate::{
     post,
     path = "/api/auth/register",
     tag = "auth",
+    operation_id = "register_user",
     request_body = RegisterRequest,
     responses(
-        (status = 200, description = "用户注册成功"),
-        (status = 400, description = "请求参数无效"),
-        (status = 409, description = "用户已存在"),
-        (status = 500, description = "内部服务器错误")
+        (status = 200, description = "注册成功", body = inline(crate::common::response_v2::ApiSuccessResponse<i32>)),
+        (status = 400, description = "请求参数无效", body = crate::common::response_v2::ApiErrorResponse),
+        (status = 409, description = "用户已存在", body = crate::common::response_v2::ApiErrorResponse),
+        (status = 500, description = "内部服务器错误", body = crate::common::response_v2::ApiErrorResponse)
     )
 )]
 #[post("/api/auth/register")]
@@ -72,13 +73,14 @@ pub async fn register(
     post,
     path = "/api/auth/login",
     tag = "auth",
+    operation_id = "login_user",
     request_body = LoginRequest,
     responses(
-        (status = 200, description = "用户登录成功"),
-        (status = 400, description = "请求参数无效"),
-        (status = 401, description = "用户名或密码错误"),
-        (status = 403, description = "账户已被禁用"),
-        (status = 500, description = "内部服务器错误")
+        (status = 200, description = "登录成功", body = inline(crate::common::response_v2::ApiSuccessResponse<crate::models::auth::TokenResponse>)),
+        (status = 400, description = "请求参数无效", body = crate::common::response_v2::ApiErrorResponse),
+        (status = 401, description = "用户名或密码错误", body = crate::common::response_v2::ApiErrorResponse),
+        (status = 403, description = "账户已被禁用", body = crate::common::response_v2::ApiErrorResponse),
+        (status = 500, description = "内部服务器错误", body = crate::common::response_v2::ApiErrorResponse)
     )
 )]
 #[post("/api/auth/login")]

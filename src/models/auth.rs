@@ -4,27 +4,51 @@ use utoipa::ToSchema;
 use validator::Validate;
 
 #[derive(Debug, Serialize, Deserialize, Validate, ToSchema)]
+#[schema(title = "用户注册请求")]
 pub struct RegisterRequest {
-    #[validate(length(min = 3, max = 20))]
+    /// 用户名，3-20个字符
+    #[validate(length(min = 3, max = 20, message = "用户名长度必须在3-20个字符之间"))]
+    #[schema(example = "testuser", min_length = 3, max_length = 20)]
     pub username: String,
-    #[validate(email)]
+
+    /// 邮箱地址，必须是有效格式
+    #[validate(email(message = "请输入有效的邮箱地址"))]
+    #[schema(example = "user@example.com")]
     pub email: String,
-    #[validate(length(min = 6, max = 32))]
+
+    /// 登录密码，6-32个字符
+    #[validate(length(min = 6, max = 32, message = "密码长度必须在6-32个字符之间"))]
+    #[schema(example = "password123", min_length = 6, max_length = 32)]
     pub password: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Validate, ToSchema)]
+#[schema(title = "用户登录请求")]
 pub struct LoginRequest {
-    #[validate(length(min = 3, max = 20))]
+    /// 用户名，3-20个字符
+    #[validate(length(min = 3, max = 20, message = "用户名长度必须在3-20个字符之间"))]
+    #[schema(example = "testuser", min_length = 3, max_length = 20)]
     pub username: String,
-    #[validate(length(min = 6, max = 32))]
+
+    /// 登录密码，6-32个字符
+    #[validate(length(min = 6, max = 32, message = "密码长度必须在6-32个字符之间"))]
+    #[schema(example = "password123", min_length = 6, max_length = 32)]
     pub password: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[schema(title = "JWT令牌响应")]
 pub struct TokenResponse {
+    /// JWT访问令牌，用于API认证
+    #[schema(example = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...")]
     pub access_token: String,
+
+    /// 令牌类型，固定为Bearer
+    #[schema(example = "Bearer")]
     pub token_type: String,
+
+    /// 令牌有效期（秒），默认604800秒（7天）
+    #[schema(example = 604800)]
     pub expires_in: i64,
 }
 
