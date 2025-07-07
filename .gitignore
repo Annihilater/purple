@@ -228,9 +228,9 @@ $RECYCLE.BIN/
 .env
 .sqlx
 .cargo
-.cursor
-.cursorrules
-.cursorignore
-.claude
 logs/
-CLAUDE.md
+#.cursor
+#.cursorrules
+#.cursorignore
+#.claude
+#CLAUDE.md
