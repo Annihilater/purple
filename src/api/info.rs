@@ -1,6 +1,6 @@
 use actix_web::{get, HttpResponse, Result};
 
-use crate::common::response::{ApiResponse, ProjectInfoApiResponse};
+use crate::common::response_v2::{ApiResponse, IntoHttpResponse};
 use crate::models::info::ProjectInfo;
 
 /// 获取项目信息接口
@@ -10,8 +10,8 @@ use crate::models::info::ProjectInfo;
     get,
     path = "/",
     responses(
-        (status = 200, description = "成功获取项目信息", body = ProjectInfoApiResponse),
-        (status = 500, description = "服务器内部错误", body = ProjectInfoApiResponse)
+        (status = 200, description = "成功获取项目信息"),
+        (status = 500, description = "服务器内部错误")
     ),
     tag = "项目信息"
 )]
@@ -19,5 +19,5 @@ use crate::models::info::ProjectInfo;
 pub async fn get_project_info() -> Result<HttpResponse> {
     let project_info = ProjectInfo::new();
     let response = ApiResponse::success(project_info);
-    Ok(response.into_response())
+    Ok(response.into_http_response())
 }
