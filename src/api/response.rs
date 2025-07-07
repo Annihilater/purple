@@ -41,7 +41,7 @@ impl From<ValidationErrors> for ApiError {
 }
 
 /// 旧版API响应结构（保持向后兼容）
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ApiResponse<T> {
     pub code: i32,
     pub message: String,

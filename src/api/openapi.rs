@@ -4,12 +4,12 @@ use utoipa_swagger_ui::SwaggerUi;
 use crate::api::{
     health::HealthResponse,
     response::UserResponse,
-    user::{
-        CreateUserRequest, EmptyApiResponse, GetUsersQuery, UpdateUserRequest,
-        UpdateUserStatusRequest, UserApiResponse, UserPageApiResponse,
-    },
+    user::{CreateUserRequest, GetUsersQuery, UpdateUserRequest, UpdateUserStatusRequest},
 };
-use crate::common::{ApiError, ApiResponse, ErrorCode, PageResponse};
+use crate::common::{
+    EmptyApiResponse, ErrorCode, HealthApiResponse, TokenApiResponse, UserApiResponse,
+    UserIdApiResponse, UserPageApiResponse, UserPageData,
+};
 use crate::models::{
     auth::{Claims, LoginRequest, RegisterRequest, TokenResponse},
     coupon::{
@@ -70,11 +70,14 @@ use crate::models::{
             TokenResponse,
             Claims,
             HealthResponse,
-            UserApiResponse,
-            EmptyApiResponse,
-            UserPageApiResponse,
-            PageResponse<User>,
             ErrorCode,
+            HealthApiResponse,
+            EmptyApiResponse,
+            UserIdApiResponse,
+            TokenApiResponse,
+            UserApiResponse,
+            UserPageApiResponse,
+            UserPageData,
         )
     ),
     tags(

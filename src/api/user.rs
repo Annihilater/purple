@@ -148,7 +148,8 @@ pub async fn get_users(
         .await
     {
         Ok((users, total)) => {
-            let page_response = PageResponse::new(users, total as u64, query.page, query.page_size);
+            let page_response =
+                crate::common::UserPageData::new(users, total as u64, query.page, query.page_size);
             ResponseBuilder::success_with_message(page_response, "获取用户列表成功".to_string())
         }
         Err(e) => {

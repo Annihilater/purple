@@ -5,6 +5,7 @@ use validator::Validate;
 
 use crate::{
     api::response::{ApiError, ApiResponse, Response},
+    common::EmptyApiResponse,
     models::plan::{CreatePlanRequest, Plan, PlanListResponse, PlanResponse, UpdatePlanRequest},
     repositories::PlanRepository,
 };
@@ -40,8 +41,8 @@ pub struct ListPlansQuery {
     request_body = CreatePlanRequest,
     responses(
         (status = 200, description = "Plan created successfully", body = PlanResponse),
-        (status = 400, description = "Invalid request", body = ResponseError),
-        (status = 500, description = "Internal server error", body = ResponseError)
+        (status = 400, description = "Invalid request", body = EmptyApiResponse),
+        (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     security(
         ("jwt_token" = [])
@@ -69,7 +70,7 @@ pub async fn create_plan(
     tag = "plans",
     responses(
         (status = 200, description = "Plans retrieved successfully", body = PlanListResponse),
-        (status = 500, description = "Internal server error", body = ResponseError)
+        (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     params(
         ("page" = i64, Query, description = "Page number (default: 1)"),
@@ -115,8 +116,8 @@ pub async fn list_plans(
     tag = "plans",
     responses(
         (status = 200, description = "Plan found", body = PlanResponse),
-        (status = 404, description = "Plan not found", body = ResponseError),
-        (status = 500, description = "Internal server error", body = ResponseError)
+        (status = 404, description = "Plan not found", body = EmptyApiResponse),
+        (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     params(
         ("id" = i32, Path, description = "Plan id")
@@ -151,9 +152,9 @@ pub async fn get_plan(
     request_body = UpdatePlanRequest,
     responses(
         (status = 200, description = "Plan updated successfully", body = PlanResponse),
-        (status = 400, description = "Invalid request", body = ResponseError),
-        (status = 404, description = "Plan not found", body = ResponseError),
-        (status = 500, description = "Internal server error", body = ResponseError)
+        (status = 400, description = "Invalid request", body = EmptyApiResponse),
+        (status = 404, description = "Plan not found", body = EmptyApiResponse),
+        (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     params(
         ("id" = i32, Path, description = "Plan id")
@@ -185,8 +186,8 @@ pub async fn update_plan(
     tag = "plans",
     responses(
         (status = 200, description = "Plan deleted successfully"),
-        (status = 404, description = "Plan not found", body = ResponseError),
-        (status = 500, description = "Internal server error", body = ResponseError)
+        (status = 404, description = "Plan not found", body = EmptyApiResponse),
+        (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     params(
         ("id" = i32, Path, description = "Plan id")
@@ -214,7 +215,7 @@ pub async fn delete_plan(
     tag = "plans",
     responses(
         (status = 200, description = "Plans retrieved successfully", body = PlanListResponse),
-        (status = 500, description = "Internal server error", body = ResponseError)
+        (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     security(
         ("jwt_token" = [])

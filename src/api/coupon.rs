@@ -5,6 +5,7 @@ use validator::Validate;
 
 use crate::{
     api::response::{ApiError, ApiResponse, Response},
+    common::EmptyApiResponse,
     models::coupon::{
         Coupon, CouponListResponse, CouponResponse, CreateCouponRequest, UpdateCouponRequest,
     },
@@ -45,8 +46,8 @@ pub struct CouponsListResponse {
     request_body = CreateCouponRequest,
     responses(
         (status = 200, description = "Coupon created successfully", body = CouponResponse),
-        (status = 400, description = "Invalid request", body = ResponseError),
-        (status = 500, description = "Internal server error", body = ResponseError)
+        (status = 400, description = "Invalid request", body = EmptyApiResponse),
+        (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     security(
         ("jwt_token" = [])
@@ -73,7 +74,7 @@ pub async fn create_coupon(
     tag = "coupons",
     responses(
         (status = 200, description = "Coupons retrieved successfully", body = CouponListResponse),
-        (status = 500, description = "Internal server error", body = ResponseError)
+        (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     params(
         ("page" = i64, Query, description = "Page number (default: 1)"),
@@ -109,8 +110,8 @@ pub async fn list_coupons(
     tag = "coupons",
     responses(
         (status = 200, description = "Coupon found", body = CouponResponse),
-        (status = 404, description = "Coupon not found", body = ResponseError),
-        (status = 500, description = "Internal server error", body = ResponseError)
+        (status = 404, description = "Coupon not found", body = EmptyApiResponse),
+        (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     params(
         ("id" = i32, Path, description = "Coupon id")
@@ -148,9 +149,9 @@ pub async fn get_coupon(
     request_body = UpdateCouponRequest,
     responses(
         (status = 200, description = "Coupon updated successfully", body = CouponResponse),
-        (status = 400, description = "Invalid request", body = ResponseError),
-        (status = 404, description = "Coupon not found", body = ResponseError),
-        (status = 500, description = "Internal server error", body = ResponseError)
+        (status = 400, description = "Invalid request", body = EmptyApiResponse),
+        (status = 404, description = "Coupon not found", body = EmptyApiResponse),
+        (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     params(
         ("id" = i32, Path, description = "Coupon id")
@@ -181,8 +182,8 @@ pub async fn update_coupon(
     tag = "coupons",
     responses(
         (status = 200, description = "Coupon deleted successfully"),
-        (status = 404, description = "Coupon not found", body = ResponseError),
-        (status = 500, description = "Internal server error", body = ResponseError)
+        (status = 404, description = "Coupon not found", body = EmptyApiResponse),
+        (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     params(
         ("id" = i32, Path, description = "Coupon id")
@@ -210,8 +211,8 @@ pub async fn delete_coupon(
     ),
     responses(
         (status = 200, description = "验证优惠码成功", body = CouponResponse),
-        (status = 404, description = "优惠码不存在或已失效", body = Response),
-        (status = 500, description = "服务器内部错误", body = Response),
+        (status = 404, description = "优惠码不存在或已失效", body = EmptyApiResponse),
+        (status = 500, description = "服务器内部错误", body = EmptyApiResponse),
     )
 )]
 #[get("/coupons/verify/{code}")]

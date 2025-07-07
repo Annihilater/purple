@@ -291,7 +291,108 @@ macro_rules! error_response {
 }
 
 // 为OpenAPI文档定义具体的响应类型
-use crate::models::user::User;
+use crate::models::{auth::TokenResponse, user::User};
 
 /// 健康检查响应类型
-pub type HealthApiResponse = ApiResponse<serde_json::Value>;
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct HealthApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<serde_json::Value>,
+    pub timestamp: i64,
+}
+
+/// 空响应类型
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct EmptyApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<()>,
+    pub timestamp: i64,
+}
+
+/// 用户ID响应类型
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct UserIdApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<i32>,
+    pub timestamp: i64,
+}
+
+/// Token响应类型
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct TokenApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<TokenResponse>,
+    pub timestamp: i64,
+}
+
+/// 用户响应类型
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct UserApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<User>,
+    pub timestamp: i64,
+}
+
+/// 用户分页数据类型
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct UserPageData {
+    /// 数据列表
+    pub items: Vec<User>,
+    /// 总记录数
+    pub total: u64,
+    /// 当前页码
+    pub page: u64,
+    /// 每页大小
+    pub page_size: u64,
+    /// 总页数
+    pub total_pages: u64,
+    /// 是否有下一页
+    pub has_next: bool,
+    /// 是否有上一页
+    pub has_prev: bool,
+}
+
+impl UserPageData {
+    /// 创建用户分页响应
+    pub fn new(items: Vec<User>, total: u64, page: u64, page_size: u64) -> Self {
+        let total_pages = (total + page_size - 1) / page_size;
+        let has_next = page < total_pages;
+        let has_prev = page > 1;
+
+        Self {
+            items,
+            total,
+            page,
+            page_size,
+            total_pages,
+            has_next,
+            has_prev,
+        }
+    }
+}
+
+/// 用户分页响应类型
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct UserPageApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<UserPageData>,
+    pub timestamp: i64,
+}

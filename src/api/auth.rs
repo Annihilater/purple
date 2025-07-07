@@ -4,7 +4,7 @@ use utoipa::ToSchema;
 use validator::Validate;
 
 use crate::{
-    common::{ErrorCode, ResponseBuilder},
+    common::{EmptyApiResponse, ErrorCode, ResponseBuilder, TokenApiResponse, UserIdApiResponse},
     models::auth::{LoginRequest, RegisterRequest, TokenResponse},
     services::AuthService,
 };
@@ -16,10 +16,10 @@ use crate::{
     tag = "auth",
     request_body = RegisterRequest,
     responses(
-        (status = 200, description = "用户注册成功", body = crate::common::ApiResponse<i32>),
-        (status = 400, description = "请求参数无效", body = crate::common::ApiResponse<()>),
-        (status = 409, description = "用户已存在", body = crate::common::ApiResponse<()>),
-        (status = 500, description = "内部服务器错误", body = crate::common::ApiResponse<()>)
+        (status = 200, description = "用户注册成功", body = UserIdApiResponse),
+        (status = 400, description = "请求参数无效", body = EmptyApiResponse),
+        (status = 409, description = "用户已存在", body = EmptyApiResponse),
+        (status = 500, description = "内部服务器错误", body = EmptyApiResponse)
     )
 )]
 #[post("/api/auth/register")]
@@ -88,11 +88,11 @@ pub async fn register(
     tag = "auth",
     request_body = LoginRequest,
     responses(
-        (status = 200, description = "用户登录成功", body = crate::common::ApiResponse<TokenResponse>),
-        (status = 400, description = "请求参数无效", body = crate::common::ApiResponse<()>),
-        (status = 401, description = "用户名或密码错误", body = crate::common::ApiResponse<()>),
-        (status = 403, description = "账户已被禁用", body = crate::common::ApiResponse<()>),
-        (status = 500, description = "内部服务器错误", body = crate::common::ApiResponse<()>)
+        (status = 200, description = "用户登录成功", body = TokenApiResponse),
+        (status = 400, description = "请求参数无效", body = EmptyApiResponse),
+        (status = 401, description = "用户名或密码错误", body = EmptyApiResponse),
+        (status = 403, description = "账户已被禁用", body = EmptyApiResponse),
+        (status = 500, description = "内部服务器错误", body = EmptyApiResponse)
     )
 )]
 #[post("/api/auth/login")]
