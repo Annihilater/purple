@@ -27,7 +27,9 @@ pub fn configure_routes(cfg: &mut web::ServiceConfig) {
         // 套餐管理路由
         .configure(configure_plan_routes)
         // 优惠券管理路由
-        .configure(configure_coupon_routes);
+        .configure(configure_coupon_routes)
+        // 订阅管理路由
+        .configure(configure_subscribe_routes);
 }
 
 /// 配置认证相关路由
@@ -72,6 +74,22 @@ fn configure_coupon_routes(cfg: &mut web::ServiceConfig) {
             .service(api::delete_coupon)
             .service(api::verify_coupon),
     );
+}
+
+/// 配置订阅管理路由
+fn configure_subscribe_routes(cfg: &mut web::ServiceConfig) {
+    cfg
+        // 用户订阅接口
+        .service(api::get_subscribe_info)
+        .service(api::get_subscribe_link)
+        .service(api::reset_subscribe_token)
+        .service(api::get_subscribe_stats)
+        .service(api::get_nodes_status)
+        .service(api::test_subscribe_connectivity)
+        // 客户端配置获取接口
+        .service(api::get_subscribe_config)
+        // 节点流量上报接口
+        .service(api::report_traffic);
 }
 
 /// 提供OpenAPI规范

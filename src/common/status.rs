@@ -13,21 +13,27 @@ impl ErrorCode {
             ErrorCode::InvalidParams
             | ErrorCode::ValidationError
             | ErrorCode::InvalidEmail
-            | ErrorCode::InvalidPassword => StatusCode::BAD_REQUEST,
+            | ErrorCode::InvalidPassword
+            | ErrorCode::InvalidSubscribeToken => StatusCode::BAD_REQUEST,
 
             ErrorCode::Unauthorized
             | ErrorCode::InvalidToken
             | ErrorCode::TokenExpired
             | ErrorCode::InvalidCredentials => StatusCode::UNAUTHORIZED,
 
-            ErrorCode::PermissionDenied | ErrorCode::AccountLocked | ErrorCode::UserDisabled => {
-                StatusCode::FORBIDDEN
-            }
+            ErrorCode::PermissionDenied
+            | ErrorCode::AccountLocked
+            | ErrorCode::UserDisabled
+            | ErrorCode::SubscribeBanned => StatusCode::FORBIDDEN,
 
             ErrorCode::UserNotFound
             | ErrorCode::PlanNotFound
             | ErrorCode::CouponNotFound
-            | ErrorCode::OrderNotFound => StatusCode::NOT_FOUND,
+            | ErrorCode::OrderNotFound
+            | ErrorCode::TicketNotFound
+            | ErrorCode::NoticeNotFound
+            | ErrorCode::KnowledgeNotFound
+            | ErrorCode::SubscribeNotFound => StatusCode::NOT_FOUND,
 
             ErrorCode::UserAlreadyExists | ErrorCode::CouponUsed | ErrorCode::OrderAlreadyPaid => {
                 StatusCode::CONFLICT
@@ -40,7 +46,11 @@ impl ErrorCode {
             | ErrorCode::OrderExpired
             | ErrorCode::PlanUnavailable
             | ErrorCode::PlanQuotaExceeded
-            | ErrorCode::InsufficientBalance => StatusCode::UNPROCESSABLE_ENTITY,
+            | ErrorCode::InsufficientBalance
+            | ErrorCode::TicketClosed
+            | ErrorCode::SubscribeExpired
+            | ErrorCode::TrafficExceeded
+            | ErrorCode::NodeNotAvailable => StatusCode::UNPROCESSABLE_ENTITY,
 
             // 服务器错误 (5xx)
             ErrorCode::InternalError

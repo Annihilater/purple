@@ -4,6 +4,10 @@ use utoipa_swagger_ui::SwaggerUi;
 use crate::api::{
     health::HealthResponse,
     response::UserResponse,
+    subscribe::{
+        NodeStatus, NodeStatusResponse, NodeTestResult, SubscribeQuery, TestResultResponse,
+        TestSubscribeRequest, TestSummary,
+    },
     user::{CreateUserRequest, GetUsersQuery, UpdateUserRequest, UpdateUserStatusRequest},
 };
 use crate::common::{
@@ -18,6 +22,11 @@ use crate::models::{
     },
     info::ProjectInfo,
     plan::{CreatePlanRequest, Plan, PlanListResponse, PlanResponse, UpdatePlanRequest},
+    subscribe::{
+        ExpireInfo, LoginStats, PlanInfo, ResetTokenRequest, ResetTokenResponse, ServerNode,
+        SubscribeConfig, SubscribeInfoHeader, SubscribeLinkResponse, SubscribeStatsResponse,
+        TrafficInfo, TrafficReportRequest, UserStatus, UserSubscribeInfo, UserTrafficData,
+    },
     user::{User, UserResponse as UserModel},
 };
 
@@ -46,6 +55,14 @@ use crate::models::{
         crate::api::coupon::update_coupon,
         crate::api::coupon::delete_coupon,
         crate::api::coupon::verify_coupon,
+        crate::api::subscribe::get_subscribe_info,
+        crate::api::subscribe::get_subscribe_link,
+        crate::api::subscribe::reset_subscribe_token,
+        crate::api::subscribe::get_subscribe_stats,
+        crate::api::subscribe::get_subscribe_config,
+        crate::api::subscribe::report_traffic,
+        crate::api::subscribe::get_nodes_status,
+        crate::api::subscribe::test_subscribe_connectivity,
     ),
     components(
         schemas(
@@ -82,6 +99,29 @@ use crate::models::{
             UserPageData,
             ProjectInfo,
             ProjectInfoApiResponse,
+            // 订阅相关的Schema
+            UserSubscribeInfo,
+            TrafficInfo,
+            ExpireInfo,
+            PlanInfo,
+            UserStatus,
+            ResetTokenRequest,
+            ResetTokenResponse,
+            SubscribeConfig,
+            SubscribeInfoHeader,
+            ServerNode,
+            TrafficReportRequest,
+            UserTrafficData,
+            SubscribeLinkResponse,
+            SubscribeStatsResponse,
+            LoginStats,
+            NodeStatusResponse,
+            NodeStatus,
+            TestSubscribeRequest,
+            TestResultResponse,
+            NodeTestResult,
+            TestSummary,
+            SubscribeQuery,
         )
     ),
     tags(
@@ -91,6 +131,7 @@ use crate::models::{
         (name = "plans", description = "Plan management endpoints"),
         (name = "coupons", description = "Coupon management endpoints"),
         (name = "auth", description = "Authentication endpoints"),
+        (name = "subscribe", description = "Subscription management endpoints"),
     )
 )]
 pub struct ApiDoc;

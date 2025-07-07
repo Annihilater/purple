@@ -78,6 +78,34 @@ pub enum ErrorCode {
     PaymentFailed = 6003,
     #[serde(rename = "INSUFFICIENT_BALANCE")]
     InsufficientBalance = 6004,
+
+    // 工单相关错误 (7000-7999)
+    #[serde(rename = "TICKET_NOT_FOUND")]
+    TicketNotFound = 7000,
+    #[serde(rename = "TICKET_CLOSED")]
+    TicketClosed = 7001,
+
+    // 公告相关错误 (8000-8999)
+    #[serde(rename = "NOTICE_NOT_FOUND")]
+    NoticeNotFound = 8000,
+
+    // 知识库相关错误 (9000-9999)
+    #[serde(rename = "KNOWLEDGE_NOT_FOUND")]
+    KnowledgeNotFound = 9000,
+
+    // 订阅相关错误 (10000-10999)
+    #[serde(rename = "SUBSCRIBE_NOT_FOUND")]
+    SubscribeNotFound = 10000,
+    #[serde(rename = "SUBSCRIBE_EXPIRED")]
+    SubscribeExpired = 10001,
+    #[serde(rename = "SUBSCRIBE_BANNED")]
+    SubscribeBanned = 10002,
+    #[serde(rename = "TRAFFIC_EXCEEDED")]
+    TrafficExceeded = 10003,
+    #[serde(rename = "NODE_NOT_AVAILABLE")]
+    NodeNotAvailable = 10004,
+    #[serde(rename = "INVALID_SUBSCRIBE_TOKEN")]
+    InvalidSubscribeToken = 10005,
 }
 
 impl ErrorCode {
@@ -131,6 +159,24 @@ impl ErrorCode {
             ErrorCode::OrderExpired => "订单已过期",
             ErrorCode::PaymentFailed => "支付失败",
             ErrorCode::InsufficientBalance => "余额不足",
+
+            // 工单相关错误
+            ErrorCode::TicketNotFound => "工单不存在",
+            ErrorCode::TicketClosed => "工单已关闭",
+
+            // 公告相关错误
+            ErrorCode::NoticeNotFound => "公告不存在",
+
+            // 知识库相关错误
+            ErrorCode::KnowledgeNotFound => "知识库条目不存在",
+
+            // 订阅相关错误
+            ErrorCode::SubscribeNotFound => "订阅不存在",
+            ErrorCode::SubscribeExpired => "订阅已过期",
+            ErrorCode::SubscribeBanned => "订阅已被禁用",
+            ErrorCode::TrafficExceeded => "流量已超限",
+            ErrorCode::NodeNotAvailable => "节点不可用",
+            ErrorCode::InvalidSubscribeToken => "订阅令牌无效",
         }
     }
 
@@ -179,6 +225,24 @@ impl ErrorCode {
             ErrorCode::OrderExpired => "Order expired",
             ErrorCode::PaymentFailed => "Payment failed",
             ErrorCode::InsufficientBalance => "Insufficient balance",
+
+            // 工单相关错误
+            ErrorCode::TicketNotFound => "Ticket not found",
+            ErrorCode::TicketClosed => "Ticket closed",
+
+            // 公告相关错误
+            ErrorCode::NoticeNotFound => "Notice not found",
+
+            // 知识库相关错误
+            ErrorCode::KnowledgeNotFound => "Knowledge not found",
+
+            // 订阅相关错误
+            ErrorCode::SubscribeNotFound => "Subscription not found",
+            ErrorCode::SubscribeExpired => "Subscription expired",
+            ErrorCode::SubscribeBanned => "Subscription banned",
+            ErrorCode::TrafficExceeded => "Traffic exceeded",
+            ErrorCode::NodeNotAvailable => "Node not available",
+            ErrorCode::InvalidSubscribeToken => "Invalid subscription token",
         }
     }
 
@@ -245,6 +309,24 @@ impl fmt::Display for ErrorCode {
             ErrorCode::OrderExpired => "ORDER_EXPIRED",
             ErrorCode::PaymentFailed => "PAYMENT_FAILED",
             ErrorCode::InsufficientBalance => "INSUFFICIENT_BALANCE",
+
+            // 工单相关错误
+            ErrorCode::TicketNotFound => "TICKET_NOT_FOUND",
+            ErrorCode::TicketClosed => "TICKET_CLOSED",
+
+            // 公告相关错误
+            ErrorCode::NoticeNotFound => "NOTICE_NOT_FOUND",
+
+            // 知识库相关错误
+            ErrorCode::KnowledgeNotFound => "KNOWLEDGE_NOT_FOUND",
+
+            // 订阅相关错误
+            ErrorCode::SubscribeNotFound => "SUBSCRIBE_NOT_FOUND",
+            ErrorCode::SubscribeExpired => "SUBSCRIBE_EXPIRED",
+            ErrorCode::SubscribeBanned => "SUBSCRIBE_BANNED",
+            ErrorCode::TrafficExceeded => "TRAFFIC_EXCEEDED",
+            ErrorCode::NodeNotAvailable => "NODE_NOT_AVAILABLE",
+            ErrorCode::InvalidSubscribeToken => "INVALID_SUBSCRIBE_TOKEN",
         };
         write!(f, "{}", string_repr)
     }
@@ -298,6 +380,24 @@ impl std::str::FromStr for ErrorCode {
             "PAYMENT_FAILED" => Ok(ErrorCode::PaymentFailed),
             "INSUFFICIENT_BALANCE" => Ok(ErrorCode::InsufficientBalance),
 
+            // 工单相关错误
+            "TICKET_NOT_FOUND" => Ok(ErrorCode::TicketNotFound),
+            "TICKET_CLOSED" => Ok(ErrorCode::TicketClosed),
+
+            // 公告相关错误
+            "NOTICE_NOT_FOUND" => Ok(ErrorCode::NoticeNotFound),
+
+            // 知识库相关错误
+            "KNOWLEDGE_NOT_FOUND" => Ok(ErrorCode::KnowledgeNotFound),
+
+            // 订阅相关错误
+            "SUBSCRIBE_NOT_FOUND" => Ok(ErrorCode::SubscribeNotFound),
+            "SUBSCRIBE_EXPIRED" => Ok(ErrorCode::SubscribeExpired),
+            "SUBSCRIBE_BANNED" => Ok(ErrorCode::SubscribeBanned),
+            "TRAFFIC_EXCEEDED" => Ok(ErrorCode::TrafficExceeded),
+            "NODE_NOT_AVAILABLE" => Ok(ErrorCode::NodeNotAvailable),
+            "INVALID_SUBSCRIBE_TOKEN" => Ok(ErrorCode::InvalidSubscribeToken),
+
             _ => Err(format!("Unknown error code: {}", s)),
         }
     }
@@ -337,6 +437,16 @@ impl From<i32> for ErrorCode {
             6002 => ErrorCode::OrderExpired,
             6003 => ErrorCode::PaymentFailed,
             6004 => ErrorCode::InsufficientBalance,
+            7000 => ErrorCode::TicketNotFound,
+            7001 => ErrorCode::TicketClosed,
+            8000 => ErrorCode::NoticeNotFound,
+            9000 => ErrorCode::KnowledgeNotFound,
+            10000 => ErrorCode::SubscribeNotFound,
+            10001 => ErrorCode::SubscribeExpired,
+            10002 => ErrorCode::SubscribeBanned,
+            10003 => ErrorCode::TrafficExceeded,
+            10004 => ErrorCode::NodeNotAvailable,
+            10005 => ErrorCode::InvalidSubscribeToken,
             _ => ErrorCode::InternalError,
         }
     }
