@@ -4,11 +4,44 @@ use utoipa::{IntoParams, ToSchema};
 use uuid::Uuid;
 
 use crate::{
-    api::openapi::{EmptyApiResponse, UserApiResponse, UserPageApiResponse},
     common::{ErrorCode, PageResponse, ResponseBuilder},
     models::user::{CreateUser, User},
     repositories::UserRepository,
 };
+
+// 为OpenAPI定义具体的响应结构体
+#[derive(Debug, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct UserApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<User>,
+    pub timestamp: i64,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct EmptyApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<()>,
+    pub timestamp: i64,
+}
+
+#[derive(Debug, Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
+pub struct UserPageApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<PageResponse<User>>,
+    pub timestamp: i64,
+}
 
 #[derive(Debug, Deserialize, ToSchema)]
 pub struct CreateUserRequest {

@@ -4,7 +4,10 @@ use utoipa_swagger_ui::SwaggerUi;
 use crate::api::{
     health::HealthResponse,
     response::UserResponse,
-    user::{CreateUserRequest, GetUsersQuery, UpdateUserRequest, UpdateUserStatusRequest},
+    user::{
+        CreateUserRequest, EmptyApiResponse, GetUsersQuery, UpdateUserRequest,
+        UpdateUserStatusRequest, UserApiResponse, UserPageApiResponse,
+    },
 };
 use crate::common::{ApiError, ApiResponse, ErrorCode, PageResponse};
 use crate::models::{
@@ -16,11 +19,6 @@ use crate::models::{
     plan::{CreatePlanRequest, Plan, PlanListResponse, PlanResponse, UpdatePlanRequest},
     user::{User, UserResponse as UserModel},
 };
-
-// 简化OpenAPI schema管理
-pub type UserApiResponse = ApiResponse<User>;
-pub type EmptyApiResponse = ApiResponse<()>;
-pub type UserPageApiResponse = ApiResponse<PageResponse<User>>;
 
 #[derive(OpenApi)]
 #[openapi(

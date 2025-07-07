@@ -289,3 +289,9 @@ macro_rules! error_response {
         ))
     };
 }
+
+// 为OpenAPI文档定义具体的响应类型
+use crate::models::user::User;
+
+/// 健康检查响应类型
+pub type HealthApiResponse = ApiResponse<serde_json::Value>;
