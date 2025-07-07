@@ -24,7 +24,10 @@ pub use openapi::*;
 pub use order::{
     cancel_order, create_order, delete_order, get_order, get_order_stats, get_orders, pay_order,
 };
-pub use plan::{create_plan, delete_plan, get_enabled_plans, get_plan, list_plans, update_plan};
+pub use plan::{
+    batch_update_plan_status, check_plan_availability, create_plan, delete_plan, get_enabled_plans,
+    get_plan, get_plan_pricing, get_plan_stats, list_plans, update_plan,
+};
 pub use response::*;
 pub use subscribe::{
     get_nodes_status, get_subscribe_config, get_subscribe_info, get_subscribe_link,

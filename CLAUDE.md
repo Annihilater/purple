@@ -214,6 +214,10 @@ JWT_SECRET=your-secret-key-here-please-change-in-production
 SERVER_ADDR=127.0.0.1
 SERVER_PORT=8080
 
+# 管理员账户配置（启动时自动创建/更新）
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=admin123
+
 # 日志配置
 RUST_LOG=info
 LOG_LEVEL=info

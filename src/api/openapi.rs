@@ -3,6 +3,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::api::{
     health::HealthResponse,
+    plan::BatchUpdatePlanStatusRequest,
     response::UserResponse,
     subscribe::{
         NodeStatus, NodeStatusResponse, NodeTestResult, SubscribeQuery, TestResultResponse,
@@ -11,7 +12,8 @@ use crate::api::{
     user::{CreateUserRequest, GetUsersQuery, UpdateUserRequest, UpdateUserStatusRequest},
 };
 use crate::common::{
-    EmptyApiResponse, ErrorCode, HealthApiResponse, ProjectInfoApiResponse, TokenApiResponse,
+    EmptyApiResponse, ErrorCode, HealthApiResponse, PlanAvailabilityApiResponse,
+    PlanPricingApiResponse, PlanStatsApiResponse, ProjectInfoApiResponse, TokenApiResponse,
     UserApiResponse, UserIdApiResponse, UserPageApiResponse, UserPageData,
 };
 use crate::models::{
@@ -21,7 +23,10 @@ use crate::models::{
         ValidateCouponResponse,
     },
     info::ProjectInfo,
-    plan::{CreatePlanRequest, Plan, PlanListResponse, PlanResponse, UpdatePlanRequest},
+    plan::{
+        CreatePlanRequest, Plan, PlanAvailability, PlanListResponse, PlanPricing, PlanResponse,
+        PlanStats, PriceOption, UpdatePlanRequest,
+    },
     subscribe::{
         ExpireInfo, LoginStats, PlanInfo, ResetTokenRequest, ResetTokenResponse, ServerNode,
         SubscribeConfig, SubscribeInfoHeader, SubscribeLinkResponse, SubscribeStatsResponse,
@@ -49,6 +54,10 @@ use crate::models::{
         crate::api::plan::update_plan,
         crate::api::plan::delete_plan,
         crate::api::plan::get_enabled_plans,
+        crate::api::plan::get_plan_stats,
+        crate::api::plan::get_plan_pricing,
+        crate::api::plan::check_plan_availability,
+        crate::api::plan::batch_update_plan_status,
         crate::api::coupon::create_coupon,
         crate::api::coupon::list_coupons,
         crate::api::coupon::get_coupon,
@@ -78,6 +87,11 @@ use crate::models::{
             UpdatePlanRequest,
             PlanResponse,
             PlanListResponse,
+            PlanStats,
+            PlanPricing,
+            PlanAvailability,
+            PriceOption,
+            BatchUpdatePlanStatusRequest,
             Coupon,
             CreateCouponRequest,
             UpdateCouponRequest,
@@ -99,6 +113,9 @@ use crate::models::{
             UserPageData,
             ProjectInfo,
             ProjectInfoApiResponse,
+            PlanStatsApiResponse,
+            PlanPricingApiResponse,
+            PlanAvailabilityApiResponse,
             // 订阅相关的Schema
             UserSubscribeInfo,
             TrafficInfo,

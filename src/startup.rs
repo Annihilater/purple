@@ -4,7 +4,7 @@ use tracing::info;
 
 use crate::{
     app_state::AppState,
-    config::{Config, DatabaseConfig},
+    config::{initialize_admin_account, Config, DatabaseConfig},
     logging::{init_logging, LogGuard},
     routes::configure_routes,
 };
@@ -39,6 +39,9 @@ impl Application {
 
         // 创建应用状态
         let app_state = AppState::new(&database_config).await?;
+
+        // 初始化管理员账户
+        initialize_admin_account(&app_state.db_pool, &config.admin).await?;
 
         // 记录启动信息
         log_startup_info(&config);

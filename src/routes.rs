@@ -59,7 +59,11 @@ fn configure_plan_routes(cfg: &mut web::ServiceConfig) {
             .service(api::get_plan)
             .service(api::update_plan)
             .service(api::delete_plan)
-            .service(api::get_enabled_plans),
+            .service(api::get_enabled_plans)
+            .service(api::get_plan_stats)
+            .service(api::get_plan_pricing)
+            .service(api::check_plan_availability)
+            .service(api::batch_update_plan_status),
     );
 }
 

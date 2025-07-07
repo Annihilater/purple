@@ -130,17 +130,34 @@ JWT_SECRET=your-secret-key-here-please-change-in-production
 SERVER_ADDR=127.0.0.1
 SERVER_PORT=8080
 
+# 管理员账户配置（首次启动自动创建）
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=admin123456
+
 # 日志配置
 RUST_LOG=info
 LOG_LEVEL=info
+LOG_WITH_THREAD_IDS=true
+LOG_WITH_LINE_NUMBER=true
+LOG_WITH_FILE=true
+LOG_WITH_TARGET=false
 LOG_FILE_PATH=logs/app.log
 ```
+
+**重要提示**:
+
+- `ADMIN_EMAIL` 和 `ADMIN_PASSWORD` 用于在应用启动时自动创建管理员账户
+- 如果管理员账户已存在但密码不匹配，系统会自动更新为配置的密码
+- 生产环境中请务必修改默认的管理员邮箱和密码
 
 ### 4. 初始化数据库
 
 ```bash
 # 运行数据库迁移脚本
 psql -U username -d purple -f migrations/init.sql
+
+# 修复字段长度限制（如果遇到管理员创建失败）
+psql -U username -d purple -f migrations/fix_user_fields.sql
 ```
 
 ### 5. 运行项目
@@ -210,8 +227,14 @@ open http://localhost:8080/swagger-ui/
 | `JWT_SECRET` | JWT签名密钥 | 无 |
 | `SERVER_ADDR` | 服务器监听地址 | 127.0.0.1 |
 | `SERVER_PORT` | 服务器端口 | 8080 |
+| `ADMIN_EMAIL` | 管理员邮箱地址 | <admin@example.com> |
+| `ADMIN_PASSWORD` | 管理员密码 | admin123 |
 | `RUST_LOG` | 日志级别 | info |
 | `LOG_LEVEL` | 应用日志级别 | info |
+| `LOG_WITH_THREAD_IDS` | 是否显示线程ID | true |
+| `LOG_WITH_LINE_NUMBER` | 是否显示行号 | true |
+| `LOG_WITH_FILE` | 是否显示文件名 | true |
+| `LOG_WITH_TARGET` | 是否显示目标模块 | false |
 | `LOG_FILE_PATH` | 日志文件路径 | logs/app.log |
 
 ### 日志配置
@@ -300,6 +323,59 @@ cargo clippy
 cargo check
 ```
 
+## 数据库修复
+
+如果遇到管理员账户创建失败的错误（如 "value too long for type character varying(64)"），需要运行数据库修复脚本：
+
+```bash
+# 运行修复脚本
+psql -U username -d purple -f migrations/fix_user_fields.sql
+```
+
+该脚本会：
+
+- 将 `email` 字段长度从 64 字符扩展到 255 字符
+- 将 `password` 字段长度从 64 字符扩展到 255 字符（支持 Argon2 哈希）
+- 添加缺失的 `token`、`created_at`、`updated_at` 字段
+
+修复完成后重新启动应用即可。
+
+## 管理员账户配置
+
+### 自动初始化
+
+应用支持在启动时自动创建和管理管理员账户：
+
+1. **首次启动**: 如果配置的管理员邮箱不存在，系统会自动创建管理员账户
+2. **密码同步**: 如果管理员账户已存在但密码与配置不符，系统会自动更新密码
+3. **安全特性**: 使用 Argon2 算法进行密码哈希，确保安全性
+
+### 配置示例
+
+在 `.env` 文件中配置管理员账户：
+
+```env
+# 管理员账户配置
+ADMIN_EMAIL=admin@yourdomain.com
+ADMIN_PASSWORD=secure_admin_password_123
+```
+
+### 注意事项
+
+- **生产环境**: 务必使用强密码，建议包含大小写字母、数字和特殊字符
+- **密码长度**: 建议密码长度至少 12 位
+- **定期更换**: 生产环境建议定期更换管理员密码
+- **邮箱格式**: 必须是有效的邮箱格式
+- **启动日志**: 管理员账户的创建/更新过程会在启动日志中记录
+
+### 启动日志示例
+
+```
+INFO src/config/admin.rs:16: 开始初始化管理员账户...
+INFO src/config/admin.rs:40: 未发现管理员账户，正在创建新的管理员账户...
+INFO src/config/admin.rs:42: 管理员账户创建成功: admin@example.com
+```
+
 ## 部署
 
 ### 生产环境构建
@@ -332,9 +408,17 @@ CMD ["./purple"]
 # 必须修改的配置
 export JWT_SECRET="your-production-secret-key"
 export DATABASE_URL="postgresql://user:pass@host:5432/db"
+export ADMIN_EMAIL="admin@yourdomain.com"
+export ADMIN_PASSWORD="your-secure-admin-password"
 export RUST_LOG="warn"
 export LOG_LEVEL="warn"
 ```
+
+**管理员账户说明**:
+
+- 应用启动时会自动检查并创建管理员账户
+- 如果配置的管理员邮箱已存在但密码不匹配，会自动更新密码
+- 生产环境中务必使用强密码并定期更换
 
 ## 许可证
 

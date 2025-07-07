@@ -14,6 +14,7 @@ use crate::{
 /// 如数据库连接池、仓库实例、服务实例等
 #[derive(Clone)]
 pub struct AppState {
+    pub db_pool: PgPool,
     pub user_repository: UserRepository,
     pub plan_repository: PlanRepository,
     pub coupon_repository: CouponRepository,
@@ -39,6 +40,7 @@ impl AppState {
         let auth_service = AuthService::new(user_repository.clone(), jwt_secret);
 
         Ok(Self {
+            db_pool: pool.clone(),
             user_repository,
             plan_repository,
             coupon_repository,

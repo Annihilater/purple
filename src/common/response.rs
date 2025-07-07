@@ -407,3 +407,36 @@ pub struct ProjectInfoApiResponse {
     pub data: Option<ProjectInfo>,
     pub timestamp: i64,
 }
+
+/// 套餐统计响应类型
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PlanStatsApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<crate::models::plan::PlanStats>,
+    pub timestamp: i64,
+}
+
+/// 套餐价格响应类型
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PlanPricingApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<crate::models::plan::PlanPricing>,
+    pub timestamp: i64,
+}
+
+/// 套餐可用性响应类型
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PlanAvailabilityApiResponse {
+    pub code: i32,
+    pub status: String,
+    pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub data: Option<crate::models::plan::PlanAvailability>,
+    pub timestamp: i64,
+}

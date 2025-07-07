@@ -181,3 +181,116 @@ pub struct PlanListResponse {
     pub plans: Vec<PlanResponse>,
     pub total: i64,
 }
+
+/// 套餐查询参数
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PlanQuery {
+    /// 组ID
+    pub group_id: Option<i32>,
+    /// 是否显示
+    pub show: Option<bool>,
+    /// 是否允许续费
+    pub renew: Option<bool>,
+    /// 页码
+    pub page: Option<u64>,
+    /// 每页大小
+    pub page_size: Option<u64>,
+}
+
+/// 套餐分页响应数据
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PlanPageData {
+    /// 套餐列表
+    pub items: Vec<Plan>,
+    /// 总数
+    pub total: u64,
+    /// 当前页
+    pub page: u64,
+    /// 每页大小
+    pub page_size: u64,
+    /// 总页数
+    pub total_pages: u64,
+    /// 是否有下一页
+    pub has_next: bool,
+    /// 是否有上一页
+    pub has_prev: bool,
+}
+
+/// 套餐统计信息
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PlanStats {
+    /// 总套餐数
+    pub total_plans: i64,
+    /// 显示中的套餐数
+    pub active_plans: i64,
+    /// 隐藏的套餐数
+    pub hidden_plans: i64,
+    /// 允许续费的套餐数
+    pub renewable_plans: i64,
+}
+
+/// 套餐可用性信息
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PlanAvailability {
+    /// 套餐ID
+    pub id: i32,
+    /// 套餐名称
+    pub name: String,
+    /// 是否可用
+    pub available: bool,
+    /// 不可用原因
+    pub reason: Option<String>,
+}
+
+/// 套餐价格信息
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PlanPricing {
+    /// 套餐ID
+    pub id: i32,
+    /// 套餐名称
+    pub name: String,
+    /// 价格信息
+    pub pricing: Vec<PriceOption>,
+}
+
+/// 价格选项
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct PriceOption {
+    /// 周期类型
+    pub period_type: String,
+    /// 周期天数
+    pub period_days: i32,
+    /// 价格（分）
+    pub price: i32,
+    /// 是否可用
+    pub available: bool,
+}
+
+/// 格式化套餐流量
+pub fn format_plan_traffic(bytes: i64) -> String {
+    const GB: i64 = 1024 * 1024 * 1024;
+    const TB: i64 = 1024 * GB;
+
+    if bytes >= TB {
+        format!("{:.2} TB", bytes as f64 / TB as f64)
+    } else if bytes >= GB {
+        format!("{:.2} GB", bytes as f64 / GB as f64)
+    } else {
+        format!("{} MB", bytes / (1024 * 1024))
+    }
+}
+
+/// 格式化套餐价格
+pub fn format_plan_price(price_in_cents: i32) -> String {
+    format!("¥{:.2}", price_in_cents as f64 / 100.0)
+}
+
+/// 计算套餐折扣
+pub fn calculate_plan_discount(original_price: i32, discounted_price: i32) -> f64 {
+    if original_price == 0 {
+        return 0.0;
+    }
+
+    let discount = (original_price - discounted_price) as f64 / original_price as f64;
+    discount * 100.0
+}

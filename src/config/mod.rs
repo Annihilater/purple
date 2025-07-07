@@ -1,7 +1,9 @@
 use anyhow::Result;
 use config;
 
+pub mod admin;
 pub mod database;
+pub use admin::{get_admin_info, initialize_admin_account, verify_admin_account, AdminInfo};
 pub use database::DatabaseConfig;
 
 #[derive(Debug)]
@@ -15,11 +17,18 @@ pub struct LogConfig {
 }
 
 #[derive(Debug)]
+pub struct AdminConfig {
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Debug)]
 pub struct Config {
     pub server_addr: String,
     pub server_port: u16,
     pub database: DatabaseConfig,
     pub log: LogConfig,
+    pub admin: AdminConfig,
 }
 
 impl Config {
@@ -45,6 +54,14 @@ impl Config {
                 file_path: config
                     .get_string("log_file_path")
                     .unwrap_or_else(|_| "logs/app.log".to_string()),
+            },
+            admin: AdminConfig {
+                email: config
+                    .get_string("admin_email")
+                    .unwrap_or_else(|_| "admin@example.com".to_string()),
+                password: config
+                    .get_string("admin_password")
+                    .unwrap_or_else(|_| "admin123".to_string()),
             },
         })
     }
