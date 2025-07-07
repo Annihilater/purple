@@ -9,7 +9,9 @@
       "Bash(grep:*)",
       "Bash(timeout:*)",
       "Bash(RUST_LOG=info cargo run)",
-      "Bash(true)"
+      "Bash(true)",
+      "Bash(mkdir:*)",
+      "Bash(tree:*)"
     ]
   },
   "enableAllProjectMcpServers": false
