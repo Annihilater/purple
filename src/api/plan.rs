@@ -1,11 +1,13 @@
-use actix_web::{delete, get, post, put, web, HttpResponse, ResponseError};
+use actix_web::{delete, get, post, put, web, HttpResponse, Result};
 use serde::{Deserialize, Serialize};
 use utoipa::{IntoParams, ToSchema};
 use validator::Validate;
 
 use crate::{
-    api::response::{ApiError, ApiResponse, Response},
-    common::EmptyApiResponse,
+    common::{
+        response_v2::{ApiError, ApiResponse, IntoHttpResponse},
+        ErrorCode,
+    },
     models::plan::{CreatePlanRequest, Plan, PlanListResponse, PlanResponse, UpdatePlanRequest},
     repositories::PlanRepository,
 };
@@ -52,15 +54,24 @@ pub struct ListPlansQuery {
 pub async fn create_plan(
     plan: web::Json<CreatePlanRequest>,
     repo: web::Data<PlanRepository>,
-) -> Response<HttpResponse> {
-    plan.validate().map_err(ApiError::from)?;
+) -> Result<HttpResponse, ApiError> {
+    if let Err(validation_errors) = plan.validate() {
+        return Err(ApiError::from(validation_errors));
+    }
 
-    let plan = repo
-        .get_ref()
-        .create(&plan.into_inner())
-        .await
-        .map_err(ApiError::from)?;
-    Ok(HttpResponse::Ok().json(ApiResponse::success(PlanResponse::from(plan))))
+    match repo.get_ref().create(&plan.into_inner()).await {
+        Ok(plan) => {
+            let response = ApiResponse::success(PlanResponse::from(plan));
+            Ok(response.into_http_response())
+        }
+        Err(e) => {
+            tracing::error!("创建套餐失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
+    }
 }
 
 /// 获取套餐列表
@@ -85,28 +96,41 @@ pub async fn create_plan(
 pub async fn list_plans(
     query: web::Query<ListPlansQuery>,
     repo: web::Data<PlanRepository>,
-) -> Response<HttpResponse> {
+) -> Result<HttpResponse, ApiError> {
     let page = query.page.unwrap_or(1);
     let page_size = query.page_size.unwrap_or(10);
     let only_enabled = query.only_enabled.unwrap_or(false);
 
     let (plans, total) = if only_enabled {
-        let plans = repo
-            .get_ref()
-            .find_enabled()
-            .await
-            .map_err(ApiError::from)?;
-        let total = plans.len() as i64;
-        (plans, total)
+        match repo.get_ref().find_enabled().await {
+            Ok(plans) => {
+                let total = plans.len() as i64;
+                (plans, total)
+            }
+            Err(e) => {
+                tracing::error!("获取已启用套餐失败: {}", e);
+                return Err(ApiError::with_details(
+                    ErrorCode::DatabaseError,
+                    "数据库操作失败".to_string(),
+                ));
+            }
+        }
     } else {
-        repo.get_ref()
-            .find_all(page as i32, page_size as i32)
-            .await
-            .map_err(ApiError::from)?
+        match repo.get_ref().find_all(page as i32, page_size as i32).await {
+            Ok(result) => result,
+            Err(e) => {
+                tracing::error!("获取套餐列表失败: {}", e);
+                return Err(ApiError::with_details(
+                    ErrorCode::DatabaseError,
+                    "数据库操作失败".to_string(),
+                ));
+            }
+        }
     };
-    let plans = plans.into_iter().map(PlanResponse::from).collect();
 
-    Ok(HttpResponse::Ok().json(ApiResponse::success(PlanListResponse { plans, total })))
+    let plans = plans.into_iter().map(PlanResponse::from).collect();
+    let response = ApiResponse::success(PlanListResponse { plans, total });
+    Ok(response.into_http_response())
 }
 
 /// 获取套餐信息
@@ -130,17 +154,22 @@ pub async fn list_plans(
 pub async fn get_plan(
     id: web::Path<i32>,
     repo: web::Data<PlanRepository>,
-) -> Response<HttpResponse> {
-    let plan = repo
-        .get_ref()
-        .find_by_id(id.into_inner())
-        .await
-        .map_err(ApiError::from)?;
+) -> Result<HttpResponse, ApiError> {
+    let plan_id = id.into_inner();
 
-    match plan {
-        Some(plan) => Ok(HttpResponse::Ok().json(ApiResponse::success(PlanResponse::from(plan)))),
-        None => Ok(HttpResponse::NotFound()
-            .json(ApiResponse::<()>::error(404, "Plan not found".to_string()))),
+    match repo.get_ref().find_by_id(plan_id).await {
+        Ok(Some(plan)) => {
+            let response = ApiResponse::success(PlanResponse::from(plan));
+            Ok(response.into_http_response())
+        }
+        Ok(None) => Err(ApiError::new(ErrorCode::PlanNotFound)),
+        Err(e) => {
+            tracing::error!("获取套餐失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
     }
 }
 
@@ -168,15 +197,25 @@ pub async fn update_plan(
     id: web::Path<i32>,
     plan: web::Json<UpdatePlanRequest>,
     repo: web::Data<PlanRepository>,
-) -> Response<HttpResponse> {
-    plan.validate().map_err(ApiError::from)?;
+) -> Result<HttpResponse, ApiError> {
+    if let Err(validation_errors) = plan.validate() {
+        return Err(ApiError::from(validation_errors));
+    }
 
-    let plan = repo
-        .get_ref()
-        .update(id.into_inner(), &plan.into_inner())
-        .await
-        .map_err(ApiError::from)?;
-    Ok(HttpResponse::Ok().json(ApiResponse::success(PlanResponse::from(plan))))
+    let plan_id = id.into_inner();
+    match repo.get_ref().update(plan_id, &plan.into_inner()).await {
+        Ok(plan) => {
+            let response = ApiResponse::success(PlanResponse::from(plan));
+            Ok(response.into_http_response())
+        }
+        Err(e) => {
+            tracing::error!("更新套餐失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
+    }
 }
 
 /// 删除套餐
@@ -200,12 +239,21 @@ pub async fn update_plan(
 pub async fn delete_plan(
     id: web::Path<i32>,
     repo: web::Data<PlanRepository>,
-) -> Response<HttpResponse> {
-    repo.get_ref()
-        .delete(id.into_inner())
-        .await
-        .map_err(ApiError::from)?;
-    Ok(HttpResponse::Ok().json(ApiResponse::<()>::success(())))
+) -> Result<HttpResponse, ApiError> {
+    let plan_id = id.into_inner();
+    match repo.get_ref().delete(plan_id).await {
+        Ok(_) => {
+            let response = ApiResponse::success(());
+            Ok(response.into_http_response())
+        }
+        Err(e) => {
+            tracing::error!("删除套餐失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
+    }
 }
 
 /// 获取已启用的套餐列表
@@ -222,14 +270,20 @@ pub async fn delete_plan(
     )
 )]
 #[get("/api/plans/enabled")]
-pub async fn get_enabled_plans(repo: web::Data<PlanRepository>) -> Response<HttpResponse> {
-    let plans = repo
-        .get_ref()
-        .find_enabled()
-        .await
-        .map_err(ApiError::from)?;
-    let total = plans.len() as i64;
-    let plans = plans.into_iter().map(PlanResponse::from).collect();
-
-    Ok(HttpResponse::Ok().json(ApiResponse::success(PlanListResponse { plans, total })))
+pub async fn get_enabled_plans(repo: web::Data<PlanRepository>) -> Result<HttpResponse, ApiError> {
+    match repo.get_ref().find_enabled().await {
+        Ok(plans) => {
+            let total = plans.len() as i64;
+            let plans = plans.into_iter().map(PlanResponse::from).collect();
+            let response = ApiResponse::success(PlanListResponse { plans, total });
+            Ok(response.into_http_response())
+        }
+        Err(e) => {
+            tracing::error!("获取已启用套餐失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
+    }
 }

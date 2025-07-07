@@ -35,6 +35,8 @@ impl ErrorCode {
 
             ErrorCode::CouponExpired
             | ErrorCode::CouponInvalid
+            | ErrorCode::CouponDisabled
+            | ErrorCode::CouponNotValid
             | ErrorCode::OrderExpired
             | ErrorCode::PlanUnavailable
             | ErrorCode::PlanQuotaExceeded

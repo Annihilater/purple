@@ -62,6 +62,10 @@ pub enum ErrorCode {
     CouponUsed = 5002,
     #[serde(rename = "COUPON_INVALID")]
     CouponInvalid = 5003,
+    #[serde(rename = "COUPON_DISABLED")]
+    CouponDisabled = 5004,
+    #[serde(rename = "COUPON_NOT_VALID")]
+    CouponNotValid = 5005,
 
     // 订单相关错误 (6000-6999)
     #[serde(rename = "ORDER_NOT_FOUND")]
@@ -118,6 +122,8 @@ impl ErrorCode {
             ErrorCode::CouponExpired => "优惠券已过期",
             ErrorCode::CouponUsed => "优惠券已使用",
             ErrorCode::CouponInvalid => "优惠券无效",
+            ErrorCode::CouponDisabled => "优惠券已禁用",
+            ErrorCode::CouponNotValid => "优惠券尚未生效",
 
             // 订单相关错误
             ErrorCode::OrderNotFound => "订单不存在",
@@ -164,6 +170,8 @@ impl ErrorCode {
             ErrorCode::CouponExpired => "Coupon expired",
             ErrorCode::CouponUsed => "Coupon used",
             ErrorCode::CouponInvalid => "Coupon invalid",
+            ErrorCode::CouponDisabled => "Coupon disabled",
+            ErrorCode::CouponNotValid => "Coupon not yet valid",
 
             // 订单相关错误
             ErrorCode::OrderNotFound => "Order not found",
@@ -228,6 +236,8 @@ impl fmt::Display for ErrorCode {
             ErrorCode::CouponExpired => "COUPON_EXPIRED",
             ErrorCode::CouponUsed => "COUPON_USED",
             ErrorCode::CouponInvalid => "COUPON_INVALID",
+            ErrorCode::CouponDisabled => "COUPON_DISABLED",
+            ErrorCode::CouponNotValid => "COUPON_NOT_VALID",
 
             // 订单相关错误
             ErrorCode::OrderNotFound => "ORDER_NOT_FOUND",
@@ -278,6 +288,8 @@ impl std::str::FromStr for ErrorCode {
             "COUPON_EXPIRED" => Ok(ErrorCode::CouponExpired),
             "COUPON_USED" => Ok(ErrorCode::CouponUsed),
             "COUPON_INVALID" => Ok(ErrorCode::CouponInvalid),
+            "COUPON_DISABLED" => Ok(ErrorCode::CouponDisabled),
+            "COUPON_NOT_VALID" => Ok(ErrorCode::CouponNotValid),
 
             // 订单相关错误
             "ORDER_NOT_FOUND" => Ok(ErrorCode::OrderNotFound),
@@ -318,6 +330,8 @@ impl From<i32> for ErrorCode {
             5001 => ErrorCode::CouponExpired,
             5002 => ErrorCode::CouponUsed,
             5003 => ErrorCode::CouponInvalid,
+            5004 => ErrorCode::CouponDisabled,
+            5005 => ErrorCode::CouponNotValid,
             6000 => ErrorCode::OrderNotFound,
             6001 => ErrorCode::OrderAlreadyPaid,
             6002 => ErrorCode::OrderExpired,

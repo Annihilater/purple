@@ -4,8 +4,10 @@ use utoipa::{IntoParams, ToSchema};
 use validator::Validate;
 
 use crate::{
-    api::response::{ApiError, ApiResponse, Response},
-    common::EmptyApiResponse,
+    common::{
+        response_v2::{ApiError, ApiResponse, IntoHttpResponse},
+        ErrorCode,
+    },
     models::coupon::{
         Coupon, CouponListResponse, CouponResponse, CreateCouponRequest, UpdateCouponRequest,
     },
@@ -57,14 +59,24 @@ pub struct CouponsListResponse {
 pub async fn create_coupon(
     coupon: web::Json<CreateCouponRequest>,
     repo: web::Data<CouponRepository>,
-) -> Response<HttpResponse> {
-    coupon.validate().map_err(ApiError::from)?;
+) -> Result<HttpResponse, ApiError> {
+    if let Err(validation_errors) = coupon.validate() {
+        return Err(ApiError::from(validation_errors));
+    }
 
-    let coupon = repo
-        .create(&coupon.into_inner())
-        .await
-        .map_err(ApiError::from)?;
-    Ok(HttpResponse::Ok().json(ApiResponse::success(CouponResponse::from(coupon))))
+    match repo.create(&coupon.into_inner()).await {
+        Ok(coupon) => {
+            let response = ApiResponse::success(CouponResponse::from(coupon));
+            Ok(response.into_http_response())
+        }
+        Err(e) => {
+            tracing::error!("创建优惠券失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
+    }
 }
 
 /// 获取优惠券列表
@@ -90,17 +102,24 @@ pub async fn create_coupon(
 pub async fn list_coupons(
     query: web::Query<GetCouponsQuery>,
     repo: web::Data<CouponRepository>,
-) -> Response<HttpResponse> {
+) -> Result<HttpResponse, ApiError> {
     let page = query.page;
     let page_size = query.page_size;
 
-    let (coupons, total) = repo
-        .list(page as i64, page_size as i64, false, false)
-        .await
-        .map_err(ApiError::from)?;
-    let coupons = coupons.into_iter().map(CouponResponse::from).collect();
-
-    Ok(HttpResponse::Ok().json(ApiResponse::success(CouponListResponse { coupons, total })))
+    match repo.list(page as i64, page_size as i64, false, false).await {
+        Ok((coupons, total)) => {
+            let coupons = coupons.into_iter().map(CouponResponse::from).collect();
+            let response = ApiResponse::success(CouponListResponse { coupons, total });
+            Ok(response.into_http_response())
+        }
+        Err(e) => {
+            tracing::error!("获取优惠券列表失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
+    }
 }
 
 /// 获取优惠券信息
@@ -124,20 +143,22 @@ pub async fn list_coupons(
 pub async fn get_coupon(
     id: web::Path<i32>,
     repo: web::Data<CouponRepository>,
-) -> Response<HttpResponse> {
-    let coupon = repo
-        .find_by_id(id.into_inner())
-        .await
-        .map_err(ApiError::from)?;
+) -> Result<HttpResponse, ApiError> {
+    let coupon_id = id.into_inner();
 
-    match coupon {
-        Some(coupon) => {
-            Ok(HttpResponse::Ok().json(ApiResponse::success(CouponResponse::from(coupon))))
+    match repo.find_by_id(coupon_id).await {
+        Ok(Some(coupon)) => {
+            let response = ApiResponse::success(CouponResponse::from(coupon));
+            Ok(response.into_http_response())
         }
-        None => Ok(HttpResponse::NotFound().json(ApiResponse::<()>::error(
-            404,
-            "Coupon not found".to_string(),
-        ))),
+        Ok(None) => Err(ApiError::new(ErrorCode::CouponNotFound)),
+        Err(e) => {
+            tracing::error!("获取优惠券失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
     }
 }
 
@@ -165,14 +186,25 @@ pub async fn update_coupon(
     id: web::Path<i32>,
     coupon: web::Json<UpdateCouponRequest>,
     repo: web::Data<CouponRepository>,
-) -> Response<HttpResponse> {
-    coupon.validate().map_err(ApiError::from)?;
+) -> Result<HttpResponse, ApiError> {
+    if let Err(validation_errors) = coupon.validate() {
+        return Err(ApiError::from(validation_errors));
+    }
 
-    let coupon = repo
-        .update(id.into_inner(), &coupon.into_inner())
-        .await
-        .map_err(ApiError::from)?;
-    Ok(HttpResponse::Ok().json(ApiResponse::success(CouponResponse::from(coupon))))
+    let coupon_id = id.into_inner();
+    match repo.update(coupon_id, &coupon.into_inner()).await {
+        Ok(coupon) => {
+            let response = ApiResponse::success(CouponResponse::from(coupon));
+            Ok(response.into_http_response())
+        }
+        Err(e) => {
+            tracing::error!("更新优惠券失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
+    }
 }
 
 /// 删除优惠券
@@ -196,9 +228,21 @@ pub async fn update_coupon(
 pub async fn delete_coupon(
     id: web::Path<i32>,
     repo: web::Data<CouponRepository>,
-) -> Response<HttpResponse> {
-    repo.delete(id.into_inner()).await.map_err(ApiError::from)?;
-    Ok(HttpResponse::Ok().json(ApiResponse::<()>::success(())))
+) -> Result<HttpResponse, ApiError> {
+    let coupon_id = id.into_inner();
+    match repo.delete(coupon_id).await {
+        Ok(_) => {
+            let response = ApiResponse::success(());
+            Ok(response.into_http_response())
+        }
+        Err(e) => {
+            tracing::error!("删除优惠券失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
+    }
 }
 
 /// 验证优惠码
@@ -219,13 +263,11 @@ pub async fn delete_coupon(
 pub async fn verify_coupon(
     coupon_repo: web::Data<CouponRepository>,
     code: web::Path<String>,
-) -> Response<HttpResponse> {
-    match coupon_repo
-        .find_by_code(&code)
-        .await
-        .map_err(ApiError::from)?
-    {
-        Some(coupon) => {
+) -> Result<HttpResponse, ApiError> {
+    let code = code.into_inner();
+
+    match coupon_repo.find_by_code(&code).await {
+        Ok(Some(coupon)) => {
             let now = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
@@ -233,10 +275,10 @@ pub async fn verify_coupon(
 
             // 检查优惠券是否可用
             if !coupon.show {
-                return Ok(HttpResponse::NotFound().json(ApiResponse::<()>::error(
-                    404,
-                    "Coupon is disabled".to_string(),
-                )));
+                return Err(ApiError::with_details(
+                    ErrorCode::CouponDisabled,
+                    "优惠券已停用".to_string(),
+                ));
             }
 
             // 检查使用次数
@@ -247,25 +289,30 @@ pub async fn verify_coupon(
 
             // 检查有效期
             if now < coupon.started_at {
-                return Ok(HttpResponse::NotFound().json(ApiResponse::<()>::error(
-                    404,
-                    "Coupon is not yet valid".to_string(),
-                )));
+                return Err(ApiError::with_details(
+                    ErrorCode::CouponNotValid,
+                    "优惠券尚未生效".to_string(),
+                ));
             }
 
             if now > coupon.ended_at {
-                return Ok(HttpResponse::NotFound().json(ApiResponse::<()>::error(
-                    404,
-                    "Coupon has expired".to_string(),
-                )));
+                return Err(ApiError::with_details(
+                    ErrorCode::CouponExpired,
+                    "优惠券已过期".to_string(),
+                ));
             }
 
-            Ok(HttpResponse::Ok().json(ApiResponse::success(CouponResponse::from(coupon))))
+            let response = ApiResponse::success(CouponResponse::from(coupon));
+            Ok(response.into_http_response())
         }
-        None => Ok(HttpResponse::NotFound().json(ApiResponse::<()>::error(
-            404,
-            "Coupon not found".to_string(),
-        ))),
+        Ok(None) => Err(ApiError::new(ErrorCode::CouponNotFound)),
+        Err(e) => {
+            tracing::error!("查找优惠券失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
     }
 }
 
