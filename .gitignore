@@ -234,3 +234,4 @@ logs/
 #.cursorignore
 #.claude
 #CLAUDE.md
+*.log

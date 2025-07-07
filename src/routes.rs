@@ -2,7 +2,7 @@ use actix_web::web;
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{api, api::openapi::ApiDoc};
+use crate::{api, api::openapi::ApiDoc, middleware::Auth};
 
 /// 配置应用路由
 ///
@@ -32,15 +32,16 @@ pub fn configure_routes(cfg: &mut web::ServiceConfig) {
         .configure(configure_subscribe_routes);
 }
 
-/// 配置认证相关路由
+/// 配置认证相关路由（无需认证）
 fn configure_auth_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(api::register).service(api::login);
 }
 
-/// 配置用户管理路由
+/// 配置用户管理路由（需要认证）
 fn configure_user_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api/users")
+            .wrap(Auth::new())
             .service(api::create_user)
             .service(api::get_users)
             .service(api::get_user)
@@ -50,10 +51,11 @@ fn configure_user_routes(cfg: &mut web::ServiceConfig) {
     );
 }
 
-/// 配置套餐管理路由
+/// 配置套餐管理路由（需要认证）
 fn configure_plan_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api/plans")
+            .wrap(Auth::new())
             .service(api::create_plan)
             .service(api::list_plans)
             .service(api::get_plan)
@@ -67,10 +69,11 @@ fn configure_plan_routes(cfg: &mut web::ServiceConfig) {
     );
 }
 
-/// 配置优惠券管理路由
+/// 配置优惠券管理路由（需要认证）
 fn configure_coupon_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(
         web::scope("/api/coupons")
+            .wrap(Auth::new())
             .service(api::create_coupon)
             .service(api::list_coupons)
             .service(api::get_coupon)
@@ -80,19 +83,23 @@ fn configure_coupon_routes(cfg: &mut web::ServiceConfig) {
     );
 }
 
-/// 配置订阅管理路由
+/// 配置订阅管理路由（需要认证）
 fn configure_subscribe_routes(cfg: &mut web::ServiceConfig) {
     cfg
-        // 用户订阅接口
-        .service(api::get_subscribe_info)
-        .service(api::get_subscribe_link)
-        .service(api::reset_subscribe_token)
-        .service(api::get_subscribe_stats)
-        .service(api::get_nodes_status)
-        .service(api::test_subscribe_connectivity)
-        // 客户端配置获取接口
+        // 用户订阅接口（需要认证）
+        .service(
+            web::scope("/api/subscribe")
+                .wrap(Auth::new())
+                .service(api::get_subscribe_info)
+                .service(api::get_subscribe_link)
+                .service(api::reset_subscribe_token)
+                .service(api::get_subscribe_stats)
+                .service(api::get_nodes_status)
+                .service(api::test_subscribe_connectivity),
+        )
+        // 客户端配置获取接口（无需认证，使用token参数验证）
         .service(api::get_subscribe_config)
-        // 节点流量上报接口
+        // 节点流量上报接口（无需认证，用于服务器上报）
         .service(api::report_traffic);
 }
 

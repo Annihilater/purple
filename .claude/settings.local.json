@@ -6,7 +6,8 @@
       "Bash(cargo:*)",
       "Bash(curl:*)",
       "Bash(pkill:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(timeout:*)"
     ]
   },
   "enableAllProjectMcpServers": false

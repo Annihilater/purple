@@ -1,4 +1,7 @@
-use std::future::{ready, Ready};
+use std::{
+    future::{ready, Ready},
+    rc::Rc,
+};
 
 use actix_web::{
     body::{BoxBody, EitherBody},
@@ -8,7 +11,10 @@ use actix_web::{
 use futures_util::future::LocalBoxFuture;
 
 use crate::{
-    common::{ErrorCode, ResponseBuilder},
+    common::{
+        response_v2::{ApiError, ApiResponse, IntoHttpResponse},
+        ErrorCode,
+    },
     models::auth::Claims,
     repositories::UserRepository,
 };
@@ -31,7 +37,7 @@ impl Default for Auth {
 
 impl<S, B> Transform<S, ServiceRequest> for Auth
 where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static + Clone,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
     B: 'static,
 {
@@ -42,17 +48,19 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ready(Ok(AuthMiddleware { service }))
+        ready(Ok(AuthMiddleware {
+            service: Rc::new(service),
+        }))
     }
 }
 
 pub struct AuthMiddleware<S> {
-    service: S,
+    service: Rc<S>,
 }
 
 impl<S, B> Service<ServiceRequest> for AuthMiddleware<S>
 where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static + Clone,
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     S::Future: 'static,
     B: 'static,
 {
@@ -77,12 +85,16 @@ where
                 Some(token) => token,
                 None => {
                     tracing::warn!("Missing authorization header");
-                    let response = ResponseBuilder::error_with_message(
+                    let response = ApiResponse::error_with_details(
                         ErrorCode::Unauthorized,
-                        "缺少授权令牌".to_string(),
+                        Some("缺少授权令牌".to_string()),
+                        None,
                     );
-                    return Ok(ServiceResponse::new(req.into_parts().0, response)
-                        .map_body(|_, body| EitherBody::right(body)));
+                    return Ok(ServiceResponse::new(
+                        req.into_parts().0,
+                        response.into_http_response(),
+                    )
+                    .map_body(|_, body| EitherBody::right(body)));
                 }
             };
 
@@ -91,12 +103,16 @@ where
                 Ok(claims) => claims,
                 Err(e) => {
                     tracing::warn!("Invalid token: {}", e);
-                    let response = ResponseBuilder::error_with_message(
+                    let response = ApiResponse::error_with_details(
                         ErrorCode::InvalidToken,
-                        "无效的授权令牌".to_string(),
+                        Some("无效的授权令牌".to_string()),
+                        None,
                     );
-                    return Ok(ServiceResponse::new(req.into_parts().0, response)
-                        .map_body(|_, body| EitherBody::right(body)));
+                    return Ok(ServiceResponse::new(
+                        req.into_parts().0,
+                        response.into_http_response(),
+                    )
+                    .map_body(|_, body| EitherBody::right(body)));
                 }
             };
 
@@ -104,12 +120,15 @@ where
             let now = chrono::Utc::now().timestamp();
             if claims.exp < now {
                 tracing::warn!("Token expired for user: {}", claims.sub);
-                let response = ResponseBuilder::error_with_message(
+                let response = ApiResponse::error_with_details(
                     ErrorCode::TokenExpired,
-                    "授权令牌已过期".to_string(),
+                    Some("授权令牌已过期".to_string()),
+                    None,
                 );
-                return Ok(ServiceResponse::new(req.into_parts().0, response)
-                    .map_body(|_, body| EitherBody::right(body)));
+                return Ok(
+                    ServiceResponse::new(req.into_parts().0, response.into_http_response())
+                        .map_body(|_, body| EitherBody::right(body)),
+                );
             }
 
             // 检查用户是否存在
@@ -117,12 +136,16 @@ where
                 Some(repo) => repo,
                 None => {
                     tracing::error!("UserRepository not found in app data");
-                    let response = ResponseBuilder::error_with_message(
+                    let response = ApiResponse::error_with_details(
                         ErrorCode::InternalError,
-                        "服务器配置错误".to_string(),
+                        Some("服务器配置错误".to_string()),
+                        None,
                     );
-                    return Ok(ServiceResponse::new(req.into_parts().0, response)
-                        .map_body(|_, body| EitherBody::right(body)));
+                    return Ok(ServiceResponse::new(
+                        req.into_parts().0,
+                        response.into_http_response(),
+                    )
+                    .map_body(|_, body| EitherBody::right(body)));
                 }
             };
 
@@ -131,12 +154,16 @@ where
                     // 检查用户是否被禁用
                     if user.banned.unwrap_or(false) {
                         tracing::warn!("Banned user {} attempted to access", claims.sub);
-                        let response = ResponseBuilder::error_with_message(
+                        let response = ApiResponse::error_with_details(
                             ErrorCode::UserDisabled,
-                            "账户已被禁用".to_string(),
+                            Some("账户已被禁用".to_string()),
+                            None,
                         );
-                        return Ok(ServiceResponse::new(req.into_parts().0, response)
-                            .map_body(|_, body| EitherBody::right(body)));
+                        return Ok(ServiceResponse::new(
+                            req.into_parts().0,
+                            response.into_http_response(),
+                        )
+                        .map_body(|_, body| EitherBody::right(body)));
                     }
 
                     // 将用户ID添加到请求扩展中，供后续处理器使用
@@ -150,21 +177,27 @@ where
                 }
                 Ok(None) => {
                     tracing::warn!("User {} not found", claims.sub);
-                    let response = ResponseBuilder::error_with_message(
+                    let response = ApiResponse::error_with_details(
                         ErrorCode::UserNotFound,
-                        "用户不存在".to_string(),
+                        Some("用户不存在".to_string()),
+                        None,
                     );
-                    Ok(ServiceResponse::new(req.into_parts().0, response)
-                        .map_body(|_, body| EitherBody::right(body)))
+                    Ok(
+                        ServiceResponse::new(req.into_parts().0, response.into_http_response())
+                            .map_body(|_, body| EitherBody::right(body)),
+                    )
                 }
                 Err(e) => {
                     tracing::error!("Failed to verify user {}: {}", claims.sub, e);
-                    let response = ResponseBuilder::error_with_message(
+                    let response = ApiResponse::error_with_details(
                         ErrorCode::DatabaseError,
-                        "验证用户失败".to_string(),
+                        Some("验证用户失败".to_string()),
+                        None,
                     );
-                    Ok(ServiceResponse::new(req.into_parts().0, response)
-                        .map_body(|_, body| EitherBody::right(body)))
+                    Ok(
+                        ServiceResponse::new(req.into_parts().0, response.into_http_response())
+                            .map_body(|_, body| EitherBody::right(body)),
+                    )
                 }
             }
         })
