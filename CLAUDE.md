@@ -2,9 +2,14 @@
 
 此文件为 Claude Code (claude.ai/code) 在此代码仓库中工作时提供指导。
 
+## 重要工作规则
+
+**中文回复规则**: 在此代码仓库中工作时，Claude 必须使用中文回复用户的所有问题和请求。所有交流都应使用中文进行。
+
 ## 常用开发命令
 
 ### 构建和测试
+
 ```bash
 # 构建项目
 cargo build
@@ -23,6 +28,7 @@ cargo check
 ```
 
 ### 代码质量
+
 ```bash
 # 格式化代码
 cargo fmt
@@ -35,6 +41,7 @@ psql -U username -d purple -f migrations/init.sql
 ```
 
 ### 运行应用
+
 ```bash
 # 启动开发服务器
 cargo run
@@ -44,7 +51,9 @@ RUST_LOG=debug cargo run
 ```
 
 ### 环境配置
+
 创建 `.env` 文件，包含以下内容：
+
 ```
 # 数据库连接配置
 DATABASE_URL=postgresql://purple:purple@localhost:5432/purple
@@ -71,12 +80,14 @@ LOG_FILE_PATH=logs/app.log
 这是一个使用 Actix-web 构建的 Rust Web API，采用分层架构模式：
 
 ### 核心架构层次
+
 - **API 层** (`src/api/`): HTTP 请求处理器和 OpenAPI 文档
 - **服务层** (`src/services/`): 业务逻辑和 JWT 认证
 - **仓库层** (`src/repositories/`): PostgreSQL 数据访问抽象
 - **模型层** (`src/models/`): 数据结构和领域模型
 
 ### 关键组件
+
 - **应用状态** (`src/app_state.rs`): 依赖注入容器，包含仓库和服务实例
 - **启动器** (`src/startup.rs`): 应用引导过程，包括配置、日志和服务器设置
 - **路由** (`src/routes.rs`): 集中的路由配置，集成 OpenAPI/Swagger
@@ -84,7 +95,9 @@ LOG_FILE_PATH=logs/app.log
 - **通用响应系统** (`src/common/`): 统一的错误处理和响应格式化
 
 ### 响应架构
+
 所有 API 返回标准化响应，包含：
+
 - `code`: 业务错误代码（1000-6999 范围）
 - `status`: 状态字符串表示
 - `message`: 人类可读消息（默认中文）
@@ -92,6 +105,7 @@ LOG_FILE_PATH=logs/app.log
 - `timestamp`: Unix 时间戳
 
 错误代码范围：
+
 - 1000-1999: 通用错误
 - 2000-2999: 认证错误
 - 3000-3999: 用户错误
@@ -100,13 +114,16 @@ LOG_FILE_PATH=logs/app.log
 - 6000-6999: 订单错误
 
 ### 数据库架构
+
 - PostgreSQL 配合 SQLx 进行异步数据库操作
 - 连接池（最大 5 个连接）
 - 表名前缀为 `purple_`（user, plan, coupon, order）
 - 迁移脚本位于 `migrations/` 目录
 
 ### 日志系统
+
 双输出日志：
+
 - 控制台：开发时的彩色输出
 - 文件：`logs/` 目录中的每日轮转日志
 
@@ -122,6 +139,7 @@ LOG_FILE_PATH=logs/app.log
 ## 测试
 
 测试位于 `tests/` 目录：
+
 - 仓库测试使用模拟依赖
 - 使用 `tokio-test` 进行异步测试
 - 使用 `mockall` 模拟外部依赖
@@ -140,6 +158,7 @@ LOG_FILE_PATH=logs/app.log
 在使用 OpenAPI 注解（`#[utoipa::path]`）时，**绝对不要**在 `body =` 参数中使用以下问题类型：
 
 #### ❌ 禁止使用的类型
+
 - **泛型类型**: `ApiResponse<T>`、`PageResponse<T>` 等
   - 问题：`T` 参数会创建 "/components/schemas/T does not exist" 错误
 - **类型别名**: `Response`、`Response<T>`
@@ -148,6 +167,7 @@ LOG_FILE_PATH=logs/app.log
   - 问题：Trait 无法序列化为 schema
 
 #### ✅ 必须使用的类型
+
 始终在 OpenAPI 注解中使用具体的响应类型：
 
 - `EmptyApiResponse` - 用于空响应/错误响应
@@ -160,6 +180,7 @@ LOG_FILE_PATH=logs/app.log
 ### OpenAPI Schema 注册
 
 1. **所有响应类型**在 `body =` 中使用的必须在 `src/api/openapi.rs` 中注册：
+
    ```rust
    #[derive(OpenApi)]
    #[openapi(
@@ -174,6 +195,7 @@ LOG_FILE_PATH=logs/app.log
    ```
 
 2. **移除泛型类型的 `#[derive(ToSchema)]`**：
+
    ```rust
    // ❌ 错误 - 会造成冲突
    #[derive(Debug, Serialize, Deserialize, ToSchema)]
