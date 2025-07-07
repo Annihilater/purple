@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rg:*)",
+      "Bash(cargo check:*)",
+      "Bash(cargo:*)"
+    ]
+  },
+  "enableAllProjectMcpServers": false
+}
