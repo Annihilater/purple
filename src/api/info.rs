@@ -13,7 +13,7 @@ use crate::models::info::ProjectInfo;
         (status = 200, description = "成功获取项目信息"),
         (status = 500, description = "服务器内部错误")
     ),
-    tag = "项目信息"
+    tag = "project_info"
 )]
 #[get("/")]
 pub async fn get_project_info() -> Result<HttpResponse> {

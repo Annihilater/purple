@@ -142,7 +142,7 @@ use crate::models::{
         )
     ),
     tags(
-        (name = "项目信息", description = "Project information endpoints"),
+        (name = "project_info", description = "Project information endpoints"),
         (name = "health", description = "Health check endpoints"),
         (name = "users", description = "User management endpoints"),
         (name = "plans", description = "Plan management endpoints"),
