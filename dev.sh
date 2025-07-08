@@ -7,10 +7,19 @@ RED='\033[0;31m'
 YELLOW='\033[0;33m'
 NC='\033[0m' # No Color
 
+# 获取脚本所在目录的绝对路径
+SCRIPT_DIR="$( cd "$( dirname "$0" )" && pwd )"
+
+# 切换到脚本所在目录
+cd "$SCRIPT_DIR" || {
+    echo -e "${RED}错误: 无法切换到脚本目录 ${SCRIPT_DIR}${NC}"
+    exit 1
+}
+
 # 定义端口
-BACKEND_PORT=3000
-ADMIN_FRONTEND_PORT=8000
-USER_FRONTEND_PORT=8080
+BACKEND_PORT=8080
+ADMIN_FRONTEND_PORT=3000
+USER_FRONTEND_PORT=8000
 
 # 定义退出处理函数
 cleanup() {
@@ -50,25 +59,41 @@ start_backend() {
     cd backend && RUST_LOG=debug cargo run | tee ../logs/backend.log &
     BACKEND_PID=$!
     echo -e "${GREEN}[✓] 后端服务已启动 (PID: ${BACKEND_PID})${NC}"
-    cd ..
+    cd "$SCRIPT_DIR" 
 }
 
 # 启动管理员前端
 start_admin_frontend() {
     echo -e "${GREEN}[*] 启动管理员前端...${NC}"
-    cd admin-frontend && trunk serve --port ${ADMIN_FRONTEND_PORT} --proxy-backend=http://localhost:${BACKEND_PORT}/api/ | tee ../logs/admin-frontend.log &
+    echo -e "${YELLOW}当前目录: $(pwd)${NC}"
+    (
+        cd admin-frontend || {
+            echo -e "${RED}错误: 无法进入 admin-frontend 目录${NC}"
+            return 1
+        }
+        echo -e "${YELLOW}进入目录: $(pwd)${NC}"
+        trunk serve --port ${ADMIN_FRONTEND_PORT} --proxy-backend=http://localhost:${BACKEND_PORT}/api/ | tee ../logs/admin-frontend.log &
+    )
     ADMIN_FRONTEND_PID=$!
     echo -e "${GREEN}[✓] 管理员前端已启动 (PID: ${ADMIN_FRONTEND_PID})${NC}"
-    cd ..
+    cd "$SCRIPT_DIR" 
 }
 
 # 启动用户前端
 start_user_frontend() {
     echo -e "${GREEN}[*] 启动用户前端...${NC}"
-    cd user-frontend && trunk serve --port ${USER_FRONTEND_PORT} --proxy-backend=http://localhost:${BACKEND_PORT}/api/ | tee ../logs/user-frontend.log &
+    echo -e "${YELLOW}当前目录: $(pwd)${NC}"
+    (
+        cd user-frontend || {
+            echo -e "${RED}错误: 无法进入 user-frontend 目录${NC}"
+            return 1
+        }
+        echo -e "${YELLOW}进入目录: $(pwd)${NC}"
+        trunk serve --port ${USER_FRONTEND_PORT} --proxy-backend=http://localhost:${BACKEND_PORT}/api/ | tee ../logs/user-frontend.log &
+    )
     USER_FRONTEND_PID=$!
     echo -e "${GREEN}[✓] 用户前端已启动 (PID: ${USER_FRONTEND_PID})${NC}"
-    cd ..
+    cd "$SCRIPT_DIR" 
 }
 
 # 显示服务状态
