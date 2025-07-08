@@ -8,4 +8,4 @@ pub fn HomePage() -> impl IntoView {
             <p>这是用户前端的首页, 您可以在这里查看和管理您的信息.</p>
         </div>
     }
-} 
+}

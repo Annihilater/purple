@@ -16,4 +16,4 @@ pub fn Layout(children: Children) -> impl IntoView {
             </footer>
         </div>
     }
-} 
+}

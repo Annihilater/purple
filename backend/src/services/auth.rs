@@ -20,6 +20,27 @@ pub struct AuthService {
 }
 
 impl AuthService {
+    /// 创建新的认证服务实例
+    ///
+    /// # 参数
+    ///
+    /// * `user_repo` - 用户仓库实例
+    /// * `jwt_secret` - JWT 密钥
+    ///
+    /// # 示例
+    ///
+    /// ```
+    /// use purple_backend::services::AuthService;
+    /// use purple_backend::repositories::UserRepository;
+    /// use sqlx::PgPool;
+    ///
+    /// async fn create_auth_service() {
+    ///     let pool = PgPool::connect("postgres://localhost/purple").await.unwrap();
+    ///     let user_repo = UserRepository::new(pool);
+    ///     let jwt_secret = "your-secret-key".to_string();
+    ///     let auth_service = AuthService::new(user_repo, jwt_secret);
+    /// }
+    /// ```
     pub fn new(user_repo: UserRepository, jwt_secret: String) -> Self {
         Self {
             user_repo,

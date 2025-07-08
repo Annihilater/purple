@@ -46,7 +46,7 @@ pub fn LoginPage() -> impl IntoView {
                     email: email.get(),
                     password: password.get(),
                 };
-                
+
                 spawn_local(async move {
                     match AuthService::login(login_request).await {
                         Ok(response) => {
@@ -68,7 +68,7 @@ pub fn LoginPage() -> impl IntoView {
                     password: password.get(),
                     username: None,
                 };
-                
+
                 spawn_local(async move {
                     match AuthService::register(register_request).await {
                         Ok(_) => {
@@ -99,15 +99,15 @@ pub fn LoginPage() -> impl IntoView {
                         {move || if mode.get() == AuthMode::Login { "登录到 Purple" } else { "注册 Purple 账户" }}
                     </h2>
                 </div>
-                
+
                 // 切换按钮
                 <div class="flex justify-center space-x-4">
                     <button
                         type="button"
-                        class=move || if mode.get() == AuthMode::Login { 
-                            "px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-md" 
-                        } else { 
-                            "px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50" 
+                        class=move || if mode.get() == AuthMode::Login {
+                            "px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-md"
+                        } else {
+                            "px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                         }
                         on:click=move |_| {
                             set_mode.set(AuthMode::Login);
@@ -118,10 +118,10 @@ pub fn LoginPage() -> impl IntoView {
                     </button>
                     <button
                         type="button"
-                        class=move || if mode.get() == AuthMode::Register { 
-                            "px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-md" 
-                        } else { 
-                            "px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50" 
+                        class=move || if mode.get() == AuthMode::Register {
+                            "px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-md"
+                        } else {
+                            "px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                         }
                         on:click=move |_| {
                             set_mode.set(AuthMode::Register);
@@ -196,9 +196,9 @@ pub fn LoginPage() -> impl IntoView {
                             disabled=loading
                             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
                         >
-                            {move || if loading.get() { 
+                            {move || if loading.get() {
                                 if mode.get() == AuthMode::Login { "登录中..." } else { "注册中..." }
-                            } else { 
+                            } else {
                                 if mode.get() == AuthMode::Login { "登录" } else { "注册" }
                             }}
                         </button>

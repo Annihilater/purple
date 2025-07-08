@@ -28,7 +28,7 @@ pub fn App() -> impl IntoView {
                 <Routes>
                     // 不需要认证的页面
                     <Route path="/login" view=LoginPage/>
-                    
+
                     // 需要认证的页面，包装在Layout中
                     <Route path="" view=Layout>
                         <Route path="" view=HomePage/>

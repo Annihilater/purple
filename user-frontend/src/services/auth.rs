@@ -7,10 +7,10 @@ pub async fn login(username: &str, password: &str) -> Result<(), String> {
         email: username.to_string(),
         password: password.to_string(),
     };
-    
+
     let login_response = AuthService::login(request).await?;
     AuthService::save_token(&login_response.token);
-    
+
     Ok(())
 }
 
@@ -74,4 +74,4 @@ impl AuthService {
             let _ = storage.remove_item("auth_token");
         }
     }
-} 
+}

@@ -247,3 +247,176 @@ impl ErrorCode {
         }
     }
 }
+
+// 订单相关类型
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Order {
+    pub id: i32,
+    pub user_id: i32,
+    pub plan_id: i32,
+    pub coupon_id: Option<i32>,
+    pub order_number: String,
+    pub original_amount: i32,
+    pub discount_amount: i32,
+    pub final_amount: i32,
+    pub status: OrderStatus,
+    pub payment_method: String,
+    pub payment_status: PaymentStatus,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum OrderStatus {
+    Pending,
+    Processing,
+    Completed,
+    Cancelled,
+    Failed,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum PaymentStatus {
+    Pending,
+    Processing,
+    Completed,
+    Failed,
+    Refunded,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Validate)]
+pub struct CreateOrderRequest {
+    pub plan_id: i32,
+    pub coupon_code: Option<String>,
+    pub payment_method: String,
+}
+
+// 订阅相关类型
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Subscription {
+    pub id: i32,
+    pub user_id: i32,
+    pub plan_id: i32,
+    pub order_id: i32,
+    pub status: SubscriptionStatus,
+    pub start_date: DateTime<Utc>,
+    pub end_date: DateTime<Utc>,
+    pub traffic_used: i64,
+    pub traffic_limit: i64,
+    pub device_count: i32,
+    pub device_limit: i32,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum SubscriptionStatus {
+    Active,
+    Expired,
+    Cancelled,
+    Suspended,
+}
+
+// 通知相关类型
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Notice {
+    pub id: i32,
+    pub title: String,
+    pub content: String,
+    pub type_: NoticeType,
+    pub level: NoticeLevel,
+    pub target_user_id: Option<i32>,
+    pub is_read: bool,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum NoticeType {
+    System,
+    Order,
+    Subscription,
+    Payment,
+    Traffic,
+    Device,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum NoticeLevel {
+    Info,
+    Warning,
+    Error,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Validate)]
+pub struct CreateNoticeRequest {
+    #[validate(length(min = 1, message = "标题不能为空"))]
+    pub title: String,
+    #[validate(length(min = 1, message = "内容不能为空"))]
+    pub content: String,
+    pub type_: NoticeType,
+    pub level: NoticeLevel,
+    pub target_user_id: Option<i32>,
+}
+
+// 工具函数
+pub mod utils {
+    use chrono::{DateTime, NaiveDateTime, TimeZone, Utc};
+    use uuid::Uuid;
+
+    /// 生成唯一的订单号
+    pub fn generate_order_number() -> String {
+        let timestamp = Utc::now().timestamp();
+        let random = Uuid::new_v4().simple().to_string();
+        format!("ORD{}{}", timestamp, &random[..8])
+    }
+
+    /// 格式化时间戳为UTC时间
+    pub fn timestamp_to_datetime(timestamp: i64) -> DateTime<Utc> {
+        DateTime::from_timestamp(timestamp, 0)
+            .unwrap_or_else(|| DateTime::from_timestamp(0, 0).unwrap())
+    }
+
+    /// 计算流量使用百分比
+    pub fn calculate_traffic_usage_percentage(used: i64, limit: i64) -> f64 {
+        if limit <= 0 {
+            return 100.0;
+        }
+        (used as f64 / limit as f64 * 100.0).min(100.0)
+    }
+
+    /// 检查订阅是否即将到期（7天内）
+    pub fn is_subscription_expiring_soon(end_date: DateTime<Utc>) -> bool {
+        let now = Utc::now();
+        let days_left = (end_date - now).num_days();
+        days_left >= 0 && days_left <= 7
+    }
+
+    /// 格式化流量大小（转换为GB/MB等可读格式）
+    pub fn format_traffic_size(bytes: i64) -> String {
+        const KB: i64 = 1024;
+        const MB: i64 = KB * 1024;
+        const GB: i64 = MB * 1024;
+        const TB: i64 = GB * 1024;
+
+        if bytes >= TB {
+            format!("{:.2} TB", bytes as f64 / TB as f64)
+        } else if bytes >= GB {
+            format!("{:.2} GB", bytes as f64 / GB as f64)
+        } else if bytes >= MB {
+            format!("{:.2} MB", bytes as f64 / MB as f64)
+        } else if bytes >= KB {
+            format!("{:.2} KB", bytes as f64 / KB as f64)
+        } else {
+            format!("{} B", bytes)
+        }
+    }
+
+    /// 格式化金额（分转元，保留2位小数）
+    pub fn format_amount(amount: i32) -> String {
+        format!("{:.2}", amount as f64 / 100.0)
+    }
+}
+
+// 重新导出工具函数
+pub use utils::*;

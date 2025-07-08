@@ -36,7 +36,7 @@ impl Config {
             .add_source(config::Environment::default())
             .build()?;
 
-        Ok(Self {
+        Ok(Config {
             server_addr: config
                 .get_string("server_addr")
                 .unwrap_or_else(|_| "127.0.0.1".to_string()),

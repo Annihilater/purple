@@ -25,9 +25,9 @@ pub fn App() -> impl IntoView {
                 <Routes>
                     // 不需要认证的页面
                     <Route path="/login" view=LoginPage/>
-                    
+
                     // 需要认证的页面，包装在Layout中
-                    <Route path="" view=Layout>
+                    <Route path="" view=|| view! { <Layout> <Outlet/> </Layout> }>
                         <Route path="" view=HomePage/>
                         // 此处可添加更多用户相关页面
                     </Route>
@@ -42,4 +42,4 @@ pub fn main() {
     console_error_panic_hook::set_once();
 
     leptos::mount_to_body(App)
-} 
+}

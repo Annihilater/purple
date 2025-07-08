@@ -24,12 +24,22 @@ check_dependencies() {
     
     if ! command -v trunk &> /dev/null; then
         echo -e "${YELLOW}⚠️  Trunk 未找到，前端构建将被跳过${NC}"
-        echo -e "${YELLOW}    请手动安装: cargo install trunk --locked${NC}"
+        echo -e "${YELLOW}    请手动安装: cargo install trunk${NC}"
     fi
     
-    if ! command -v wasm-pack &> /dev/null; then
-        echo -e "${YELLOW}⚠️  wasm-pack 未找到，正在安装...${NC}"
-        cargo install wasm-pack
+    # 检查WebAssembly目标是否安装
+    if ! rustup target list --installed | grep -q "wasm32-unknown-unknown"; then
+        echo -e "${YELLOW}⚠️  WebAssembly目标未安装，尝试安装...${NC}"
+        rustup target add wasm32-unknown-unknown
+        
+        # 验证安装成功
+        if ! rustup target list --installed | grep -q "wasm32-unknown-unknown"; then
+            echo -e "${RED}❌ WebAssembly目标安装失败${NC}"
+            echo -e "${YELLOW}    前端构建将被跳过${NC}"
+            echo -e "${YELLOW}    如需手动安装，请运行: rustup target add wasm32-unknown-unknown${NC}"
+        else
+            echo -e "${GREEN}✅ WebAssembly目标安装成功${NC}"
+        fi
     fi
     
     echo -e "${GREEN}✅ 依赖检查完成${NC}"
@@ -51,6 +61,12 @@ build_admin_frontend() {
         echo -e "${YELLOW}⚠️  Trunk 未安装，跳过管理员前端构建${NC}"
         return 0
     fi
+    
+    if ! rustup target list --installed | grep -q "wasm32-unknown-unknown"; then
+        echo -e "${YELLOW}⚠️  WebAssembly目标未安装，跳过管理员前端构建${NC}"
+        return 0
+    fi
+    
     cd admin-frontend
     trunk build --release
     cd ..
@@ -64,6 +80,12 @@ build_user_frontend() {
         echo -e "${YELLOW}⚠️  Trunk 未安装，跳过用户前端构建${NC}"
         return 0
     fi
+    
+    if ! rustup target list --installed | grep -q "wasm32-unknown-unknown"; then
+        echo -e "${YELLOW}⚠️  WebAssembly目标未安装，跳过用户前端构建${NC}"
+        return 0
+    fi
+    
     cd user-frontend
     trunk build --release
     cd ..

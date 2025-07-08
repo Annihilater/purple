@@ -19,7 +19,7 @@
 //! ## 快速开始
 //!
 //! ```rust,no_run
-//! use purple::startup::Application;
+//! use purple_backend::startup::Application;
 //!
 //! #[tokio::main]
 //! async fn main() -> anyhow::Result<()> {
@@ -54,11 +54,17 @@
 //! ### 用户认证
 //!
 //! ```rust,no_run
-//! use purple::services::AuthService;
-//! use purple::models::auth::LoginRequest;
+//! use purple_backend::services::AuthService;
+//! use purple_backend::models::auth::LoginRequest;
 //!
 //! async fn login_example() -> anyhow::Result<()> {
-//!     let auth_service = AuthService::new(/* dependencies */);
+//!     use purple_backend::repositories::UserRepository;
+//!     use sqlx::PgPool;
+//!
+//!     let pool = PgPool::connect("postgres://localhost/purple").await?;
+//!     let user_repo = UserRepository::new(pool);
+//!     let jwt_secret = "your-secret-key".to_string();
+//!     let auth_service = AuthService::new(user_repo, jwt_secret);
 //!     
 //!     let login_request = LoginRequest {
 //!         username: "admin@test.com".to_string(),
@@ -77,8 +83,8 @@
 //! Purple 使用统一的响应格式，确保所有 API 返回一致的数据结构：
 //!
 //! ```rust
-//! use purple::common::response_v2::{ApiResponse, IntoHttpResponse, ApiError};
-//! use purple::common::ErrorCode;
+//! use purple_backend::common::response_v2::{ApiResponse, IntoHttpResponse, ApiError};
+//! use purple_backend::common::ErrorCode;
 //! use actix_web::HttpResponse;
 //!
 //! // 成功响应
@@ -155,7 +161,7 @@
 //!
 //! ### 认证中间件
 //! ```rust,no_run
-//! use purple::middleware::Auth;
+//! use purple_backend::middleware::Auth;
 //! use actix_web::{web, App};
 //!
 //! let app = App::new()
@@ -168,7 +174,7 @@
 //!
 //! ### 请求监控中间件
 //! ```rust,no_run
-//! use purple::middleware::{RequestLogger, RequestTimer};
+//! use purple_backend::middleware::{RequestLogger, RequestTimer};
 //! use actix_web::App;
 //!
 //! let app = App::new()
@@ -181,8 +187,9 @@
 //! Purple 使用统一的错误代码系统：
 //!
 //! ```rust
-//! use purple::common::ErrorCode;
+//! use purple_backend::common::ErrorCode;
 //!
+//! let error_code = ErrorCode::UserNotFound;
 //! match error_code {
 //!     ErrorCode::Success => println!("操作成功"),
 //!     ErrorCode::UserNotFound => println!("用户不存在"),
@@ -194,11 +201,14 @@
 //! ## 配置管理
 //!
 //! ```rust,no_run
-//! use purple::config::{Config, DatabaseConfig};
+//! use purple_backend::config::{Config, DatabaseConfig};
+//! use anyhow::Result;
 //!
-//! // 从环境变量加载配置
-//! let config = Config::from_env()?;
-//! let db_config = DatabaseConfig::from_env()?;
+//! fn load_config() -> Result<()> {
+//!     // 从环境变量加载配置
+//!     let config = Config::from_env()?;
+//!     Ok(())
+//! }
 //! ```
 //!
 //! 更多信息请参考：

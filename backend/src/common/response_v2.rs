@@ -14,7 +14,7 @@
 //!
 //! ### 成功响应
 //! ```rust
-//! use crate::common::response_v2::{ApiResponse, IntoHttpResponse};
+//! use purple_backend::common::response_v2::{ApiResponse, IntoHttpResponse};
 //!
 //! let response = ApiResponse::success("操作成功");
 //! let http_response = response.into_http_response();
@@ -22,7 +22,7 @@
 //!
 //! ### 分页响应
 //! ```rust
-//! use crate::common::response_v2::{ApiResponse, IntoHttpResponse};
+//! use purple_backend::common::response_v2::{ApiResponse, IntoHttpResponse};
 //!
 //! let data = vec!["item1", "item2"];
 //! let response = ApiResponse::page(data, 1, 10, 100);
@@ -31,8 +31,8 @@
 //!
 //! ### 错误响应
 //! ```rust
-//! use crate::common::response_v2::{ApiResponse, ApiError, IntoHttpResponse};
-//! use crate::common::ErrorCode;
+//! use purple_backend::common::response_v2::{ApiResponse, ApiError, IntoHttpResponse};
+//! use purple_backend::common::ErrorCode;
 //!
 //! // 简单错误响应
 //! let response = ApiResponse::error(ErrorCode::UserNotFound);
