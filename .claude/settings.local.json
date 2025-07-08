@@ -17,7 +17,24 @@
       "Bash(RUST_LOG=debug cargo run)",
       "Bash(--header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImV4cCI6MTc1MjUwNjYwMSwiaWF0IjoxNzUxOTAxODAxfQ.ayAtGpsFX2_9ybQ1KIGdzcFHhgpjBusFOahLj955csU' )",
       "Bash(psql:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(cp:*)",
+      "Bash(mv:*)",
+      "Bash(chmod:*)",
+      "Bash(/Users/ziji/github/purple/build.sh check:*)",
+      "Bash(touch:*)",
+      "Bash(./build.sh lint:*)",
+      "Bash(./build.sh:*)",
+      "Bash(ls:*)",
+      "Bash(rustup target:*)",
+      "Bash(./dev.sh:*)",
+      "Bash(trunk build:*)",
+      "Bash(rustup:*)",
+      "Bash(ls:*)",
+      "Bash(rustc:*)",
+      "Bash(python3:*)",
+      "Bash(export:*)",
+      "Bash(trunk serve:*)"
     ]
   },
   "enableAllProjectMcpServers": false

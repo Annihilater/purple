@@ -1,0 +1,57 @@
+[package]
+name = "purple-frontend"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Purple 项目前端 Web 应用"
+
+# 继承 workspace 的 lint 配置
+[lints]
+workspace = true
+
+[lib]
+name = "purple_frontend"
+path = "src/lib.rs"
+crate-type = ["cdylib"]
+
+[dependencies]
+# 工作空间依赖
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+# 前端特定依赖
+leptos = { workspace = true }
+leptos_meta = { workspace = true }
+leptos_router = { workspace = true }
+wasm-bindgen = { workspace = true }
+console_log = { workspace = true }
+console_error_panic_hook = { workspace = true, optional = true }
+
+# Web API 和网络请求
+reqwest = { version = "0.11", features = ["json"] }
+js-sys = "0.3"
+log = "0.4"
+web-sys = { version = "0.3", features = [
+  "console",
+  "Window",
+  "Document",
+  "Element",
+  "HtmlElement",
+  "Storage",
+  "Location",
+] }
+gloo-storage = "0.3"
+gloo-utils = "0.2"
+
+# 共享库依赖
+purple-shared = { path = "../shared" }
+
+[features]
+default = ["console_error_panic_hook"]
+
+[dependencies.wee_alloc]
+version = "0.4.5"
+optional = true

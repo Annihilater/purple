@@ -1,0 +1,61 @@
+[package]
+name = "purple-backend"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Purple 项目后端 API 服务"
+readme = "../README.md"
+keywords = ["web", "api", "actix-web", "postgresql", "jwt"]
+categories = ["web-programming"]
+
+# 继承 workspace 的 lint 配置
+[lints]
+workspace = true
+
+[lib]
+name = "purple_backend"
+path = "src/lib.rs"
+
+[[bin]]
+name = "purple-backend"
+path = "src/main.rs"
+
+[dependencies]
+# 工作空间依赖
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+validator = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }
+
+# 后端特定依赖
+actix-web = { workspace = true }
+sqlx = { workspace = true }
+utoipa = { workspace = true }
+utoipa-swagger-ui = { workspace = true }
+jsonwebtoken = { workspace = true }
+argon2 = { workspace = true }
+
+# 其他后端依赖
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+tracing-appender = "0.2"
+dotenv = "0.15"
+rand = "0.8"
+config = "0.15.11"
+futures-util = "0.3.31"
+actix-http = "3.11.0"
+actix-cors = "0.7.1"
+
+# 共享库依赖
+purple-shared = { path = "../shared" }
+
+[dev-dependencies]
+mockall = "0.11"
+tokio-test = "0.4"

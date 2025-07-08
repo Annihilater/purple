@@ -1,0 +1,31 @@
+[package]
+name = "purple-shared"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Purple 项目前后端共享类型和工具"
+
+# 继承 workspace 的 lint 配置
+[lints]
+workspace = true
+
+[lib]
+name = "purple_shared"
+path = "src/lib.rs"
+
+[dependencies]
+# 工作空间依赖
+serde = { workspace = true }
+serde_json = { workspace = true }
+chrono = { workspace = true }
+uuid = { workspace = true }
+validator = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+default = []
+backend = []
+frontend = []
