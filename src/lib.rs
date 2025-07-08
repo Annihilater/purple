@@ -10,6 +10,11 @@
 //! - 📊 **完整监控**: 请求日志、性能监控、错误追踪
 //! - 📚 **自动文档**: OpenAPI/Swagger 自动生成 API 文档
 //! - 🔧 **易于维护**: 分层架构、统一错误处理、类型安全
+//! - 🔄 **统一响应格式**: 标准化的 RESTful API 响应规范
+//! - ⚡ **微秒级监控**: 精确到微秒的响应时间监控和智能预警
+//! - 🎯 **智能路由**: 避免路径冲突的路由配置系统
+//! - 📄 **分页支持**: 统一的分页查询和响应格式
+//! - 🔍 **请求追踪**: 每个请求的唯一标识符，便于问题排查
 //!
 //! ## 快速开始
 //!
@@ -56,8 +61,8 @@
 //!     let auth_service = AuthService::new(/* dependencies */);
 //!     
 //!     let login_request = LoginRequest {
-//!         username: "admin".to_string(),
-//!         password: "password123".to_string(),
+//!         username: "admin@test.com".to_string(),
+//!         password: "secure_admin_password_123".to_string(),
 //!     };
 //!     
 //!     let token_response = auth_service.login(login_request).await?;
@@ -67,19 +72,81 @@
 //! }
 //! ```
 //!
-//! ### API 响应处理
+//! ### 统一响应格式 API
+//!
+//! Purple 使用统一的响应格式，确保所有 API 返回一致的数据结构：
 //!
 //! ```rust
-//! use purple::common::response_v2::{ApiResponse, IntoHttpResponse};
+//! use purple::common::response_v2::{ApiResponse, IntoHttpResponse, ApiError};
 //! use purple::common::ErrorCode;
+//! use actix_web::HttpResponse;
 //!
 //! // 成功响应
 //! let response = ApiResponse::success("操作成功");
-//! let http_response = response.into_http_response();
+//! let http_response: HttpResponse = response.into_http_response();
+//!
+//! // 分页响应
+//! let data = vec!["item1", "item2"];
+//! let page_response = ApiResponse::page(data, 1, 10, 100);
+//! let http_page_response: HttpResponse = page_response.into_http_response();
 //!
 //! // 错误响应
 //! let error_response = ApiResponse::error(ErrorCode::UserNotFound);
-//! let http_error_response = error_response.into_http_response();
+//! let http_error_response: HttpResponse = error_response.into_http_response();
+//!
+//! // 自定义错误响应
+//! let custom_error = ApiError::with_details(
+//!     ErrorCode::ValidationError,
+//!     "参数验证失败".to_string()
+//! );
+//! ```
+//!
+//! ### 响应格式示例
+//!
+//! 所有 API 响应都遵循统一格式：
+//!
+//! ```json
+//! // 成功响应
+//! {
+//!   "success": true,
+//!   "data": { "id": 1, "name": "示例数据" },
+//!   "meta": {
+//!     "timestamp": 1751938399,
+//!     "request_id": "uuid-here"
+//!   }
+//! }
+//!
+//! // 分页响应
+//! {
+//!   "success": true,
+//!   "data": [{"id": 1}, {"id": 2}],
+//!   "pagination": {
+//!     "page": 1,
+//!     "page_size": 10,
+//!     "total": 100,
+//!     "total_pages": 10,
+//!     "has_next": true,
+//!     "has_prev": false
+//!   },
+//!   "meta": {
+//!     "timestamp": 1751938399,
+//!     "request_id": "uuid-here"
+//!   }
+//! }
+//!
+//! // 错误响应
+//! {
+//!   "success": false,
+//!   "error": {
+//!     "code": "USER_NOT_FOUND",
+//!     "message": "用户未找到",
+//!     "details": "用户ID 123 不存在"
+//!   },
+//!   "meta": {
+//!     "timestamp": 1751938399,
+//!     "request_id": "uuid-here"
+//!   }
+//! }
 //! ```
 //!
 //! ## 中间件系统

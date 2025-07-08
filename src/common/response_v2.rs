@@ -1,3 +1,98 @@
+//! # 统一 API 响应系统 v2
+//!
+//! 提供标准化的 RESTful API 响应格式，确保所有接口返回数据的一致性和可维护性。
+//!
+//! ## 核心设计原则
+//!
+//! 1. **语义明确**: `success` 字段明确表示操作是否成功
+//! 2. **类型安全**: 错误代码使用字符串枚举，便于维护和理解
+//! 3. **RESTful 兼容**: 配合 HTTP 状态码使用
+//! 4. **扩展性**: `meta` 字段可包含时间戳、请求ID等元数据
+//! 5. **调试友好**: 可选的 `request_id` 便于问题追踪
+//!
+//! ## 使用示例
+//!
+//! ### 成功响应
+//! ```rust
+//! use crate::common::response_v2::{ApiResponse, IntoHttpResponse};
+//!
+//! let response = ApiResponse::success("操作成功");
+//! let http_response = response.into_http_response();
+//! ```
+//!
+//! ### 分页响应
+//! ```rust
+//! use crate::common::response_v2::{ApiResponse, IntoHttpResponse};
+//!
+//! let data = vec!["item1", "item2"];
+//! let response = ApiResponse::page(data, 1, 10, 100);
+//! let http_response = response.into_http_response();
+//! ```
+//!
+//! ### 错误响应
+//! ```rust
+//! use crate::common::response_v2::{ApiResponse, ApiError, IntoHttpResponse};
+//! use crate::common::ErrorCode;
+//!
+//! // 简单错误响应
+//! let response = ApiResponse::error(ErrorCode::UserNotFound);
+//! let http_response = response.into_http_response();
+//!
+//! // 带详细信息的错误响应
+//! let error = ApiError::with_details(
+//!     ErrorCode::ValidationError,
+//!     "用户名不能为空".to_string()
+//! );
+//! ```
+//!
+//! ## 响应格式示例
+//!
+//! 所有响应都遵循统一的 JSON 格式：
+//!
+//! ```json
+//! // 成功响应
+//! {
+//!   "success": true,
+//!   "data": { "id": 1, "name": "示例数据" },
+//!   "meta": {
+//!     "timestamp": 1751938399,
+//!     "request_id": "uuid-here"
+//!   }
+//! }
+//!
+//! // 分页响应
+//! {
+//!   "success": true,
+//!   "data": [{"id": 1}, {"id": 2}],
+//!   "pagination": {
+//!     "page": 1,
+//!     "page_size": 10,
+//!     "total": 100,
+//!     "total_pages": 10,
+//!     "has_next": true,
+//!     "has_prev": false
+//!   },
+//!   "meta": {
+//!     "timestamp": 1751938399,
+//!     "request_id": "uuid-here"
+//!   }
+//! }
+//!
+//! // 错误响应
+//! {
+//!   "success": false,
+//!   "error": {
+//!     "code": "USER_NOT_FOUND",
+//!     "message": "用户未找到",
+//!     "details": "用户ID 123 不存在"
+//!   },
+//!   "meta": {
+//!     "timestamp": 1751938399,
+//!     "request_id": "uuid-here"
+//!   }
+//! }
+//! ```
+
 use actix_web::{HttpResponse, ResponseError};
 use serde::{Deserialize, Serialize};
 use std::fmt;

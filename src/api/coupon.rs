@@ -37,6 +37,58 @@ fn default_false() -> bool {
 }
 
 /// 创建优惠券
+///
+/// 创建新的优惠券，支持设置优惠金额、使用限制、有效期等参数。
+/// 需要管理员权限。
+///
+/// # 参数
+///
+/// - `coupon`: 优惠券创建请求数据
+/// - `repo`: 优惠券仓库
+///
+/// # 返回
+///
+/// 成功时返回创建的优惠券信息，使用统一的 ApiResponse 格式。
+/// 失败时返回相应的错误响应。
+///
+/// # 示例
+///
+/// ```json
+/// // 请求
+/// POST /api/coupons
+/// {
+///   "name": "新用户优惠",
+///   "code": "NEWUSER2024",
+///   "type": 1,
+///   "value": 1000,
+///   "started_at": 1704067200,
+///   "ended_at": 1735689600,
+///   "limit_use": 100,
+///   "show": true
+/// }
+///
+/// // 响应
+/// {
+///   "success": true,
+///   "data": {
+///     "id": 1,
+///     "name": "新用户优惠",
+///     "code": "NEWUSER2024",
+///     "type": 1,
+///     "value": 1000,
+///     "started_at": 1704067200,
+///     "ended_at": 1735689600,
+///     "limit_use": 100,
+///     "show": true,
+///     "created_at": 1704067200,
+///     "updated_at": 1704067200
+///   },
+///   "meta": {
+///     "timestamp": 1751938399,
+///     "request_id": "uuid-here"
+///   }
+/// }
+/// ```
 #[utoipa::path(
     post,
     path = "/api/coupons",
@@ -76,6 +128,82 @@ pub async fn create_coupon(
 }
 
 /// 获取优惠券列表
+///
+/// 支持分页查询优惠券列表，可以通过参数过滤启用状态和有效性。
+/// 需要认证访问。
+///
+/// # 查询参数
+///
+/// - `page`: 页码，默认为 1
+/// - `page_size`: 每页大小，默认为 10
+/// - `only_enabled`: 仅显示启用的优惠券，默认为 false
+/// - `only_valid`: 仅显示有效的优惠券，默认为 false
+///
+/// # 返回
+///
+/// 返回分页的优惠券列表，使用统一的分页响应格式。
+/// 空数据时返回空数组和正确的分页信息。
+///
+/// # 示例
+///
+/// ```bash
+/// # 带认证的请求
+/// curl 'http://127.0.0.1:8080/api/coupons?page=1&page_size=10&only_enabled=true' \
+///   -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...'
+/// ```
+///
+/// ```json
+/// // 成功响应（有数据）
+/// {
+///   "success": true,
+///   "data": [
+///     {
+///       "id": 1,
+///       "name": "新用户优惠",
+///       "code": "NEWUSER2024",
+///       "type": 1,
+///       "value": 1000,
+///       "show": true
+///     }
+///   ],
+///   "pagination": {
+///     "page": 1,
+///     "page_size": 10,
+///     "total": 1,
+///     "total_pages": 1,
+///     "has_next": false,
+///     "has_prev": false
+///   },
+///   "meta": {
+///     "timestamp": 1751938399,
+///     "request_id": "uuid-here"
+///   }
+/// }
+///
+/// // 成功响应（空数据）
+/// {
+///   "success": true,
+///   "data": [],
+///   "pagination": {
+///     "page": 1,
+///     "page_size": 10,
+///     "total": 0,
+///     "total_pages": 0,
+///     "has_next": false,
+///     "has_prev": false
+///   },
+///   "meta": {
+///     "timestamp": 1751938399,
+///     "request_id": "uuid-here"
+///   }
+/// }
+/// ```
+///
+/// # 注意事项
+///
+/// - 该接口需要 JWT 认证
+/// - 空数据时返回 200 状态码而非 401，确保认证用户能正确获取空结果
+/// - 路由配置使用相对路径 `""` 配合 scope `/api/coupons`
 #[utoipa::path(
     get,
     path = "/api/coupons",
