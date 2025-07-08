@@ -1,19 +1,19 @@
 [package]
-name = "purple-frontend"
+name = "purple-admin-frontend"
 version.workspace = true
 edition.workspace = true
 authors.workspace = true
 license.workspace = true
 repository.workspace = true
 homepage.workspace = true
-description = "Purple 项目前端 Web 应用"
+description = "Purple 项目管理员前端 Web 应用"
 
 # 继承 workspace 的 lint 配置
 [lints]
 workspace = true
 
 [lib]
-name = "purple_frontend"
+name = "purple_admin_frontend"
 path = "src/lib.rs"
 crate-type = ["cdylib"]
 

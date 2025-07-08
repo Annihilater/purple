@@ -568,3 +568,55 @@ volumes:
   <p>🦀 Built with ❤️ using Rust + WebAssembly</p>
   <p><strong>Purple</strong> - 让 Rust 全栈开发更简单！ ✨</p>
 </div>
+
+# Purple 项目
+
+Purple 是一个完整的SaaS系统，包含后端API服务、用户前端和管理员前端。
+
+## 项目结构
+
+- **backend/**: 后端API服务，基于Actix-Web和PostgreSQL
+- **user-frontend/**: 用户界面，基于Leptos框架的WebAssembly前端
+- **admin-frontend/**: 管理员界面，基于Leptos框架的WebAssembly前端
+- **shared/**: 前后端共享代码和类型定义
+- **docs/**: 项目文档
+
+## 开发环境设置
+
+### 后端
+
+```bash
+cd backend
+cargo run
+```
+
+后端服务默认运行在 `http://127.0.0.1:8080`
+
+### 用户前端
+
+```bash
+cd user-frontend
+trunk serve --open
+```
+
+### 管理员前端
+
+```bash
+cd admin-frontend
+trunk serve --open
+```
+
+## 部署
+
+请参考 `docs/deployment/` 目录下的文档了解部署详情。
+
+## 文档
+
+- API文档: `docs/api/`
+- 开发指南: `docs/development/`
+- 部署指南: `docs/deployment/`
+- 示例代码: `docs/examples/`
+
+## 许可证
+
+MIT

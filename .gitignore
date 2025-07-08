@@ -235,3 +235,8 @@ logs/
 #.claude
 #CLAUDE.md
 *.log
+
+# Project specific
+frontend/dist
+user-frontend/dist/
+admin-frontend/dist/

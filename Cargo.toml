@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "backend",
-    "frontend", 
+    "admin-frontend", 
+    "user-frontend",
     "shared"
 ]
 resolver = "2"

@@ -77,6 +77,15 @@ pub struct LoginRequest {
     pub password: String,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, Validate)]
+pub struct RegisterRequest {
+    #[validate(email(message = "邮箱格式无效"))]
+    pub email: String,
+    #[validate(length(min = 6, message = "密码至少6位"))]
+    pub password: String,
+    pub username: Option<String>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LoginResponse {
     pub token: String,

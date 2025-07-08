@@ -1,5 +1,5 @@
 use crate::services::api::ApiClient;
-use purple_shared::{LoginRequest, LoginResponse};
+use purple_shared::{LoginRequest, LoginResponse, RegisterRequest, User};
 
 pub struct AuthService;
 
@@ -16,6 +16,21 @@ impl AuthService {
                 .error
                 .map(|e| e.message)
                 .unwrap_or_else(|| "登录失败".to_string()))
+        }
+    }
+
+    pub async fn register(request: RegisterRequest) -> Result<User, String> {
+        let response = ApiClient::post::<RegisterRequest, User>("/api/auth/register", &request)
+            .await
+            .map_err(|e| format!("网络请求失败: {}", e))?;
+
+        if response.success {
+            response.data.ok_or_else(|| "注册响应数据为空".to_string())
+        } else {
+            Err(response
+                .error
+                .map(|e| e.message)
+                .unwrap_or_else(|| "注册失败".to_string()))
         }
     }
 

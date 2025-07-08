@@ -8,10 +8,7 @@ mod services;
 mod utils;
 
 use components::layout::Layout;
-use pages::{
-    coupons::CouponsPage, dashboard::DashboardPage, home::HomePage, login::LoginPage,
-    plans::PlansPage, users::UsersPage,
-};
+use pages::{home::HomePage, login::LoginPage};
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -19,20 +16,20 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Stylesheet id="leptos" href="/pkg/purple-frontend.css"/>
+        <Stylesheet id="leptos" href="/pkg/purple-user-frontend.css"/>
 
-        <Title text="Purple - 现代化 Web 管理系统"/>
+        <Title text="Purple - 用户平台"/>
 
         <Router>
             <main>
                 <Routes>
+                    // 不需要认证的页面
+                    <Route path="/login" view=LoginPage/>
+                    
+                    // 需要认证的页面，包装在Layout中
                     <Route path="" view=Layout>
                         <Route path="" view=HomePage/>
-                        <Route path="/login" view=LoginPage/>
-                        <Route path="/dashboard" view=DashboardPage/>
-                        <Route path="/plans" view=PlansPage/>
-                        <Route path="/coupons" view=CouponsPage/>
-                        <Route path="/users" view=UsersPage/>
+                        // 此处可添加更多用户相关页面
                     </Route>
                 </Routes>
             </main>
@@ -45,4 +42,4 @@ pub fn main() {
     console_error_panic_hook::set_once();
 
     leptos::mount_to_body(App)
-}
+} 
