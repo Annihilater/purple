@@ -3,7 +3,8 @@ pub mod response_types;
 pub mod response_v2;
 pub mod status;
 
-pub use error::*;
+// 选择性导出，避免命名冲突和不必要的依赖
+pub use error::ErrorCode;
 pub use response_types::*;
-pub use response_v2::*;
-pub use status::*;
+pub use response_v2::{ApiError, ApiResponse, IntoHttpResponse, PaginationMeta, ResponseMeta};
+// pub use status::*;  // 暂时注释，避免过多导出
