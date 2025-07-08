@@ -242,3 +242,4 @@ user-frontend/dist/
 admin-frontend/dist/
 backend/target/
 backend/logs/
+run/
