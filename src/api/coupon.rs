@@ -95,7 +95,7 @@ fn default_false() -> bool {
     tag = "coupons",
     request_body = CreateCouponRequest,
     responses(
-        (status = 200, description = "Coupon created successfully", body = CouponResponse),
+        (status = 200, description = "Coupon created successfully", body = CouponApiResponse),
         (status = 400, description = "Invalid request", body = EmptyApiResponse),
         (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
@@ -209,7 +209,7 @@ pub async fn create_coupon(
     path = "/api/coupons",
     tag = "coupons",
     responses(
-        (status = 200, description = "Coupons retrieved successfully", body = CouponListResponse),
+        (status = 200, description = "Coupons retrieved successfully", body = CouponPageApiResponse),
         (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
     params(
@@ -257,7 +257,7 @@ pub async fn list_coupons(
     path = "/api/coupons/{id}",
     tag = "coupons",
     responses(
-        (status = 200, description = "Coupon found", body = CouponResponse),
+        (status = 200, description = "Coupon found", body = CouponApiResponse),
         (status = 404, description = "Coupon not found", body = EmptyApiResponse),
         (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
@@ -298,7 +298,7 @@ pub async fn get_coupon(
     tag = "coupons",
     request_body = UpdateCouponRequest,
     responses(
-        (status = 200, description = "Coupon updated successfully", body = CouponResponse),
+        (status = 200, description = "Coupon updated successfully", body = CouponApiResponse),
         (status = 400, description = "Invalid request", body = EmptyApiResponse),
         (status = 404, description = "Coupon not found", body = EmptyApiResponse),
         (status = 500, description = "Internal server error", body = EmptyApiResponse)
@@ -342,7 +342,7 @@ pub async fn update_coupon(
     path = "/api/coupons/{id}",
     tag = "coupons",
     responses(
-        (status = 200, description = "Coupon deleted successfully"),
+        (status = 200, description = "Coupon deleted successfully", body = EmptyApiResponse),
         (status = 404, description = "Coupon not found", body = EmptyApiResponse),
         (status = 500, description = "Internal server error", body = EmptyApiResponse)
     ),
@@ -383,7 +383,7 @@ pub async fn delete_coupon(
         ("code" = String, Path, description = "优惠码"),
     ),
     responses(
-        (status = 200, description = "验证优惠码成功", body = CouponResponse),
+        (status = 200, description = "验证优惠码成功", body = CouponApiResponse),
         (status = 404, description = "优惠码不存在或已失效", body = EmptyApiResponse),
         (status = 500, description = "服务器内部错误", body = EmptyApiResponse),
     )

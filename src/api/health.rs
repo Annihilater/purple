@@ -17,7 +17,7 @@ pub struct HealthResponse {
     path = "/health",
     tag = "health",
     responses(
-        (status = 200, description = "健康检查成功")
+        (status = 200, description = "健康检查成功", body = HealthApiResponse)
     )
 )]
 #[get("/health")]

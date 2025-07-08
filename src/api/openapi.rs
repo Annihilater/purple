@@ -4,7 +4,6 @@ use utoipa_swagger_ui::SwaggerUi;
 use crate::api::{
     health::HealthResponse,
     plan::BatchUpdatePlanStatusRequest,
-    response::UserResponse,
     subscribe::{
         NodeStatus, NodeStatusResponse, NodeTestResult, SubscribeQuery, TestResultResponse,
         TestSubscribeRequest, TestSummary,
@@ -12,9 +11,12 @@ use crate::api::{
     user::{CreateUserRequest, GetUsersQuery, UpdateUserRequest, UpdateUserStatusRequest},
 };
 use crate::common::{
-    EmptyApiResponse, ErrorCode, HealthApiResponse, PlanAvailabilityApiResponse,
-    PlanPricingApiResponse, PlanStatsApiResponse, ProjectInfoApiResponse, TokenApiResponse,
-    UserApiResponse, UserIdApiResponse, UserPageApiResponse, UserPageData,
+    BatchUpdateApiResponse, BatchUpdateData, CouponApiResponse, CouponPageApiResponse,
+    CouponValidationApiResponse, CouponValidationData, EmptyApiResponse, ErrorCode,
+    HealthApiResponse, HealthData, PlanApiResponse, PlanAvailabilityApiResponse,
+    PlanAvailabilityData, PlanListApiResponse, PlanPageApiResponse, PlanPricingApiResponse,
+    PlanPricingData, PlanStatsApiResponse, PlanStatsData, ProjectInfoApiResponse, ProjectInfoData,
+    TokenApiResponse, UserApiResponse, UserIdApiResponse, UserIdData, UserPageApiResponse,
 };
 use crate::models::{
     auth::{Claims, LoginRequest, RegisterRequest, TokenResponse},
@@ -75,13 +77,16 @@ use crate::models::{
     ),
     components(
         schemas(
+            // 用户相关
             User,
             CreateUserRequest,
             UpdateUserRequest,
             UpdateUserStatusRequest,
             GetUsersQuery,
-            UserResponse,
             UserModel,
+            UserIdData,
+            
+            // 套餐相关
             Plan,
             CreatePlanRequest,
             UpdatePlanRequest,
@@ -92,30 +97,54 @@ use crate::models::{
             PlanAvailability,
             PriceOption,
             BatchUpdatePlanStatusRequest,
+            PlanStatsData,
+            PlanPricingData,
+            PlanAvailabilityData,
+            BatchUpdateData,
+            
+            // 优惠券相关
             Coupon,
             CreateCouponRequest,
             UpdateCouponRequest,
             CouponResponse,
             CouponListResponse,
             ValidateCouponResponse,
+            CouponValidationData,
+            
+            // 认证相关
             RegisterRequest,
             LoginRequest,
             TokenResponse,
             Claims,
+            
+            // 健康检查
             HealthResponse,
+            HealthData,
+            
+            // 项目信息
+            ProjectInfo,
+            ProjectInfoData,
+            
+            // 错误和响应类型
             ErrorCode,
-            HealthApiResponse,
             EmptyApiResponse,
-            UserIdApiResponse,
+            HealthApiResponse,
+            ProjectInfoApiResponse,
             TokenApiResponse,
+            UserIdApiResponse,
             UserApiResponse,
             UserPageApiResponse,
-            UserPageData,
-            ProjectInfo,
-            ProjectInfoApiResponse,
+            PlanApiResponse,
+            PlanListApiResponse,
+            PlanPageApiResponse,
             PlanStatsApiResponse,
             PlanPricingApiResponse,
             PlanAvailabilityApiResponse,
+            BatchUpdateApiResponse,
+            CouponApiResponse,
+            CouponPageApiResponse,
+            CouponValidationApiResponse,
+            
             // 订阅相关的Schema
             UserSubscribeInfo,
             TrafficInfo,

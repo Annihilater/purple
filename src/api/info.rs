@@ -10,8 +10,8 @@ use crate::models::info::ProjectInfo;
     get,
     path = "/",
     responses(
-        (status = 200, description = "成功获取项目信息"),
-        (status = 500, description = "服务器内部错误")
+        (status = 200, description = "成功获取项目信息", body = ProjectInfoApiResponse),
+        (status = 500, description = "服务器内部错误", body = EmptyApiResponse)
     ),
     tag = "project_info"
 )]
