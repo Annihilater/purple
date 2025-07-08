@@ -8,6 +8,65 @@
 
 **Rust 最佳实践规则**: 总是从 Rust 最佳项目实践的方向思考和解决问题，保持整个项目代码风格一致，逻辑自洽和闭合。遵循 Rust 社区的惯用法和设计模式，确保代码质量和可维护性。
 
+## 路由配置重要规则
+
+### 路由路径配置原则
+
+在配置 API 路由时，必须遵循以下原则避免路径重复：
+
+#### ❌ 错误的路由配置
+```rust
+// 在 routes.rs 中已经定义了 scope
+cfg.service(
+    web::scope("/api/coupons")
+        .service(api::list_coupons)
+);
+
+// 在 api/coupon.rs 中又重复定义了完整路径
+#[get("/api/coupons")]  // 错误：会导致 /api/coupons/api/coupons
+pub async fn list_coupons(...) { ... }
+```
+
+#### ✅ 正确的路由配置
+```rust
+// 在 routes.rs 中定义 scope
+cfg.service(
+    web::scope("/api/coupons")
+        .wrap(Auth::new())
+        .service(api::create_coupon)    // POST ""
+        .service(api::list_coupons)     // GET ""
+        .service(api::get_coupon)       // GET "/{id}"
+        .service(api::update_coupon)    // PUT "/{id}"
+        .service(api::delete_coupon)    // DELETE "/{id}"
+);
+
+// 在 api/coupon.rs 中使用相对路径
+#[post("")]           // 对应 POST /api/coupons
+#[get("")]            // 对应 GET /api/coupons
+#[get("/{id}")]       // 对应 GET /api/coupons/{id}
+#[put("/{id}")]       // 对应 PUT /api/coupons/{id}
+#[delete("/{id}")]    // 对应 DELETE /api/coupons/{id}
+```
+
+### 路由检查清单
+
+在添加新的 API 端点时，请检查：
+
+1. ✅ **Scope 配置**: 在 `src/routes.rs` 中正确配置 scope
+2. ✅ **相对路径**: 在处理函数中使用相对路径注解
+3. ✅ **导出函数**: 在 `src/api/mod.rs` 中正确导出函数
+4. ✅ **认证中间件**: 为需要认证的路由添加 `Auth::new()`
+5. ✅ **OpenAPI 注解**: 正确配置 `#[utoipa::path]` 注解
+
+### 常见路由问题排查
+
+如果遇到 404 错误，按以下步骤排查：
+
+1. **检查路由注册**: 确认函数在 `routes.rs` 中正确注册
+2. **检查路径配置**: 确认没有路径重复（scope + 注解路径）
+3. **检查函数导出**: 确认函数在 `api/mod.rs` 中正确导出
+4. **检查编译**: 确认代码编译通过且服务器重启
+
 ## 统一响应格式规范
 
 本项目采用标准化的 RESTful API 响应格式，确保所有接口返回数据的一致性和可维护性。
@@ -75,53 +134,105 @@
 
 #### 1. 使用新的响应系统
 ```rust
-use crate::common::response_new::{ApiResponse, IntoHttpResponse};
+use crate::common::response_v2::{ApiResponse, IntoHttpResponse};
 use crate::common::ErrorCode;
 
 // 成功响应
 let response = ApiResponse::success(data);
 Ok(response.into_http_response())
 
-// 错误响应
-let response = ApiResponse::error(ErrorCode::UserNotFound);
-Ok(response.into_http_response())
+// 错误响应 - 使用 with_details 方法
+let response = ApiError::with_details(ErrorCode::UserNotFound, "用户不存在".to_string());
+Err(response)
 
-// 分页响应
-let response = ApiResponse::page(items, page, page_size, total);
+// 分页响应 - 直接返回数组和分页信息
+let response = ApiResponse::page(items, page as u64, page_size as u64, total as u64);
 Ok(response.into_http_response())
 ```
 
-#### 2. 便捷宏
+#### 2. 推荐的响应模式
 ```rust
-// 成功响应宏
-success_response!(data)
+// 成功响应
+match repo.create(&request).await {
+    Ok(item) => {
+        let response = ApiResponse::success(ItemResponse::from(item));
+        Ok(response.into_http_response())
+    }
+    Err(e) => {
+        tracing::error!("创建失败: {}", e);
+        Err(ApiError::with_details(
+            ErrorCode::DatabaseError,
+            "数据库操作失败".to_string(),
+        ))
+    }
+}
 
-// 分页响应宏
-page_response!(data, page, page_size, total)
-
-// 错误响应宏
-error_response!(ErrorCode::UserNotFound)
-error_response!(ErrorCode::ValidationError, "详细错误信息")
-error_response!(ErrorCode::InvalidParams, "参数无效", "field_name")
+// 分页响应
+match repo.list(page, page_size, filters).await {
+    Ok((items, total)) => {
+        let items = items.into_iter().map(ItemResponse::from).collect();
+        let response = ApiResponse::page(items, page as u64, page_size as u64, total as u64);
+        Ok(response.into_http_response())
+    }
+    Err(e) => {
+        tracing::error!("查询失败: {}", e);
+        Err(ApiError::with_details(
+            ErrorCode::DatabaseError,
+            "数据库操作失败".to_string(),
+        ))
+    }
+}
 ```
 
 #### 3. 错误处理最佳实践
 ```rust
-// 使用 ? 操作符进行错误传播
-pub async fn create_user(data: CreateUserRequest) -> Result<HttpResponse, ApiError> {
-    let user = user_service.create(data).await?;
-    success_response!(user)
+// 标准错误处理模式
+pub async fn create_user(
+    user: web::Json<CreateUserRequest>,
+    service: web::Data<AuthService>,
+) -> Result<HttpResponse, ApiError> {
+    // 输入验证
+    if let Err(validation_errors) = user.validate() {
+        return Err(ApiError::from(validation_errors));
+    }
+
+    // 业务逻辑处理
+    match service.create(&user.into_inner()).await {
+        Ok(user) => {
+            let response = ApiResponse::success(UserResponse::from(user));
+            Ok(response.into_http_response())
+        }
+        Err(e) => {
+            tracing::error!("创建用户失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::InternalError,
+                "注册失败，请稍后重试".to_string(),
+            ))
+        }
+    }
 }
 
-// 自定义错误处理
-pub async fn validate_user(id: i32) -> Result<HttpResponse, ApiError> {
-    let user = user_repo.find_by_id(id).await
-        .map_err(|_| ApiError::with_details(
-            ErrorCode::UserNotFound,
-            format!("用户ID {} 不存在", id)
-        ))?;
-    
-    success_response!(user)
+// 查找资源错误处理
+pub async fn get_user(
+    id: web::Path<i32>,
+    repo: web::Data<UserRepository>,
+) -> Result<HttpResponse, ApiError> {
+    let user_id = id.into_inner();
+
+    match repo.find_by_id(user_id).await {
+        Ok(Some(user)) => {
+            let response = ApiResponse::success(UserResponse::from(user));
+            Ok(response.into_http_response())
+        }
+        Ok(None) => Err(ApiError::new(ErrorCode::UserNotFound)),
+        Err(e) => {
+            tracing::error!("查找用户失败: {}", e);
+            Err(ApiError::with_details(
+                ErrorCode::DatabaseError,
+                "数据库操作失败".to_string(),
+            ))
+        }
+    }
 }
 ```
 
@@ -145,6 +256,81 @@ pub async fn validate_user(id: i32) -> Result<HttpResponse, ApiError> {
 - 客户端错误: `400 Bad Request`
 - 资源不存在: `404 Not Found`
 - 服务器错误: `500 Internal Server Error`
+
+### 响应格式验证示例
+
+#### 认证失败场景 (401)
+```bash
+curl 'http://127.0.0.1:8080/api/coupons'
+```
+返回：
+```json
+{
+  "success": false,
+  "error": {
+    "code": "UNAUTHORIZED",
+    "message": "未授权访问",
+    "details": "缺少授权令牌"
+  },
+  "meta": {
+    "timestamp": 1751937981,
+    "request_id": "uuid-here"
+  }
+}
+```
+
+#### 认证成功但无数据场景 (200)
+```bash
+curl 'http://127.0.0.1:8080/api/coupons?page=1&page_size=10' \
+  -H 'Authorization: Bearer valid-token'
+```
+返回：
+```json
+{
+  "success": true,
+  "data": [],
+  "pagination": {
+    "page": 1,
+    "page_size": 10,
+    "total": 0,
+    "total_pages": 0,
+    "has_next": false,
+    "has_prev": false
+  },
+  "meta": {
+    "timestamp": 1751938399,
+    "request_id": "uuid-here"
+  }
+}
+```
+
+#### 认证成功且有数据场景 (200)
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": 1,
+      "code": "WELCOME10",
+      "name": "欢迎优惠券",
+      "type": false,
+      "value": 1000
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 10,
+    "total": 1,
+    "total_pages": 1,
+    "has_next": false,
+    "has_prev": false
+  },
+  "meta": {
+    "timestamp": 1751938399,
+    "request_id": "uuid-here"
+  }
+}
+```
 
 ### 迁移指南
 

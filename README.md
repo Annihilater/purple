@@ -15,8 +15,12 @@
 - 📚 **自动文档**: OpenAPI/Swagger 自动生成 API 文档
 - 🔧 **易于维护**: 分层架构、统一错误处理、类型安全
 - 🐳 **容器化**: Docker 支持，一键部署
-- 🔄 **现代化响应格式**: 统一的 RESTful API 响应规范
+- 🔄 **统一响应格式**: 标准化的 RESTful API 响应规范
 - ⏱️ **智能监控**: 自动请求耗时统计和性能预警
+- 🎯 **路由管理**: 智能路由配置，避免路径冲突
+- 📄 **分页支持**: 统一的分页查询和响应格式
+- 🔍 **请求追踪**: 每个请求的唯一标识符，便于问题排查
+- ⚡ **微秒级监控**: 精确到微秒的响应时间监控
 
 ## 🚀 快速开始
 
@@ -244,27 +248,125 @@ POST /api/auth/register          # 用户注册
 POST /api/auth/login             # 用户登录
 GET  /swagger-ui/                # API 文档
 GET  /api-docs/openapi.json      # OpenAPI 规范
+GET  /coupons/verify/{code}      # 验证优惠码（公开接口）
 ```
 
 ### 🔒 认证接口（需要 JWT）
 ```bash
 # 用户管理
-GET    /api/users                # 获取用户列表
+GET    /api/users                # 获取用户列表（分页）
 POST   /api/users                # 创建用户
 GET    /api/users/{id}           # 获取用户详情
 PUT    /api/users/{id}           # 更新用户
 DELETE /api/users/{id}           # 删除用户
 
 # 套餐管理
-GET    /api/plans                # 获取套餐列表
+GET    /api/plans                # 获取套餐列表（分页）
 POST   /api/plans                # 创建套餐
 GET    /api/plans/enabled        # 获取启用套餐
 GET    /api/plans/{id}/pricing   # 获取套餐价格
 
 # 优惠券管理
-GET    /api/coupons              # 获取优惠券列表
+GET    /api/coupons              # 获取优惠券列表（分页）
 POST   /api/coupons              # 创建优惠券
-POST   /api/coupons/verify       # 验证优惠券
+GET    /api/coupons/{id}         # 获取优惠券详情
+PUT    /api/coupons/{id}         # 更新优惠券
+DELETE /api/coupons/{id}         # 删除优惠券
+
+# 订阅管理
+GET    /api/subscribe/info       # 获取订阅信息
+GET    /api/subscribe/link       # 获取订阅链接
+POST   /api/subscribe/reset      # 重置订阅令牌
+```
+
+### 🔄 统一响应格式
+
+所有 API 返回统一的响应格式，确保客户端处理的一致性：
+
+#### ✅ 成功响应示例
+```json
+{
+  "success": true,
+  "data": {
+    "id": 1,
+    "name": "示例数据"
+  },
+  "meta": {
+    "timestamp": 1751938399,
+    "request_id": "uuid-here"
+  }
+}
+```
+
+#### ❌ 错误响应示例
+```json
+{
+  "success": false,
+  "error": {
+    "code": "USER_NOT_FOUND",
+    "message": "用户未找到",
+    "details": "用户ID 123 不存在"
+  },
+  "meta": {
+    "timestamp": 1751938399,
+    "request_id": "uuid-here"
+  }
+}
+```
+
+#### 📄 分页响应示例
+```json
+{
+  "success": true,
+  "data": [
+    {"id": 1, "name": "项目1"},
+    {"id": 2, "name": "项目2"}
+  ],
+  "pagination": {
+    "page": 1,
+    "page_size": 20,
+    "total": 100,
+    "total_pages": 5,
+    "has_next": true,
+    "has_prev": false
+  },
+  "meta": {
+    "timestamp": 1751938399,
+    "request_id": "uuid-here"
+  }
+}
+```
+
+### 🔑 认证方式
+
+使用 JWT Bearer Token 进行认证：
+
+```bash
+# 1. 登录获取令牌
+curl -X POST 'http://127.0.0.1:8080/api/auth/login' \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "username": "admin@test.com",
+    "password": "secure_admin_password_123"
+  }'
+
+# 响应示例
+{
+  "success": true,
+  "data": {
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGc...",
+    "token_type": "Bearer",
+    "expires_in": 604800
+  },
+  "meta": {
+    "timestamp": 1751938088,
+    "request_id": "uuid-here"
+  }
+}
+
+# 2. 使用令牌访问受保护的接口
+curl 'http://127.0.0.1:8080/api/coupons?page=1&page_size=10' \
+  -H 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGc...'
 ```
 
 详细 API 文档请查看：[docs/api/README.md](docs/api/README.md)
