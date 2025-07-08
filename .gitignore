@@ -240,3 +240,5 @@ logs/
 frontend/dist
 user-frontend/dist/
 admin-frontend/dist/
+backend/target/
+backend/logs/
