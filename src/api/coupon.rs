@@ -8,9 +8,7 @@ use crate::{
         response_v2::{ApiError, ApiResponse, IntoHttpResponse},
         ErrorCode,
     },
-    models::coupon::{
-        Coupon, CouponListResponse, CouponResponse, CreateCouponRequest, UpdateCouponRequest,
-    },
+    models::coupon::{Coupon, CouponResponse, CreateCouponRequest, UpdateCouponRequest},
     repositories::CouponRepository,
 };
 
@@ -20,6 +18,10 @@ pub struct GetCouponsQuery {
     pub page: i32,
     #[serde(default = "default_page_size")]
     pub page_size: i32,
+    #[serde(default = "default_false")]
+    pub only_enabled: bool,
+    #[serde(default = "default_false")]
+    pub only_valid: bool,
 }
 
 fn default_page() -> i32 {
@@ -30,14 +32,8 @@ fn default_page_size() -> i32 {
     10
 }
 
-#[derive(Debug, Serialize, ToSchema)]
-pub struct CouponsListResponse {
-    pub code: i32,
-    pub message: String,
-    pub data: Option<Vec<Coupon>>,
-    pub total: i64,
-    pub page: i32,
-    pub page_size: i32,
+fn default_false() -> bool {
+    false
 }
 
 /// 创建优惠券
@@ -55,7 +51,7 @@ pub struct CouponsListResponse {
         ("jwt_token" = [])
     )
 )]
-#[post("/api/coupons")]
+#[post("")]
 pub async fn create_coupon(
     coupon: web::Json<CreateCouponRequest>,
     repo: web::Data<CouponRepository>,
@@ -98,18 +94,23 @@ pub async fn create_coupon(
         ("jwt_token" = [])
     )
 )]
-#[get("/api/coupons")]
+#[get("")]
 pub async fn list_coupons(
     query: web::Query<GetCouponsQuery>,
     repo: web::Data<CouponRepository>,
 ) -> Result<HttpResponse, ApiError> {
     let page = query.page;
     let page_size = query.page_size;
+    let only_enabled = query.only_enabled;
+    let only_valid = query.only_valid;
 
-    match repo.list(page as i64, page_size as i64, false, false).await {
+    match repo
+        .list(page as i64, page_size as i64, only_enabled, only_valid)
+        .await
+    {
         Ok((coupons, total)) => {
             let coupons = coupons.into_iter().map(CouponResponse::from).collect();
-            let response = ApiResponse::success(CouponListResponse { coupons, total });
+            let response = ApiResponse::page(coupons, page as u64, page_size as u64, total as u64);
             Ok(response.into_http_response())
         }
         Err(e) => {
@@ -139,7 +140,7 @@ pub async fn list_coupons(
         ("jwt_token" = [])
     )
 )]
-#[get("/api/coupons/{id}")]
+#[get("/{id}")]
 pub async fn get_coupon(
     id: web::Path<i32>,
     repo: web::Data<CouponRepository>,
@@ -181,7 +182,7 @@ pub async fn get_coupon(
         ("jwt_token" = [])
     )
 )]
-#[put("/api/coupons/{id}")]
+#[put("/{id}")]
 pub async fn update_coupon(
     id: web::Path<i32>,
     coupon: web::Json<UpdateCouponRequest>,
@@ -224,7 +225,7 @@ pub async fn update_coupon(
         ("jwt_token" = [])
     )
 )]
-#[delete("/api/coupons/{id}")]
+#[delete("/{id}")]
 pub async fn delete_coupon(
     id: web::Path<i32>,
     repo: web::Data<CouponRepository>,

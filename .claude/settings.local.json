@@ -11,7 +11,12 @@
       "Bash(RUST_LOG=info cargo run)",
       "Bash(true)",
       "Bash(mkdir:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(--header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImV4cCI6MTc1MjUwNjYwMSwiaWF0IjoxNzUxOTAxODAxfQ.ayAtGpsFX2_9ybQ1KIGdzcFHhgpjBusFOahLj955csU' )",
+      "Bash(--header 'Content-Type: application/json')",
+      "Bash(RUST_LOG=debug cargo run)",
+      "Bash(--header 'Authorization: Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOjEsImV4cCI6MTc1MjUwNjYwMSwiaWF0IjoxNzUxOTAxODAxfQ.ayAtGpsFX2_9ybQ1KIGdzcFHhgpjBusFOahLj955csU' )",
+      "Bash(psql:*)"
     ]
   },
   "enableAllProjectMcpServers": false
