@@ -44,17 +44,30 @@ build_backend() {
     echo -e "${GREEN}✅ 后端构建完成${NC}"
 }
 
-# 构建前端
-build_frontend() {
-    echo -e "${BLUE}🎨 构建前端...${NC}"
+# 构建管理员前端
+build_admin_frontend() {
+    echo -e "${BLUE}🎨 构建管理员前端...${NC}"
     if ! command -v trunk &> /dev/null; then
-        echo -e "${YELLOW}⚠️  Trunk 未安装，跳过前端构建${NC}"
+        echo -e "${YELLOW}⚠️  Trunk 未安装，跳过管理员前端构建${NC}"
         return 0
     fi
-    cd frontend
+    cd admin-frontend
     trunk build --release
     cd ..
-    echo -e "${GREEN}✅ 前端构建完成${NC}"
+    echo -e "${GREEN}✅ 管理员前端构建完成${NC}"
+}
+
+# 构建用户前端
+build_user_frontend() {
+    echo -e "${BLUE}🎨 构建用户前端...${NC}"
+    if ! command -v trunk &> /dev/null; then
+        echo -e "${YELLOW}⚠️  Trunk 未安装，跳过用户前端构建${NC}"
+        return 0
+    fi
+    cd user-frontend
+    trunk build --release
+    cd ..
+    echo -e "${GREEN}✅ 用户前端构建完成${NC}"
 }
 
 # 构建共享库
@@ -91,8 +104,15 @@ main() {
         "backend")
             build_backend
             ;;
-        "frontend")
-            build_frontend
+        "admin-frontend")
+            build_admin_frontend
+            ;;
+        "user-frontend")
+            build_user_frontend
+            ;;
+        "frontend-all")
+            build_admin_frontend
+            build_user_frontend
             ;;
         "shared")
             build_shared
@@ -108,29 +128,33 @@ main() {
             ;;
         "clean")
             cargo clean
-            cd frontend && trunk clean && cd ..
+            cd admin-frontend && trunk clean && cd ..
+            cd user-frontend && trunk clean && cd ..
             ;;
         "all")
             check_dependencies
             build_shared
             build_backend
-            build_frontend
+            build_admin_frontend
+            build_user_frontend
             run_tests
             echo -e "${GREEN}🎉 Purple Workspace 构建完成！${NC}"
             ;;
         *)
-            echo "使用方法: $0 [deps|backend|frontend|shared|test|lint|check|clean|all]"
+            echo "使用方法: $0 [deps|backend|admin-frontend|user-frontend|frontend-all|shared|test|lint|check|clean|all]"
             echo ""
             echo "命令说明："
-            echo "  deps     - 检查并安装依赖"
-            echo "  backend  - 构建后端"
-            echo "  frontend - 构建前端"
-            echo "  shared   - 构建共享库"
-            echo "  test     - 运行测试"
-            echo "  lint     - 代码检查"
-            echo "  check    - 快速检查编译"
-            echo "  clean    - 清理构建缓存"
-            echo "  all      - 完整构建（默认）"
+            echo "  deps          - 检查并安装依赖"
+            echo "  backend       - 构建后端"
+            echo "  admin-frontend - 构建管理员前端"
+            echo "  user-frontend  - 构建用户前端"
+            echo "  frontend-all   - 构建两个前端"
+            echo "  shared        - 构建共享库"
+            echo "  test          - 运行测试"
+            echo "  lint          - 代码检查"
+            echo "  check         - 快速检查编译"
+            echo "  clean         - 清理构建缓存"
+            echo "  all           - 完整构建（默认）"
             exit 1
             ;;
     esac
