@@ -4,7 +4,7 @@ use std::rc::Rc;
 #[component]
 pub fn PageTemplate(title: String, subtitle: String, children: Children) -> impl IntoView {
     view! {
-        <div class="page-container">
+        <div class="page-template">
             <div class="page-header">
                 <h1 class="page-title">{title}</h1>
                 <p class="page-subtitle">{subtitle}</p>
@@ -131,7 +131,7 @@ pub fn StatusBadge(
     variant: String, // success, warning, error, info
 ) -> impl IntoView {
     view! {
-        <span class=format!("status-badge status-{}", variant)>
+        <span class=format!("status-badge {}", variant)>
             {status}
         </span>
     }
@@ -199,8 +199,13 @@ pub fn StatsCard(
                 <div class="stats-card-value">{value}</div>
                 {match (change, change_type) {
                     (Some(change_val), Some(change_type_val)) => {
+                        let change_class = match change_type_val.as_str() {
+                            "up" => "positive",
+                            "down" => "negative",
+                            _ => "neutral"
+                        };
                         view! {
-                            <div class=format!("stats-card-change stats-card-change-{}", change_type_val)>
+                            <div class=format!("stats-card-change {}", change_class)>
                                 <span class="change-icon">{match change_type_val.as_str() {
                                     "up" => "↗",
                                     "down" => "↘",
