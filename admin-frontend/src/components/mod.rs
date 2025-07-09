@@ -1,7 +1,9 @@
 pub mod auth_guard;
+pub mod common;
 pub mod error;
 pub mod header;
 pub mod layout;
 pub mod loading;
 pub mod sidebar;
+pub mod theme_selector;
 pub mod theme_toggle;

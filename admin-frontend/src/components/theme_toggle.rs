@@ -1,27 +1,28 @@
-use crate::utils::theme::{use_theme, Theme};
+use crate::utils::theme::{use_theme, ThemeMode};
 use leptos::*;
 
 #[component]
 pub fn ThemeToggle() -> impl IntoView {
-    let (theme, set_theme) = use_theme();
+    let (get_theme_mode, toggle_mode) = use_theme();
+    let get_theme_mode_for_title = get_theme_mode.clone();
 
     let toggle_theme = move |_| {
-        set_theme.update(|t| *t = t.toggle());
+        toggle_mode();
     };
 
     view! {
         <button
             class="theme-toggle-btn"
             on:click=toggle_theme
-            title=move || match theme.get() {
-                Theme::Light => "切换到深色模式",
-                Theme::Dark => "切换到浅色模式",
+            title=move || match get_theme_mode_for_title() {
+                ThemeMode::Light => "切换到深色模式",
+                ThemeMode::Dark => "切换到浅色模式",
             }
         >
             <span class="theme-icon">
-                {move || match theme.get() {
-                    Theme::Light => "🌙",
-                    Theme::Dark => "☀️",
+                {move || match get_theme_mode() {
+                    ThemeMode::Light => "🌙",
+                    ThemeMode::Dark => "☀️",
                 }}
             </span>
         </button>

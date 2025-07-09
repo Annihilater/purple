@@ -56,7 +56,7 @@ pub fn LoginPage() -> impl IntoView {
                             leptos_router::use_navigate()("/admin/dashboard", Default::default());
                         }
                         Err(err) => {
-                            set_error.set(Some(format!("登录失败: {}", err)));
+                            set_error.set(Some(format!("登录失败: {err}")));
                         }
                     }
                     set_loading.set(false);
@@ -82,7 +82,7 @@ pub fn LoginPage() -> impl IntoView {
                             set_error.set(Some("注册成功！请登录".to_string()));
                         }
                         Err(err) => {
-                            set_error.set(Some(format!("注册失败: {}", err)));
+                            set_error.set(Some(format!("注册失败: {err}")));
                         }
                     }
                     set_loading.set(false);
@@ -197,9 +197,7 @@ pub fn LoginPage() -> impl IntoView {
                     >
                         {move || if loading.get() {
                             if mode.get() == AuthMode::Login { "登录中..." } else { "注册中..." }
-                        } else {
-                            if mode.get() == AuthMode::Login { "立即登录" } else { "立即注册" }
-                        }}
+                        } else if mode.get() == AuthMode::Login { "立即登录" } else { "立即注册" }}
                     </button>
                 </form>
 

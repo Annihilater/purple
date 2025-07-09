@@ -10,8 +10,28 @@ mod utils;
 
 use components::layout::Layout;
 use pages::{
-    coupons::CouponsPage, dashboard::DashboardPage, home::HomePage, login::LoginPage,
-    plans::PlansPage, users::UsersPage,
+    announcements_management::AnnouncementsManagementPage,
+    coupons::CouponsPage,
+    dashboard::DashboardPage,
+    home::HomePage,
+    knowledge_management::KnowledgeManagementPage,
+    login::LoginPage,
+    // 服务器管理
+    nodes_management::NodesManagementPage,
+    orders_management::OrdersManagementPage,
+    permissions_management::PermissionsManagementPage,
+    plans::PlansPage,
+    // 指标管理
+    queues_management::QueuesManagementPage,
+    routes_management::RoutesManagementPage,
+    // 财务管理
+    subscriptions_management::SubscriptionsManagementPage,
+    system_settings::SystemSettings,
+    theme_settings::ThemeSettingsPage,
+    tickets_management::TicketsManagementPage,
+    users::UsersPage,
+    // 用户管理
+    users_management::UsersManagementPage,
 };
 
 #[component]
@@ -35,6 +55,27 @@ pub fn App() -> impl IntoView {
                     <Route path="/plans" view=PlansPage/>
                     <Route path="/coupons" view=CouponsPage/>
                     <Route path="/users" view=UsersPage/>
+                    <Route path="/settings/theme" view=ThemeSettingsPage/>
+                    <Route path="/settings/system" view=SystemSettings/>
+                    <Route path="/settings/payment" view=SystemSettings/>
+
+                    // 服务器管理
+                    <Route path="/server/nodes" view=NodesManagementPage/>
+                    <Route path="/server/permissions" view=PermissionsManagementPage/>
+                    <Route path="/server/routes" view=RoutesManagementPage/>
+
+                    // 财务管理
+                    <Route path="/finance/subscriptions" view=SubscriptionsManagementPage/>
+                    <Route path="/finance/orders" view=OrdersManagementPage/>
+
+                    // 用户管理
+                    <Route path="/users/management" view=UsersManagementPage/>
+                    <Route path="/users/announcements" view=AnnouncementsManagementPage/>
+                    <Route path="/users/tickets" view=TicketsManagementPage/>
+
+                    // 指标管理
+                    <Route path="/metrics/queues" view=QueuesManagementPage/>
+                    <Route path="/metrics/knowledge" view=KnowledgeManagementPage/>
                 </Route>
             </Routes>
         </Router>

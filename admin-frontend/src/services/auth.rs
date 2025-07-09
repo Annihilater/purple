@@ -7,7 +7,7 @@ impl AuthService {
     pub async fn login(request: LoginRequest) -> Result<LoginResponse, String> {
         let response = ApiClient::post::<LoginRequest, LoginResponse>("/api/auth/login", &request)
             .await
-            .map_err(|e| format!("网络请求失败: {}", e))?;
+            .map_err(|e| format!("网络请求失败: {e}"))?;
 
         if response.success {
             response.data.ok_or_else(|| "登录响应数据为空".to_string())
@@ -22,7 +22,7 @@ impl AuthService {
     pub async fn register(request: RegisterRequest) -> Result<User, String> {
         let response = ApiClient::post::<RegisterRequest, User>("/api/auth/register", &request)
             .await
-            .map_err(|e| format!("网络请求失败: {}", e))?;
+            .map_err(|e| format!("网络请求失败: {e}"))?;
 
         if response.success {
             response.data.ok_or_else(|| "注册响应数据为空".to_string())

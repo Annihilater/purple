@@ -80,7 +80,7 @@ pub fn Sidebar() -> impl IntoView {
                                 </A>
                             </li>
                             <li>
-                                <A href="/admin/finance/coupons" class="sidebar-link">
+                                <A href="/admin/coupons" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"🎫"</span>
                                     "优惠券管理"
                                 </A>
@@ -113,7 +113,7 @@ pub fn Sidebar() -> impl IntoView {
                                 </A>
                             </li>
                             <li>
-                                <A href="/admin/users/knowledge" class="sidebar-link">
+                                <A href="/admin/metrics/knowledge" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"📚"</span>
                                     "知识库管理"
                                 </A>

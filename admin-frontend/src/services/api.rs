@@ -13,7 +13,7 @@ impl ApiClient {
     }
 
     fn get_auth_header() -> Option<String> {
-        AuthService::get_token().map(|token| format!("Bearer {}", token))
+        AuthService::get_token().map(|token| format!("Bearer {token}"))
     }
 
     pub async fn get<T>(endpoint: &str) -> Result<ApiResponse<T>, reqwest::Error>
