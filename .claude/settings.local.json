@@ -20,7 +20,7 @@
       "Bash(cp:*)",
       "Bash(mv:*)",
       "Bash(chmod:*)",
-      "Bash(/Users/ziji/github/purple/build.sh check:*)",
+      "Bash(./build.sh check:*)",
       "Bash(touch:*)",
       "Bash(./build.sh lint:*)",
       "Bash(./build.sh:*)",
