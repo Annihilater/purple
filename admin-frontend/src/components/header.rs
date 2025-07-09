@@ -1,4 +1,4 @@
-use crate::services::auth::AuthService;
+use crate::{components::theme_toggle::ThemeToggle, services::auth::AuthService};
 use leptos::*;
 use leptos_router::*;
 
@@ -12,7 +12,7 @@ pub fn Header() -> impl IntoView {
     };
 
     view! {
-        <header style="background: white; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border-bottom: 1px solid #e2e8f0;">
+        <header class="header">
             <div style="max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; height: 4rem;">
                     <div style="display: flex; align-items: center;">
@@ -21,7 +21,8 @@ pub fn Header() -> impl IntoView {
                         </A>
                     </div>
                     <div style="display: flex; align-items: center; gap: 1rem;">
-                        <span style="font-size: 0.875rem; color: #4a5568;">"管理员"</span>
+                        <ThemeToggle/>
+                        <span class="header-text">"管理员"</span>
                         <button
                             class="btn-secondary"
                             style="padding: 0.5rem 1rem; font-size: 0.875rem;"

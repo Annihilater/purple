@@ -331,6 +331,27 @@
             text-decoration: none;
         }
         
+        /* Header 基础样式 */
+        .header {
+            background: white;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .header-text {
+            font-size: 0.875rem;
+            color: #4a5568;
+            transition: color 0.3s ease;
+        }
+        
+        /* 侧边栏样式 */
+        .sidebar {
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
         /* 侧边栏链接样式 */
         .sidebar-link {
             display: flex;
@@ -347,6 +368,205 @@
         .sidebar-link:hover {
             background-color: #f7fafc !important;
             color: #2d3748 !important;
+        }
+        
+        /* 侧边栏分组标题 */
+        .sidebar-group-title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #a0aec0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 0.75rem 0.5rem;
+            transition: color 0.3s ease;
+        }
+        
+        /* 主内容区域 */
+        .main-content {
+            background: #f7fafc;
+            transition: all 0.3s ease;
+        }
+        
+        /* 主题切换按钮样式 */
+        .theme-toggle-btn {
+            background: none;
+            border: 2px solid #e2e8f0;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+        
+        .theme-toggle-btn:hover {
+            background: #f7fafc;
+            border-color: #cbd5e0;
+            transform: scale(1.1);
+        }
+        
+        .theme-icon {
+            filter: grayscale(0.2);
+            transition: filter 0.3s ease;
+        }
+        
+        .theme-toggle-btn:hover .theme-icon {
+            filter: grayscale(0);
+        }
+        
+        /* 浅色主题 */
+        .light-theme {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #2d3748;
+            transition: all 0.3s ease;
+        }
+        
+        .light-theme .card {
+            background: rgba(255, 255, 255, 0.95);
+            color: #2d3748;
+        }
+        
+        .light-theme header {
+            background: white;
+            color: #2d3748;
+        }
+        
+        .light-theme .sidebar-link {
+            color: #4a5568;
+        }
+        
+        .light-theme .sidebar-link:hover {
+            background-color: #f7fafc !important;
+            color: #2d3748 !important;
+        }
+        
+        /* 深色主题 */
+        .dark-theme {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .dark-theme .header {
+            background: #2d3748;
+            color: #e2e8f0;
+            border-bottom: 1px solid #4a5568;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dark-theme .header-logo {
+            color: #90cdf4;
+        }
+        
+        .dark-theme .header-text {
+            color: #cbd5e0;
+        }
+        
+        .dark-theme .sidebar {
+            background: #2d3748;
+            border-right: 1px solid #4a5568;
+        }
+        
+        .dark-theme .sidebar-link {
+            color: #cbd5e0;
+        }
+        
+        .dark-theme .sidebar-link:hover {
+            background-color: #4a5568 !important;
+            color: #e2e8f0 !important;
+        }
+        
+        .dark-theme .sidebar-group-title {
+            color: #718096;
+        }
+        
+        .dark-theme .main-content {
+            background: #1a202c;
+        }
+        
+        .dark-theme .card {
+            background: rgba(45, 55, 72, 0.95);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark-theme .form-input {
+            background: rgba(45, 55, 72, 0.8);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: #e2e8f0;
+        }
+        
+        .dark-theme .form-input:focus {
+            background: rgba(45, 55, 72, 1);
+            border-color: #90cdf4;
+        }
+        
+        .dark-theme .form-input::placeholder {
+            color: #a0aec0;
+        }
+        
+        .dark-theme .theme-toggle-btn {
+            border-color: #4a5568;
+        }
+        
+        .dark-theme .theme-toggle-btn:hover {
+            background: #4a5568;
+            border-color: #718096;
+        }
+        
+        .dark-theme .login-form {
+            background: rgba(45, 55, 72, 0.95);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark-theme .login-container {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+        }
+        
+        .dark-theme .login-subtitle {
+            color: #a0aec0;
+        }
+        
+        .dark-theme .toggle-container {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark-theme .toggle-btn {
+            color: #a0aec0;
+        }
+        
+        /* 表格样式 */
+        .dark-theme table {
+            background: rgba(45, 55, 72, 0.95);
+            color: #e2e8f0;
+        }
+        
+        .dark-theme th {
+            background: rgba(26, 32, 44, 0.95);
+            color: #e2e8f0;
+            border-bottom: 1px solid #4a5568;
+        }
+        
+        .dark-theme td {
+            border-bottom: 1px solid #4a5568;
+            color: #e2e8f0;
+        }
+        
+        .dark-theme tr:hover {
+            background: rgba(74, 85, 104, 0.5);
+        }
+        
+        /* 按钮深色主题样式 */
+        .dark-theme .btn {
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .dark-theme .btn-secondary {
+            box-shadow: 0 4px 15px rgba(245, 87, 108, 0.3);
         }
     </style>
 </head>

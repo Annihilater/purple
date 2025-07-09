@@ -4,3 +4,4 @@ pub mod header;
 pub mod layout;
 pub mod loading;
 pub mod sidebar;
+pub mod theme_toggle;
