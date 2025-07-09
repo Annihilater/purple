@@ -25,10 +25,10 @@ pub struct RegisterRequest {
 #[derive(Debug, Serialize, Deserialize, Validate, ToSchema)]
 #[schema(title = "用户登录请求")]
 pub struct LoginRequest {
-    /// 用户名，3-20个字符
-    #[validate(length(min = 3, max = 20, message = "用户名长度必须在3-20个字符之间"))]
-    #[schema(example = "testuser", min_length = 3, max_length = 20)]
-    pub username: String,
+    /// 邮箱地址，必须是有效格式
+    #[validate(email(message = "请输入有效的邮箱地址"))]
+    #[schema(example = "user@example.com")]
+    pub email: String,
 
     /// 登录密码，6-32个字符
     #[validate(length(min = 6, max = 32, message = "密码长度必须在6-32个字符之间"))]

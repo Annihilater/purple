@@ -75,9 +75,9 @@ impl AuthService {
         Ok(user)
     }
 
-    pub async fn login(&self, req: LoginRequest) -> Result<TokenResponse> {
-        // 查找用户（支持用户名或邮箱登录）
-        let user = match self.user_repo.find_by_email(&req.username).await? {
+    pub async fn login(&self, req: LoginRequest) -> Result<purple_shared::LoginResponse> {
+        // 查找用户（使用邮箱登录）
+        let user = match self.user_repo.find_by_email(&req.email).await? {
             Some(user) => user,
             None => anyhow::bail!("用户名或密码错误"),
         };
@@ -101,10 +101,22 @@ impl AuthService {
         let claims = Claims::new(user.id);
         let token = claims.encode()?;
 
-        Ok(TokenResponse {
-            access_token: token,
-            token_type: "Bearer".to_string(),
-            expires_in: claims.exp - chrono::Utc::now().timestamp(),
+        // 转换为共享的User类型
+        let shared_user = purple_shared::User {
+            id: user.id,
+            email: user.email,
+            username: None, // 后端User模型没有username字段
+            is_admin: user.is_admin.unwrap_or(false),
+            is_enabled: !user.banned.unwrap_or(false),
+            created_at: chrono::DateTime::from_timestamp(user.created_at as i64, 0)
+                .unwrap_or_else(|| chrono::Utc::now()),
+            updated_at: chrono::DateTime::from_timestamp(user.updated_at as i64, 0)
+                .unwrap_or_else(|| chrono::Utc::now()),
+        };
+
+        Ok(purple_shared::LoginResponse {
+            token,
+            user: shared_user,
         })
     }
 }

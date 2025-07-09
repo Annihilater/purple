@@ -67,7 +67,7 @@
 //!     let auth_service = AuthService::new(user_repo, jwt_secret);
 //!     
 //!     let login_request = LoginRequest {
-//!         username: "admin@test.com".to_string(),
+//!         email: "admin@example.com".to_string(),
 //!         password: "secure_admin_password_123".to_string(),
 //!     };
 //!     

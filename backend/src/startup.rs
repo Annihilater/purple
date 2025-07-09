@@ -6,7 +6,7 @@ use crate::{
     app_state::AppState,
     config::{initialize_admin_account, Config, DatabaseConfig},
     logging::{init_logging, LogGuard},
-    middleware::{RequestLogger, RequestTimer},
+    middleware::{cors::Cors, RequestLogger, RequestTimer},
     routes::configure_routes,
 };
 
@@ -70,9 +70,11 @@ fn create_server(app_state: AppState, config: &Config) -> Result<actix_web::dev:
 
     let server = HttpServer::new(move || {
         App::new()
-            // 添加请求计时中间件（最外层，先执行）
+            // 添加CORS中间件（最外层，最先执行）
+            .wrap(Cors::development())
+            // 添加请求计时中间件（第二层）
             .wrap(RequestTimer::new())
-            // 添加请求日志中间件（第二层）
+            // 添加请求日志中间件（第三层）
             .wrap(RequestLogger::new())
             .app_data(web::Data::new(
                 app_state_for_factory.user_repository.clone(),

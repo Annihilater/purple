@@ -76,7 +76,7 @@ pub async fn register(
     operation_id = "login_user",
     request_body = LoginRequest,
     responses(
-        (status = 200, description = "登录成功", body = inline(crate::common::response_v2::ApiSuccessResponse<crate::models::auth::TokenResponse>)),
+        (status = 200, description = "登录成功", body = inline(crate::common::response_v2::ApiSuccessResponse<purple_shared::LoginResponse>)),
         (status = 400, description = "请求参数无效", body = crate::common::response_v2::ApiErrorResponse),
         (status = 401, description = "用户名或密码错误", body = crate::common::response_v2::ApiErrorResponse),
         (status = 403, description = "账户已被禁用", body = crate::common::response_v2::ApiErrorResponse),
@@ -94,8 +94,8 @@ pub async fn login(
     }
 
     match service.login(request.into_inner()).await {
-        Ok(token) => {
-            let response = ApiResponse::success(token);
+        Ok(login_response) => {
+            let response = ApiResponse::success(login_response);
             Ok(response.into_http_response())
         }
         Err(e) => {
