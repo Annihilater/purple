@@ -51,4 +51,8 @@ impl AuthService {
             let _ = storage.remove_item("auth_token");
         }
     }
+
+    pub fn is_authenticated() -> bool {
+        Self::get_token().is_some()
+    }
 }

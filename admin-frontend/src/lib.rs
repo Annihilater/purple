@@ -24,11 +24,12 @@ pub fn App() -> impl IntoView {
 
         <Router>
             <Routes>
-                // 不需要认证的页面 - 无布局
+                // 公开页面 - 无需认证
+                <Route path="/" view=HomePage/>
                 <Route path="/login" view=LoginPage/>
-
+                
                 // 需要认证的页面，包装在Layout中
-                <Route path="" view=Layout>
+                <Route path="/admin" view=Layout>
                     <Route path="/" view=DashboardPage/>
                     <Route path="/dashboard" view=DashboardPage/>
                     <Route path="/plans" view=PlansPage/>

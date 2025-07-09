@@ -52,8 +52,8 @@ pub fn LoginPage() -> impl IntoView {
                         Ok(response) => {
                             // 保存token
                             AuthService::save_token(&response.token);
-                            // 跳转到仪表盘
-                            leptos_router::use_navigate()("/dashboard", Default::default());
+                            // 跳转到管理员区域
+                            leptos_router::use_navigate()("/admin/dashboard", Default::default());
                         }
                         Err(err) => {
                             set_error.set(Some(format!("登录失败: {}", err)));

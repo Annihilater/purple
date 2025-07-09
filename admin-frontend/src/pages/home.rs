@@ -4,8 +4,20 @@ use leptos::*;
 pub fn HomePage() -> impl IntoView {
     view! {
         <div class="hero fade-in">
-            <h1 class="hero-title">"管理控制台"</h1>
-            <p class="hero-subtitle">"现代化的企业级管理平台，助力您的业务增长"</p>
+            <div style="text-align: center; padding: 4rem 2rem;">
+                <h1 class="hero-title">"Purple 管理系统"</h1>
+                <p class="hero-subtitle">"现代化的企业级管理平台，助力您的业务增长"</p>
+                
+                // 登录注册按钮
+                <div style="margin: 3rem 0;">
+                    <a href="/login" class="btn" style="margin-right: 1rem;">
+                        "管理员登录"
+                    </a>
+                    <a href="/login" class="btn btn-secondary">
+                        "注册账户"
+                    </a>
+                </div>
+            </div>
 
             <div class="features-grid">
                 <div class="feature-card fade-in">
@@ -56,13 +68,17 @@ pub fn HomePage() -> impl IntoView {
                     </p>
                 </div>
             </div>
-
-            <div style="margin-top: 3rem;">
-                <a href="/dashboard" class="btn">
-                    "进入控制台"
-                </a>
-                <a href="/login" class="btn btn-secondary" style="margin-left: 1rem;">
-                    "重新登录"
+            
+            // 底部行动区域
+            <div style="text-align: center; margin-top: 4rem; padding: 2rem; background: rgba(255, 255, 255, 0.1); border-radius: 16px;">
+                <h2 style="font-size: 1.5rem; font-weight: 600; color: white; margin-bottom: 1rem;">
+                    "立即开始管理您的业务"
+                </h2>
+                <p style="color: rgba(255, 255, 255, 0.8); margin-bottom: 2rem;">
+                    "加入数千家企业的选择，体验现代化管理系统带来的效率提升"
+                </p>
+                <a href="/login" class="btn" style="font-size: 1.1rem; padding: 1rem 2rem;">
+                    "立即开始 →"
                 </a>
             </div>
         </div>

@@ -14,19 +14,19 @@ pub fn Sidebar() -> impl IntoView {
                         </div>
                         <ul style="display: flex; flex-direction: column; gap: 0.25rem;">
                             <li>
-                                <A href="/settings/system" class="sidebar-link">
+                                <A href="/admin/settings/system" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"⚙️"</span>
                                     "系统设置"
                                 </A>
                             </li>
                             <li>
-                                <A href="/settings/payment" class="sidebar-link">
+                                <A href="/admin/settings/payment" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"💳"</span>
                                     "支付设置"
                                 </A>
                             </li>
                             <li>
-                                <A href="/settings/theme" class="sidebar-link">
+                                <A href="/admin/settings/theme" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"🎨"</span>
                                     "主题配置"
                                 </A>
@@ -41,19 +41,19 @@ pub fn Sidebar() -> impl IntoView {
                         </div>
                         <ul style="display: flex; flex-direction: column; gap: 0.25rem;">
                             <li>
-                                <A href="/server/nodes" class="sidebar-link">
+                                <A href="/admin/server/nodes" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"🖥️"</span>
                                     "节点管理"
                                 </A>
                             </li>
                             <li>
-                                <A href="/server/permissions" class="sidebar-link">
+                                <A href="/admin/server/permissions" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"🔐"</span>
                                     "权限组管理"
                                 </A>
                             </li>
                             <li>
-                                <A href="/server/routes" class="sidebar-link">
+                                <A href="/admin/server/routes" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"🛣️"</span>
                                     "路由管理"
                                 </A>
@@ -68,19 +68,19 @@ pub fn Sidebar() -> impl IntoView {
                         </div>
                         <ul style="display: flex; flex-direction: column; gap: 0.25rem;">
                             <li>
-                                <A href="/finance/subscriptions" class="sidebar-link">
+                                <A href="/admin/finance/subscriptions" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"📋"</span>
                                     "订阅管理"
                                 </A>
                             </li>
                             <li>
-                                <A href="/finance/orders" class="sidebar-link">
+                                <A href="/admin/finance/orders" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"🧾"</span>
                                     "订单管理"
                                 </A>
                             </li>
                             <li>
-                                <A href="/finance/coupons" class="sidebar-link">
+                                <A href="/admin/finance/coupons" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"🎫"</span>
                                     "优惠券管理"
                                 </A>
@@ -95,25 +95,25 @@ pub fn Sidebar() -> impl IntoView {
                         </div>
                         <ul style="display: flex; flex-direction: column; gap: 0.25rem;">
                             <li>
-                                <A href="/users/management" class="sidebar-link">
+                                <A href="/admin/users/management" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"👥"</span>
                                     "用户管理"
                                 </A>
                             </li>
                             <li>
-                                <A href="/users/announcements" class="sidebar-link">
+                                <A href="/admin/users/announcements" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"📢"</span>
                                     "公告管理"
                                 </A>
                             </li>
                             <li>
-                                <A href="/users/tickets" class="sidebar-link">
+                                <A href="/admin/users/tickets" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"🎫"</span>
                                     "工单管理"
                                 </A>
                             </li>
                             <li>
-                                <A href="/users/knowledge" class="sidebar-link">
+                                <A href="/admin/users/knowledge" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"📚"</span>
                                     "知识库管理"
                                 </A>
@@ -128,7 +128,7 @@ pub fn Sidebar() -> impl IntoView {
                         </div>
                         <ul style="display: flex; flex-direction: column; gap: 0.25rem;">
                             <li>
-                                <A href="/metrics/queues" class="sidebar-link">
+                                <A href="/admin/metrics/queues" class="sidebar-link">
                                     <span style="margin-right: 0.75rem;">"📊"</span>
                                     "队列管理"
                                 </A>
