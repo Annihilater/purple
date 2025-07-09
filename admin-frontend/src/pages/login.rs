@@ -93,15 +93,25 @@ pub fn LoginPage() -> impl IntoView {
 
     view! {
         <div class="login-container fade-in">
+            // 顶部品牌标题
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h1 style="font-size: 3rem; font-weight: 800; color: #ffffff; margin-bottom: 0.5rem; text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                    "Purple 管理系统"
+                </h1>
+                <p style="color: #f1f5f9; font-size: 1.1rem; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);">
+                    "现代化企业级管理平台"
+                </p>
+            </div>
+
             <div class="login-form">
                 <h1 class="login-title">
                     {move || if mode.get() == AuthMode::Login { "欢迎回来" } else { "创建账户" }}
                 </h1>
                 <p class="login-subtitle">
                     {move || if mode.get() == AuthMode::Login {
-                        "登录您的 Purple 管理账户"
+                        "登录您的管理账户"
                     } else {
-                        "注册新的 Purple 管理账户"
+                        "注册新的管理账户"
                     }}
                 </p>
 
