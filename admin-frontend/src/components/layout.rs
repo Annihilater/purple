@@ -5,11 +5,11 @@ use leptos_router::*;
 #[component]
 pub fn Layout() -> impl IntoView {
     view! {
-        <div class="min-h-screen bg-gray-50">
+        <div style="min-height: 100vh; background-color: #f7fafc;">
             <Header/>
-            <div class="flex">
+            <div style="display: flex;">
                 <Sidebar/>
-                <main class="flex-1 p-6">
+                <main style="flex: 1; padding: 1.5rem;">
                     <Outlet/>
                 </main>
             </div>

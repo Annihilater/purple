@@ -16,8 +16,6 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Stylesheet id="leptos" href="/pkg/purple-user-frontend.css"/>
-
         <Title text="Purple - 用户平台"/>
 
         <Router>

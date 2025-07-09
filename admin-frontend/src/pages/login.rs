@@ -92,23 +92,24 @@ pub fn LoginPage() -> impl IntoView {
     };
 
     view! {
-        <div class="min-h-screen flex items-center justify-center bg-gray-50">
-            <div class="max-w-md w-full space-y-8">
-                <div>
-                    <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
-                        {move || if mode.get() == AuthMode::Login { "登录到 Purple" } else { "注册 Purple 账户" }}
-                    </h2>
-                </div>
+        <div class="login-container fade-in">
+            <div class="login-form">
+                <h1 class="login-title">
+                    {move || if mode.get() == AuthMode::Login { "欢迎回来" } else { "创建账户" }}
+                </h1>
+                <p class="login-subtitle">
+                    {move || if mode.get() == AuthMode::Login {
+                        "登录您的 Purple 管理账户"
+                    } else {
+                        "注册新的 Purple 管理账户"
+                    }}
+                </p>
 
                 // 切换按钮
-                <div class="flex justify-center space-x-4">
+                <div class="toggle-container">
                     <button
                         type="button"
-                        class=move || if mode.get() == AuthMode::Login {
-                            "px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-md"
-                        } else {
-                            "px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                        }
+                        class=move || if mode.get() == AuthMode::Login { "toggle-btn active" } else { "toggle-btn" }
                         on:click=move |_| {
                             set_mode.set(AuthMode::Login);
                             set_error.set(None);
@@ -118,11 +119,7 @@ pub fn LoginPage() -> impl IntoView {
                     </button>
                     <button
                         type="button"
-                        class=move || if mode.get() == AuthMode::Register {
-                            "px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 border border-indigo-200 rounded-md"
-                        } else {
-                            "px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                        }
+                        class=move || if mode.get() == AuthMode::Register { "toggle-btn active" } else { "toggle-btn" }
                         on:click=move |_| {
                             set_mode.set(AuthMode::Register);
                             set_error.set(None);
@@ -132,48 +129,40 @@ pub fn LoginPage() -> impl IntoView {
                     </button>
                 </div>
 
-                <form class="mt-8 space-y-6" on:submit=on_submit>
-                    <div>
-                        <label for="email" class="sr-only">"邮箱地址"</label>
+                <form on:submit=on_submit>
+                    <div class="form-group">
                         <input
-                            id="email"
-                            name="email"
                             type="email"
-                            required
-                            class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            placeholder="邮箱地址"
+                            class="form-input"
+                            placeholder="请输入邮箱地址"
                             prop:value=email
                             on:input=move |ev| set_email.set(event_target_value(&ev))
+                            required
                         />
                     </div>
-                    <div>
-                        <label for="password" class="sr-only">"密码"</label>
+
+                    <div class="form-group">
                         <input
-                            id="password"
-                            name="password"
                             type="password"
-                            required
-                            class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            placeholder={move || if mode.get() == AuthMode::Register { "密码（至少6位）" } else { "密码" }}
+                            class="form-input"
+                            placeholder={move || if mode.get() == AuthMode::Register { "请输入密码（至少6位）" } else { "请输入密码" }}
                             prop:value=password
                             on:input=move |ev| set_password.set(event_target_value(&ev))
+                            required
                         />
                     </div>
 
                     // 注册模式下显示确认密码字段
                     {move || if mode.get() == AuthMode::Register {
                         view! {
-                            <div>
-                                <label for="confirm_password" class="sr-only">"确认密码"</label>
+                            <div class="form-group">
                                 <input
-                                    id="confirm_password"
-                                    name="confirm_password"
                                     type="password"
-                                    required
-                                    class="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                                    placeholder="确认密码"
+                                    class="form-input"
+                                    placeholder="请确认密码"
                                     prop:value=confirm_password
                                     on:input=move |ev| set_confirm_password.set(event_target_value(&ev))
+                                    required
                                 />
                             </div>
                         }
@@ -184,26 +173,35 @@ pub fn LoginPage() -> impl IntoView {
                     {move || error.get().map(|err| {
                         let is_success = err.contains("注册成功");
                         view! {
-                            <div class={if is_success { "bg-green-50 border border-green-200 rounded-md p-3" } else { "bg-red-50 border border-red-200 rounded-md p-3" }}>
-                                <div class={if is_success { "text-green-800 text-sm" } else { "text-red-800 text-sm" }}>{err}</div>
+                            <div class={if is_success { "success-message" } else { "error-message" }}>
+                                {err}
                             </div>
                         }
                     })}
 
-                    <div>
-                        <button
-                            type="submit"
-                            disabled=loading
-                            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-                        >
-                            {move || if loading.get() {
-                                if mode.get() == AuthMode::Login { "登录中..." } else { "注册中..." }
-                            } else {
-                                if mode.get() == AuthMode::Login { "登录" } else { "注册" }
-                            }}
-                        </button>
-                    </div>
+                    <button
+                        type="submit"
+                        class="btn"
+                        style="width: 100%; margin-top: 1rem;"
+                        disabled=loading
+                    >
+                        {move || if loading.get() {
+                            if mode.get() == AuthMode::Login { "登录中..." } else { "注册中..." }
+                        } else {
+                            if mode.get() == AuthMode::Login { "立即登录" } else { "立即注册" }
+                        }}
+                    </button>
                 </form>
+
+                <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(102, 126, 234, 0.2);">
+                    <p style="color: #718096; font-size: 0.875rem;">
+                        {move || if mode.get() == AuthMode::Login {
+                            "还没有账户？点击上方注册按钮"
+                        } else {
+                            "已有账户？点击上方登录按钮"
+                        }}
+                    </p>
+                </div>
             </div>
         </div>
     }

@@ -4,17 +4,17 @@ use leptos_router::*;
 #[component]
 pub fn Header() -> impl IntoView {
     view! {
-        <header class="bg-white shadow-sm border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between h-16">
-                    <div class="flex items-center">
-                        <A href="/" class="text-xl font-bold text-indigo-600">
+        <header style="background: white; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); border-bottom: 1px solid #e2e8f0;">
+            <div style="max-width: 1280px; margin: 0 auto; padding: 0 1.5rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; height: 4rem;">
+                    <div style="display: flex; align-items: center;">
+                        <A href="/" class="header-logo">
                             "Purple"
                         </A>
                     </div>
-                    <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-700">"管理员"</span>
-                        <button class="bg-indigo-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-indigo-700">
+                    <div style="display: flex; align-items: center; gap: 1rem;">
+                        <span style="font-size: 0.875rem; color: #4a5568;">"管理员"</span>
+                        <button class="btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.875rem;">
                             "退出"
                         </button>
                     </div>

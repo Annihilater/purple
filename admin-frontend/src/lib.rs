@@ -1,6 +1,7 @@
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
+use wasm_bindgen::prelude::*;
 
 mod components;
 mod pages;
@@ -19,33 +20,57 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Stylesheet id="leptos" href="/pkg/purple-admin-frontend.css"/>
-
         <Title text="Purple - 管理员平台"/>
 
         <Router>
-            <main>
-                <Routes>
-                    // 不需要认证的页面
-                    <Route path="/login" view=LoginPage/>
+            <Routes>
+                // 不需要认证的页面 - 无布局
+                <Route path="/login" view=LoginPage/>
 
-                    // 需要认证的页面，包装在Layout中
-                    <Route path="" view=Layout>
-                        <Route path="" view=HomePage/>
-                        <Route path="/dashboard" view=DashboardPage/>
-                        <Route path="/plans" view=PlansPage/>
-                        <Route path="/coupons" view=CouponsPage/>
-                        <Route path="/users" view=UsersPage/>
-                    </Route>
-                </Routes>
-            </main>
+                // 需要认证的页面，包装在Layout中
+                <Route path="" view=Layout>
+                    <Route path="/" view=DashboardPage/>
+                    <Route path="/dashboard" view=DashboardPage/>
+                    <Route path="/plans" view=PlansPage/>
+                    <Route path="/coupons" view=CouponsPage/>
+                    <Route path="/users" view=UsersPage/>
+                </Route>
+            </Routes>
         </Router>
     }
 }
 
+#[wasm_bindgen(start)]
 pub fn main() {
-    _ = console_log::init_with_level(log::Level::Debug);
+    // 初始化日志
+    console_log::init_with_level(log::Level::Debug).expect("日志初始化失败");
     console_error_panic_hook::set_once();
 
-    leptos::mount_to_body(App)
+    // 添加调试信息
+    web_sys::console::log_1(&"开始初始化 Leptos 应用".into());
+
+    // 等待 DOM 就绪
+    let window = web_sys::window().unwrap();
+    let document = window.document().unwrap();
+
+    // 检查 DOM 是否就绪
+    if document.ready_state() == "loading" {
+        // 如果还在加载，等待 DOMContentLoaded 事件
+        let closure = Closure::wrap(Box::new(move || {
+            web_sys::console::log_1(&"DOM 已就绪，开始挂载应用".into());
+            leptos::mount_to_body(App);
+        }) as Box<dyn Fn()>);
+
+        document
+            .add_event_listener_with_callback("DOMContentLoaded", closure.as_ref().unchecked_ref())
+            .unwrap();
+        closure.forget();
+    } else {
+        // DOM 已就绪，直接挂载
+        web_sys::console::log_1(&"DOM 已就绪，开始挂载应用".into());
+        leptos::mount_to_body(App);
+    }
+
+    // 添加调试信息
+    web_sys::console::log_1(&"Leptos 应用初始化完成".into());
 }
