@@ -1485,6 +1485,486 @@
             color: var(--color-text-secondary, #cbd5e0);
         }
         
+        /* 优惠券管理页面样式 */
+        .coupon-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .coupon-code {
+            font-weight: 600;
+            color: var(--color-text-primary, #1a202c);
+            font-family: monospace;
+            font-size: 0.875rem;
+            background: var(--color-hover, #f7fafc);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        
+        .coupon-name {
+            font-size: 0.875rem;
+            color: var(--color-text-secondary, #4a5568);
+            margin-bottom: 0.125rem;
+        }
+        
+        .coupon-id {
+            font-size: 0.75rem;
+            color: var(--color-text-muted, #a0aec0);
+            font-family: monospace;
+        }
+        
+        .coupon-type {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+        
+        .coupon-value {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: var(--color-text-primary, #1a202c);
+            font-family: monospace;
+        }
+        
+        .usage-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .usage-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .usage-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-text-secondary, #4a5568);
+            font-family: monospace;
+        }
+        
+        .usage-bar {
+            width: 100%;
+            height: 6px;
+            background: var(--color-border, #e2e8f0);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .usage-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .usage-success {
+            background: linear-gradient(135deg, #68d391 0%, #38a169 100%);
+        }
+        
+        .usage-warning {
+            background: linear-gradient(135deg, #fbd38d 0%, #d69e2e 100%);
+        }
+        
+        .usage-error {
+            background: linear-gradient(135deg, #fc8181 0%, #e53e3e 100%);
+        }
+        
+        .amount-limits {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .min-amount, .max-amount {
+            font-size: 0.75rem;
+            color: var(--color-text-secondary, #4a5568);
+        }
+        
+        .amount-label {
+            color: var(--color-text-muted, #a0aec0);
+        }
+        
+        .amount-value {
+            font-weight: 600;
+            color: var(--color-text-primary, #1a202c);
+            font-family: monospace;
+        }
+        
+        .period-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .period-text {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--color-text-primary, #1a202c);
+            background: var(--color-hover, #f7fafc);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+            width: fit-content;
+        }
+        
+        .user-limit {
+            font-size: 0.75rem;
+            color: var(--color-text-secondary, #4a5568);
+        }
+        
+        .limit-label {
+            color: var(--color-text-muted, #a0aec0);
+        }
+        
+        .limit-value {
+            font-weight: 600;
+            color: var(--color-text-primary, #1a202c);
+            font-family: monospace;
+        }
+        
+        .time-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .start-time, .end-time {
+            font-size: 0.75rem;
+            color: var(--color-text-secondary, #4a5568);
+        }
+        
+        .time-label {
+            color: var(--color-text-muted, #a0aec0);
+        }
+        
+        .time-value {
+            font-weight: 600;
+            color: var(--color-text-primary, #1a202c);
+            font-family: monospace;
+        }
+        
+        .time-value.expired {
+            color: var(--color-error, #e53e3e);
+        }
+        
+        .status-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            align-items: flex-start;
+        }
+        
+        .expired-badge {
+            margin-top: 0.25rem;
+        }
+        
+        /* 搜索和筛选样式 */
+        .search-filters {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .search-input-group {
+            display: flex;
+            align-items: center;
+            background: var(--color-surface, #ffffff);
+            border: 1px solid var(--color-border, #e2e8f0);
+            border-radius: 8px;
+            overflow: hidden;
+            min-width: 300px;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 0.75rem 1rem;
+            border: none;
+            outline: none;
+            font-size: 0.875rem;
+            background: transparent;
+            color: var(--color-text-primary, #1a202c);
+        }
+        
+        .search-input::placeholder {
+            color: var(--color-text-muted, #a0aec0);
+        }
+        
+        .search-button {
+            padding: 0.75rem;
+            background: var(--color-primary, #667eea);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .search-button:hover {
+            background: var(--color-secondary, #764ba2);
+        }
+        
+        .search-icon {
+            font-size: 1rem;
+        }
+        
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .filter-select {
+            padding: 0.75rem;
+            border: 1px solid var(--color-border, #e2e8f0);
+            border-radius: 8px;
+            background: var(--color-surface, #ffffff);
+            color: var(--color-text-primary, #1a202c);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--color-primary, #667eea);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+        
+        /* 模态框样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+        
+        .modal-content {
+            background: var(--color-card, rgba(255, 255, 255, 0.95));
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--color-border, #e2e8f0);
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--color-border, #e2e8f0);
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--color-text-primary, #1a202c);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--color-text-muted, #a0aec0);
+            cursor: pointer;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+        }
+        
+        .modal-close:hover {
+            background: var(--color-hover, #f7fafc);
+            color: var(--color-text-secondary, #4a5568);
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 1.5rem;
+            border-top: 1px solid var(--color-border, #e2e8f0);
+        }
+        
+        .form-notice {
+            text-align: center;
+            padding: 2rem;
+            color: var(--color-text-secondary, #4a5568);
+        }
+        
+        .form-notice p {
+            margin: 0;
+            font-size: 1rem;
+        }
+        
+        /* 深色主题下的优惠券样式 */
+        .dark-theme .coupon-code {
+            background: rgba(74, 85, 104, 0.3);
+            color: var(--color-text-primary, #e2e8f0);
+        }
+        
+        .dark-theme .coupon-name {
+            color: var(--color-text-secondary, #cbd5e0);
+        }
+        
+        .dark-theme .coupon-id {
+            color: var(--color-text-muted, #a0aec0);
+        }
+        
+        .dark-theme .coupon-value {
+            color: var(--color-text-primary, #e2e8f0);
+        }
+        
+        .dark-theme .usage-text {
+            color: var(--color-text-secondary, #cbd5e0);
+        }
+        
+        .dark-theme .usage-bar {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark-theme .amount-value, .dark-theme .limit-value, .dark-theme .time-value {
+            color: var(--color-text-primary, #e2e8f0);
+        }
+        
+        .dark-theme .period-text {
+            background: rgba(74, 85, 104, 0.3);
+            color: var(--color-text-primary, #e2e8f0);
+        }
+        
+        .dark-theme .search-input-group {
+            background: rgba(45, 55, 72, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark-theme .search-input {
+            color: var(--color-text-primary, #e2e8f0);
+        }
+        
+        .dark-theme .search-input::placeholder {
+            color: var(--color-text-muted, #a0aec0);
+        }
+        
+        .dark-theme .filter-select {
+            background: rgba(45, 55, 72, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--color-text-primary, #e2e8f0);
+        }
+        
+        .dark-theme .modal-content {
+            background: rgba(45, 55, 72, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark-theme .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark-theme .modal-header h3 {
+            color: var(--color-text-primary, #e2e8f0);
+        }
+        
+        .dark-theme .modal-close {
+            color: var(--color-text-muted, #a0aec0);
+        }
+        
+        .dark-theme .modal-close:hover {
+            background: rgba(74, 85, 104, 0.3);
+            color: var(--color-text-secondary, #cbd5e0);
+        }
+        
+        .dark-theme .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .dark-theme .form-notice {
+            color: var(--color-text-secondary, #cbd5e0);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 1024px) {
+            .search-filters {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: stretch;
+            }
+            
+            .search-input-group {
+                min-width: auto;
+            }
+            
+            .filter-group {
+                flex-wrap: wrap;
+            }
+            
+            .header-actions {
+                margin-top: 1rem;
+                justify-content: flex-start;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .coupon-info {
+                gap: 0.125rem;
+            }
+            
+            .coupon-code {
+                font-size: 0.75rem;
+            }
+            
+            .coupon-name {
+                font-size: 0.75rem;
+            }
+            
+            .coupon-type {
+                gap: 0.25rem;
+            }
+            
+            .usage-stats {
+                gap: 0.125rem;
+            }
+            
+            .amount-limits {
+                gap: 0.125rem;
+            }
+            
+            .time-info {
+                gap: 0.125rem;
+            }
+            
+            .modal-content {
+                width: 95%;
+                margin: 1rem;
+            }
+            
+            .modal-header, .modal-body, .modal-footer {
+                padding: 1rem;
+            }
+        }
+        
         /* 页面模板样式 */
         .page-template {
             padding: 2rem;
