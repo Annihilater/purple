@@ -8,7 +8,111 @@
 
 **Rust 最佳实践规则**: 总是从 Rust 最佳项目实践的方向思考和解决问题，保持整个项目代码风格一致，逻辑自洽和闭合。遵循 Rust 社区的惯用法和设计模式，确保代码质量和可维护性。
 
-## 路由配置重要规则
+**代码质量保证规则**: 每次修改完代码之后都要确保 `cargo fmt --all` 没有任何错误，且代码可以编译通过。一些无关的警告可以不用修复，但绝对不能有编译错误或格式化错误。这是代码质量的基本保障。
+
+## 管理员前端项目结构
+
+本项目包含两个主要部分：
+- **后端 API** (`backend/`): 使用 Actix-web 构建的 Rust Web API
+- **前端界面** (`admin-frontend/`): 使用 Leptos 构建的 Rust 前端应用
+
+### 前端项目架构
+
+前端项目采用 Leptos 框架，具有以下特点：
+
+#### 核心架构层次
+
+- **组件层** (`src/components/`): 可复用的UI组件
+  - `common.rs`: 通用组件库 (PageTemplate, DataTable, StatusBadge, StatsCard等)
+  - `sidebar.rs`: 侧边栏导航组件
+  - `layout/`: 布局组件
+- **页面层** (`src/pages/`): 各功能页面组件
+  - 设置页面: `system_settings.rs`, `theme_settings.rs`
+  - 服务器管理: `nodes_management.rs`, `permissions_management.rs`, `routes_management.rs`
+  - 财务管理: `subscriptions_management.rs`, `orders_management.rs`
+  - 用户管理: `users_management.rs`, `announcements_management.rs`, `tickets_management.rs`
+  - 指标管理: `queues_management.rs`, `knowledge_management.rs`
+- **服务层** (`src/services/`): API 调用和业务逻辑
+- **工具层** (`src/utils/`): 主题系统、工具函数等
+
+#### 前端路由配置
+
+路由配置位于 `src/lib.rs` 中，采用嵌套路由结构：
+
+```rust
+// 公开页面
+<Route path="/" view=HomePage/>
+<Route path="/login" view=LoginPage/>
+
+// 管理员页面 (需要认证)
+<Route path="/admin" view=Layout>
+    // 基础页面
+    <Route path="/" view=DashboardPage/>
+    <Route path="/dashboard" view=DashboardPage/>
+    
+    // 设置页面
+    <Route path="/settings/system" view=SystemSettings/>
+    <Route path="/settings/payment" view=SystemSettings/>
+    <Route path="/settings/theme" view=ThemeSettingsPage/>
+    
+    // 服务器管理
+    <Route path="/server/nodes" view=NodesManagementPage/>
+    <Route path="/server/permissions" view=PermissionsManagementPage/>
+    <Route path="/server/routes" view=RoutesManagementPage/>
+    
+    // 财务管理
+    <Route path="/finance/subscriptions" view=SubscriptionsManagementPage/>
+    <Route path="/finance/orders" view=OrdersManagementPage/>
+    
+    // 用户管理
+    <Route path="/users/management" view=UsersManagementPage/>
+    <Route path="/users/announcements" view=AnnouncementsManagementPage/>
+    <Route path="/users/tickets" view=TicketsManagementPage/>
+    
+    // 指标管理
+    <Route path="/metrics/queues" view=QueuesManagementPage/>
+    <Route path="/metrics/knowledge" view=KnowledgeManagementPage/>
+</Route>
+```
+
+#### 前端组件设计模式
+
+1. **页面模板模式**: 使用 `PageTemplate` 组件确保页面布局一致性
+2. **数据表格模式**: 使用 `DataTable` 组件实现统一的数据展示
+3. **状态标识模式**: 使用 `StatusBadge` 组件显示各种状态
+4. **统计卡片模式**: 使用 `StatsCard` 组件展示关键指标
+5. **响应式设计**: 使用 Signal 和 Memo 实现响应式数据流
+
+#### 前端路由特殊处理
+
+对于系统设置页面，支持通过 URL 路径自动选择对应的标签页：
+
+```rust
+// 根据 URL 路径确定初始标签页
+let initial_tab = create_memo(move |_| match location.pathname.get().as_str() {
+    "/admin/settings/payment" => "payment".to_string(),
+    "/admin/settings/system" => "system".to_string(),
+    _ => "site".to_string(),
+});
+```
+
+### 前端开发命令
+
+```bash
+# 检查代码格式
+cargo fmt --all
+
+# 检查编译
+cargo check
+
+# 构建项目
+cargo build
+
+# 开发模式运行
+cargo run
+```
+
+## 后端 API 路由配置重要规则
 
 ### 路由路径配置原则
 
@@ -184,58 +288,6 @@ match repo.list(page, page_size, filters).await {
 }
 ```
 
-#### 3. 错误处理最佳实践
-```rust
-// 标准错误处理模式
-pub async fn create_user(
-    user: web::Json<CreateUserRequest>,
-    service: web::Data<AuthService>,
-) -> Result<HttpResponse, ApiError> {
-    // 输入验证
-    if let Err(validation_errors) = user.validate() {
-        return Err(ApiError::from(validation_errors));
-    }
-
-    // 业务逻辑处理
-    match service.create(&user.into_inner()).await {
-        Ok(user) => {
-            let response = ApiResponse::success(UserResponse::from(user));
-            Ok(response.into_http_response())
-        }
-        Err(e) => {
-            tracing::error!("创建用户失败: {}", e);
-            Err(ApiError::with_details(
-                ErrorCode::InternalError,
-                "注册失败，请稍后重试".to_string(),
-            ))
-        }
-    }
-}
-
-// 查找资源错误处理
-pub async fn get_user(
-    id: web::Path<i32>,
-    repo: web::Data<UserRepository>,
-) -> Result<HttpResponse, ApiError> {
-    let user_id = id.into_inner();
-
-    match repo.find_by_id(user_id).await {
-        Ok(Some(user)) => {
-            let response = ApiResponse::success(UserResponse::from(user));
-            Ok(response.into_http_response())
-        }
-        Ok(None) => Err(ApiError::new(ErrorCode::UserNotFound)),
-        Err(e) => {
-            tracing::error!("查找用户失败: {}", e);
-            Err(ApiError::with_details(
-                ErrorCode::DatabaseError,
-                "数据库操作失败".to_string(),
-            ))
-        }
-    }
-}
-```
-
 ### 错误代码规范
 
 错误代码采用分类管理，便于维护和扩展：
@@ -246,100 +298,6 @@ pub async fn get_user(
 - **4000-4999**: 套餐相关错误
 - **5000-5999**: 优惠券相关错误
 - **6000-6999**: 订单相关错误
-
-### HTTP 状态码映射
-
-响应系统会自动根据错误类型映射相应的 HTTP 状态码：
-
-- 成功响应: `200 OK`
-- 认证错误: `401 Unauthorized` 或 `403 Forbidden`
-- 客户端错误: `400 Bad Request`
-- 资源不存在: `404 Not Found`
-- 服务器错误: `500 Internal Server Error`
-
-### 响应格式验证示例
-
-#### 认证失败场景 (401)
-```bash
-curl 'http://127.0.0.1:8080/api/coupons'
-```
-返回：
-```json
-{
-  "success": false,
-  "error": {
-    "code": "UNAUTHORIZED",
-    "message": "未授权访问",
-    "details": "缺少授权令牌"
-  },
-  "meta": {
-    "timestamp": 1751937981,
-    "request_id": "uuid-here"
-  }
-}
-```
-
-#### 认证成功但无数据场景 (200)
-```bash
-curl 'http://127.0.0.1:8080/api/coupons?page=1&page_size=10' \
-  -H 'Authorization: Bearer valid-token'
-```
-返回：
-```json
-{
-  "success": true,
-  "data": [],
-  "pagination": {
-    "page": 1,
-    "page_size": 10,
-    "total": 0,
-    "total_pages": 0,
-    "has_next": false,
-    "has_prev": false
-  },
-  "meta": {
-    "timestamp": 1751938399,
-    "request_id": "uuid-here"
-  }
-}
-```
-
-#### 认证成功且有数据场景 (200)
-```json
-{
-  "success": true,
-  "data": [
-    {
-      "id": 1,
-      "code": "WELCOME10",
-      "name": "欢迎优惠券",
-      "type": false,
-      "value": 1000
-    }
-  ],
-  "pagination": {
-    "page": 1,
-    "page_size": 10,
-    "total": 1,
-    "total_pages": 1,
-    "has_next": false,
-    "has_prev": false
-  },
-  "meta": {
-    "timestamp": 1751938399,
-    "request_id": "uuid-here"
-  }
-}
-```
-
-### 迁移指南
-
-对于现有接口，建议渐进式迁移：
-
-1. 新接口直接使用新的响应格式
-2. 现有接口可以保持兼容性，逐步迁移
-3. 重要接口优先迁移
-4. 统一更新 OpenAPI 文档
 
 ## 常用开发命令
 
@@ -366,10 +324,16 @@ cargo check
 
 ```bash
 # 格式化代码
-cargo fmt
+cargo fmt --all
+
+# 检查格式化
+cargo fmt --all --check
 
 # 代码检查
 cargo clippy
+
+# 自动修复可修复的clippy警告
+cargo clippy --fix --allow-dirty --allow-staged
 
 # 运行数据库迁移
 psql -U username -d purple -f migrations/init.sql
@@ -378,8 +342,11 @@ psql -U username -d purple -f migrations/init.sql
 ### 运行应用
 
 ```bash
-# 启动开发服务器
+# 启动后端开发服务器
 cargo run
+
+# 启动前端开发服务器 (在admin-frontend目录中)
+cd admin-frontend && cargo run
 
 # 使用自定义环境启动
 RUST_LOG=debug cargo run
@@ -414,7 +381,7 @@ LOG_WITH_TARGET=false
 LOG_FILE_PATH=logs/app.log
 ```
 
-## 架构概览
+## 后端架构概览
 
 这是一个使用 Actix-web 构建的 Rust Web API，采用分层架构模式：
 
@@ -433,25 +400,6 @@ LOG_FILE_PATH=logs/app.log
 - **中间件系统** (`src/middleware/`): 认证、CORS 和请求日志中间件
 - **通用响应系统** (`src/common/`): 统一的错误处理和响应格式化
 
-### 响应架构
-
-所有 API 返回标准化响应，包含：
-
-- `code`: 业务错误代码（1000-6999 范围）
-- `status`: 状态字符串表示
-- `message`: 人类可读消息（默认中文）
-- `data`: 响应数据（可选）
-- `timestamp`: Unix 时间戳
-
-错误代码范围：
-
-- 1000-1999: 通用错误
-- 2000-2999: 认证错误
-- 3000-3999: 用户错误
-- 4000-4999: 套餐错误
-- 5000-5999: 优惠券错误
-- 6000-6999: 订单错误
-
 ### 数据库架构
 
 - PostgreSQL 配合 SQLx 进行异步数据库操作
@@ -468,12 +416,20 @@ LOG_FILE_PATH=logs/app.log
 
 ## 添加新功能
 
+### 后端新功能
 1. **定义模型**: 在 `src/models/` 中添加数据结构
 2. **创建仓库**: 在 `src/repositories/` 中实现数据访问
 3. **添加服务**: 在 `src/services/` 中实现业务逻辑
 4. **创建 API 处理器**: 在 `src/api/` 中添加 HTTP 处理器
 5. **注册路由**: 在 `src/routes.rs` 中更新新端点
 6. **使用响应系统**: 利用 `common/response.rs` 实现一致的响应
+
+### 前端新功能
+1. **创建页面组件**: 在 `src/pages/` 中添加新页面
+2. **添加路由**: 在 `src/lib.rs` 中注册新路由
+3. **更新导航**: 在 `src/components/sidebar.rs` 中添加导航链接
+4. **使用通用组件**: 利用 `src/components/common.rs` 中的组件
+5. **添加服务调用**: 在 `src/services/` 中添加 API 调用
 
 ## 测试
 
@@ -562,36 +518,9 @@ pub struct YourNewApiResponse {
 }
 ```
 
-### 分页响应模式
-
-对于分页数据，创建具体的数据类型：
-
-```rust
-// 创建具体的分页数据类型
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
-pub struct YourPageData {
-    pub items: Vec<YourType>,
-    pub total: u64,
-    pub page: u64,
-    pub page_size: u64,
-    pub total_pages: u64,
-    pub has_next: bool,
-    pub has_prev: bool,
-}
-
-// 在具体响应类型中使用
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
-pub struct YourPageApiResponse {
-    pub code: i32,
-    pub status: String,
-    pub message: String,
-    pub data: Option<YourPageData>,
-    pub timestamp: i64,
-}
-```
-
 ## 关键依赖
 
+### 后端依赖
 - **actix-web**: Web 框架
 - **sqlx**: 数据库工具包
 - **utoipa**: OpenAPI 文档生成
@@ -599,3 +528,10 @@ pub struct YourPageApiResponse {
 - **tracing**: 结构化日志
 - **validator**: 输入验证
 - **serde**: 序列化/反序列化
+
+### 前端依赖
+- **leptos**: 前端框架
+- **leptos_router**: 路由管理
+- **serde**: 序列化/反序列化
+- **web-sys**: Web API 绑定
+- **wasm-bindgen**: WebAssembly 绑定
