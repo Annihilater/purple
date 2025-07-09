@@ -18,9 +18,9 @@ pub struct SiteSettings {
 impl Default for SiteSettings {
     fn default() -> Self {
         Self {
-            site_name: "Purple VPN".to_string(),
+            site_name: "Purple Network".to_string(),
             site_url: "https://purple.example.com".to_string(),
-            site_description: "高速稳定的VPN服务".to_string(),
+            site_description: "高速稳定的网络服务".to_string(),
             logo_url: "/assets/logo.png".to_string(),
             favicon_url: "/assets/favicon.ico".to_string(),
             contact_email: "support@purple.example.com".to_string(),
@@ -52,7 +52,7 @@ impl Default for EmailSettings {
             smtp_password: "".to_string(),
             smtp_encryption: "tls".to_string(),
             from_email: "noreply@purple.example.com".to_string(),
-            from_name: "Purple VPN".to_string(),
+            from_name: "Purple Network".to_string(),
             test_email: "".to_string(),
         }
     }

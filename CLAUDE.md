@@ -25,11 +25,12 @@
 - **组件层** (`src/components/`): 可复用的UI组件
   - `common.rs`: 通用组件库 (PageTemplate, DataTable, StatusBadge, StatsCard等)
   - `sidebar.rs`: 侧边栏导航组件
-  - `layout/`: 布局组件
+  - `layout.rs`: 布局组件
 - **页面层** (`src/pages/`): 各功能页面组件
+  - 基础页面: `dashboard.rs`, `home.rs`, `login.rs`
   - 设置页面: `system_settings.rs`, `theme_settings.rs`
   - 服务器管理: `nodes_management.rs`, `permissions_management.rs`, `routes_management.rs`
-  - 财务管理: `subscriptions_management.rs`, `orders_management.rs`
+  - 财务管理: `subscriptions_management.rs`, `orders_management.rs`, `coupons.rs`
   - 用户管理: `users_management.rs`, `announcements_management.rs`, `tickets_management.rs`
   - 指标管理: `queues_management.rs`, `knowledge_management.rs`
 - **服务层** (`src/services/`): API 调用和业务逻辑
@@ -49,6 +50,9 @@
     // 基础页面
     <Route path="/" view=DashboardPage/>
     <Route path="/dashboard" view=DashboardPage/>
+    <Route path="/plans" view=PlansPage/>
+    <Route path="/coupons" view=CouponsPage/>
+    <Route path="/users" view=UsersPage/>
     
     // 设置页面
     <Route path="/settings/system" view=SystemSettings/>
@@ -96,9 +100,133 @@ let initial_tab = create_memo(move |_| match location.pathname.get().as_str() {
 });
 ```
 
+#### 前端页面实现详情
+
+##### 1. 优惠券管理页面 (coupons.rs)
+
+这是一个完整的 v2board 风格的优惠券管理系统：
+
+**核心功能:**
+- 完整的优惠券 CRUD 操作
+- 支持固定金额和百分比折扣
+- 使用次数限制和用户限制
+- 有效期管理和状态控制
+- 实时搜索和筛选功能
+
+**数据模型:**
+```rust
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct Coupon {
+    pub id: u32,
+    pub code: String,
+    pub name: String,
+    pub type_: String,                    // fixed, percentage
+    pub value: u32,                       // 固定金额（分）或百分比
+    pub min_amount: Option<u32>,          // 最小使用金额（分）
+    pub max_amount: Option<u32>,          // 最大优惠金额（分）
+    pub limit_quota: Option<u32>,         // 使用次数限制
+    pub used_quota: u32,                  // 已使用次数
+    pub limit_use_with_user: Option<u32>, // 每用户限制次数
+    pub limit_plan_ids: Option<Vec<u32>>, // 限制套餐ID
+    pub limit_period: Option<String>,     // 限制周期
+    pub started_at: Option<String>,       // 开始时间
+    pub ended_at: Option<String>,         // 结束时间
+    pub status: bool,                     // 状态：true启用，false禁用
+    pub created_at: String,
+    pub updated_at: String,
+}
+```
+
+**UI 特色:**
+- 专业的表格布局，信息层次清晰
+- 状态徽章显示，支持多种状态类型
+- 使用情况进度条直观显示
+- 支持多维度筛选和搜索
+- 模态框操作，符合现代 Web 交互习惯
+
+##### 2. 其他管理页面
+
+所有管理页面都遵循统一的设计模式：
+
+**用户管理页面:**
+- 用户资料管理（头像、联系方式）
+- 流量使用统计和可视化
+- 权限和角色管理
+- 推荐关系追踪
+
+**服务器管理页面:**
+- 节点状态监控和负载显示
+- 权限组配置和用户分配
+- API 路由管理和限流配置
+
+**财务管理页面:**
+- 订阅状态跟踪和自动续费
+- 订单处理和支付状态
+- 收入统计和报表
+
+#### 前端样式系统
+
+项目使用完整的 CSS 样式系统，位于 `index.html` 中：
+
+**核心特性:**
+- CSS 变量系统支持主题切换
+- 响应式设计适配多种设备
+- 现代化的渐变和动画效果
+- 统一的组件样式库
+
+**主题支持:**
+```css
+/* 浅色主题 */
+:root {
+    --color-primary: #667eea;
+    --color-text-primary: #1a202c;
+    --color-surface: #ffffff;
+}
+
+/* 深色主题 */
+.dark-theme {
+    --color-primary: #90cdf4;
+    --color-text-primary: #e2e8f0;
+    --color-surface: #2d3748;
+}
+```
+
+#### 前端状态管理
+
+使用 Leptos 的信号系统进行状态管理：
+
+```rust
+// 创建响应式状态
+let (data, set_data) = create_signal(initial_value);
+
+// 创建计算属性
+let filtered_data = create_memo(move |_| {
+    data.get().into_iter().filter(|item| {
+        // 筛选逻辑
+    }).collect()
+});
+
+// 创建副作用
+create_effect(move |_| {
+    // 响应状态变化
+    let current_data = data.get();
+    // 执行副作用操作
+});
+```
+
 ### 前端开发命令
 
 ```bash
+# 安装依赖
+rustup target add wasm32-unknown-unknown
+cargo install trunk
+
+# 开发模式运行
+trunk serve
+
+# 生产构建
+trunk build --release
+
 # 检查代码格式
 cargo fmt --all
 
@@ -107,9 +235,6 @@ cargo check
 
 # 构建项目
 cargo build
-
-# 开发模式运行
-cargo run
 ```
 
 ## 后端 API 路由配置重要规则
