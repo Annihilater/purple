@@ -22,6 +22,8 @@ pub fn configure_routes(cfg: &mut web::ServiceConfig) {
         .service(api::health_check)
         // 认证相关路由
         .configure(configure_auth_routes)
+        // 管理员专用路由
+        .configure(configure_admin_routes)
         // 用户管理路由
         .configure(configure_user_routes)
         // 套餐管理路由
@@ -35,6 +37,16 @@ pub fn configure_routes(cfg: &mut web::ServiceConfig) {
 /// 配置认证相关路由（无需认证）
 fn configure_auth_routes(cfg: &mut web::ServiceConfig) {
     cfg.service(api::register).service(api::login);
+}
+
+/// 配置管理员专用路由（需要认证）
+fn configure_admin_routes(cfg: &mut web::ServiceConfig) {
+    cfg.service(
+        web::scope("/api/admin")
+            .wrap(Auth::new())
+            .service(api::get_admin_dashboard)
+            .service(api::get_admin_stats),
+    );
 }
 
 /// 配置用户管理路由（需要认证）

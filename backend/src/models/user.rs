@@ -109,3 +109,38 @@ pub struct UserResponse {
     pub created_at: i32,
     pub updated_at: i32,
 }
+
+impl From<User> for UserResponse {
+    fn from(user: User) -> Self {
+        Self {
+            id: user.id,
+            invite_user_id: user.invite_user_id,
+            telegram_id: user.telegram_id,
+            email: user.email,
+            balance: user.balance,
+            discount: user.discount,
+            commission_type: user.commission_type,
+            commission_rate: user.commission_rate,
+            commission_balance: user.commission_balance,
+            t: user.t,
+            u: user.u,
+            d: user.d,
+            transfer_enable: user.transfer_enable,
+            banned: user.banned,
+            is_admin: user.is_admin,
+            is_staff: user.is_staff,
+            last_login_at: user.last_login_at,
+            last_login_ip: user.last_login_ip,
+            uuid: user.uuid,
+            group_id: user.group_id,
+            plan_id: user.plan_id,
+            speed_limit: user.speed_limit,
+            remind_expire: user.remind_expire,
+            remind_traffic: user.remind_traffic,
+            expired_at: user.expired_at,
+            remarks: user.remarks,
+            created_at: user.created_at,
+            updated_at: user.updated_at,
+        }
+    }
+}

@@ -191,4 +191,88 @@ impl UserRepository {
 
         Ok((users, total))
     }
+
+    pub async fn list(
+        &self,
+        page: i64,
+        page_size: i64,
+        status: Option<bool>,
+        search: Option<String>,
+    ) -> Result<(Vec<User>, i64)> {
+        let offset = (page - 1) * page_size;
+
+        let (users, total) = if let Some(search_term) = search {
+            let search_pattern = format!("%{}%", search_term);
+
+            let users = sqlx::query_as!(
+                User,
+                r#"
+                SELECT * FROM purple_user
+                WHERE email ILIKE $1 OR remarks ILIKE $1
+                ORDER BY id DESC
+                LIMIT $2 OFFSET $3
+                "#,
+                search_pattern,
+                page_size,
+                offset
+            )
+            .fetch_all(&self.pool)
+            .await?;
+
+            let total = sqlx::query!(
+                r#"
+                SELECT COUNT(*) as count FROM purple_user
+                WHERE email ILIKE $1 OR remarks ILIKE $1
+                "#,
+                search_pattern
+            )
+            .fetch_one(&self.pool)
+            .await?
+            .count
+            .unwrap_or(0);
+
+            (users, total)
+        } else {
+            let users = sqlx::query_as!(
+                User,
+                r#"
+                SELECT * FROM purple_user
+                ORDER BY id DESC
+                LIMIT $1 OFFSET $2
+                "#,
+                page_size,
+                offset
+            )
+            .fetch_all(&self.pool)
+            .await?;
+
+            let total = sqlx::query!(
+                r#"
+                SELECT COUNT(*) as count FROM purple_user
+                "#
+            )
+            .fetch_one(&self.pool)
+            .await?
+            .count
+            .unwrap_or(0);
+
+            (users, total)
+        };
+
+        Ok((users, total))
+    }
+
+    pub async fn count_total(&self) -> Result<i64> {
+        let count = sqlx::query!(
+            r#"
+            SELECT COUNT(*) as count FROM purple_user
+            "#
+        )
+        .fetch_one(&self.pool)
+        .await?
+        .count
+        .unwrap_or(0);
+
+        Ok(count)
+    }
 }

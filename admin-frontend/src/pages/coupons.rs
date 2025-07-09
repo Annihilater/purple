@@ -1,140 +1,52 @@
 use crate::components::common::*;
+use crate::services::coupon_service::{Coupon, CouponService, CouponStats};
 use leptos::*;
 use serde::{Deserialize, Serialize};
 use std::rc::Rc;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
-pub struct Coupon {
-    pub id: u32,
-    pub code: String,
-    pub name: String,
-    pub type_: String,                    // fixed, percentage
-    pub value: u32,                       // 固定金额（分）或百分比
-    pub min_amount: Option<u32>,          // 最小使用金额（分）
-    pub max_amount: Option<u32>,          // 最大优惠金额（分），仅百分比有效
-    pub limit_quota: Option<u32>,         // 使用次数限制
-    pub used_quota: u32,                  // 已使用次数
-    pub limit_use_with_user: Option<u32>, // 每用户限制次数
-    pub limit_plan_ids: Option<Vec<u32>>, // 限制套餐ID
-    pub limit_period: Option<String>,     // 限制周期 monthly, quarterly, half_year, year
-    pub started_at: Option<String>,       // 开始时间
-    pub ended_at: Option<String>,         // 结束时间
-    pub status: bool,                     // 状态：true启用，false禁用
-    pub created_at: String,
-    pub updated_at: String,
-}
-
-impl Coupon {
-    pub fn mock_data() -> Vec<Self> {
-        vec![
-            Coupon {
-                id: 1,
-                code: "WELCOME10".to_string(),
-                name: "新用户欢迎优惠券".to_string(),
-                type_: "fixed".to_string(),
-                value: 1000,            // 10.00元
-                min_amount: Some(5000), // 50.00元
-                max_amount: None,
-                limit_quota: Some(100),
-                used_quota: 25,
-                limit_use_with_user: Some(1),
-                limit_plan_ids: None,
-                limit_period: Some("monthly".to_string()),
-                started_at: Some("2024-01-01 00:00:00".to_string()),
-                ended_at: Some("2024-12-31 23:59:59".to_string()),
-                status: true,
-                created_at: "2024-01-01 10:00:00".to_string(),
-                updated_at: "2024-01-15 15:30:00".to_string(),
-            },
-            Coupon {
-                id: 2,
-                code: "DISCOUNT20".to_string(),
-                name: "8折优惠券".to_string(),
-                type_: "percentage".to_string(),
-                value: 20,               // 20%折扣
-                min_amount: Some(10000), // 100.00元
-                max_amount: Some(5000),  // 最大优惠50.00元
-                limit_quota: Some(50),
-                used_quota: 12,
-                limit_use_with_user: Some(2),
-                limit_plan_ids: Some(vec![1, 2, 3]),
-                limit_period: Some("quarterly".to_string()),
-                started_at: Some("2024-01-01 00:00:00".to_string()),
-                ended_at: Some("2024-06-30 23:59:59".to_string()),
-                status: true,
-                created_at: "2024-01-01 10:00:00".to_string(),
-                updated_at: "2024-01-10 14:20:00".to_string(),
-            },
-            Coupon {
-                id: 3,
-                code: "NEWUSER50".to_string(),
-                name: "新用户50元优惠券".to_string(),
-                type_: "fixed".to_string(),
-                value: 5000,             // 50.00元
-                min_amount: Some(20000), // 200.00元
-                max_amount: None,
-                limit_quota: Some(200),
-                used_quota: 89,
-                limit_use_with_user: Some(1),
-                limit_plan_ids: None,
-                limit_period: Some("year".to_string()),
-                started_at: Some("2024-01-01 00:00:00".to_string()),
-                ended_at: None,
-                status: true,
-                created_at: "2024-01-01 10:00:00".to_string(),
-                updated_at: "2024-01-12 11:15:00".to_string(),
-            },
-            Coupon {
-                id: 4,
-                code: "EXPIRED15".to_string(),
-                name: "过期优惠券".to_string(),
-                type_: "percentage".to_string(),
-                value: 15,              // 15%折扣
-                min_amount: Some(8000), // 80.00元
-                max_amount: Some(3000), // 最大优惠30.00元
-                limit_quota: Some(30),
-                used_quota: 30,
-                limit_use_with_user: Some(1),
-                limit_plan_ids: Some(vec![1, 3]),
-                limit_period: Some("monthly".to_string()),
-                started_at: Some("2023-12-01 00:00:00".to_string()),
-                ended_at: Some("2023-12-31 23:59:59".to_string()),
-                status: false,
-                created_at: "2023-12-01 10:00:00".to_string(),
-                updated_at: "2024-01-01 00:00:00".to_string(),
-            },
-            Coupon {
-                id: 5,
-                code: "STUDENT30".to_string(),
-                name: "学生专享优惠券".to_string(),
-                type_: "fixed".to_string(),
-                value: 3000,             // 30.00元
-                min_amount: Some(10000), // 100.00元
-                max_amount: None,
-                limit_quota: None, // 无限制
-                used_quota: 156,
-                limit_use_with_user: Some(3),
-                limit_plan_ids: Some(vec![2, 4, 5]),
-                limit_period: Some("half_year".to_string()),
-                started_at: Some("2024-01-01 00:00:00".to_string()),
-                ended_at: Some("2024-08-31 23:59:59".to_string()),
-                status: true,
-                created_at: "2024-01-01 10:00:00".to_string(),
-                updated_at: "2024-01-08 16:45:00".to_string(),
-            },
-        ]
-    }
-}
-
 #[component]
 pub fn CouponsPage() -> impl IntoView {
-    let coupons = create_rw_signal(Coupon::mock_data());
+    let coupons = create_rw_signal(Vec::<Coupon>::new());
+    let loading = create_rw_signal(false);
+    let error = create_rw_signal(None::<String>);
     let search_term = create_rw_signal(String::new());
     let filter_status = create_rw_signal(String::from("all")); // all, active, inactive
     let filter_type = create_rw_signal(String::from("all")); // all, fixed, percentage
     let show_add_modal = create_rw_signal(false);
     let show_edit_modal = create_rw_signal(false);
     let selected_coupon = create_rw_signal(None::<Coupon>);
+    let stats = create_rw_signal(CouponStats {
+        total_coupons: 0,
+        active_coupons: 0,
+        total_used: 0,
+        total_quota: 0,
+    });
+
+    // 加载优惠券数据
+    let load_coupons = create_action(move |_: &()| async move {
+        loading.set(true);
+        error.set(None);
+
+        match CouponService::list_coupons(1, 1000, false, false).await {
+            Ok((coupon_list, _total)) => {
+                coupons.set(coupon_list);
+                // 加载统计数据
+                if let Ok(stats_data) = CouponService::get_coupon_stats().await {
+                    stats.set(stats_data);
+                }
+            }
+            Err(e) => {
+                error.set(Some(e));
+            }
+        }
+
+        loading.set(false);
+    });
+
+    // 页面加载时获取数据
+    create_effect(move |_| {
+        load_coupons.dispatch(());
+    });
 
     // 筛选后的优惠券
     let filtered_coupons = create_rw_signal(Vec::<Coupon>::new());
@@ -176,17 +88,14 @@ pub fn CouponsPage() -> impl IntoView {
     });
 
     // 统计数据
-    let stats = create_memo(move |_| {
-        let coupons_data = coupons.get();
-        let total_coupons = coupons_data.len();
-        let active_coupons = coupons_data.iter().filter(|c| c.status).count();
-        let total_used = coupons_data.iter().map(|c| c.used_quota).sum::<u32>();
-        let total_quota = coupons_data
-            .iter()
-            .filter_map(|c| c.limit_quota)
-            .sum::<u32>();
-
-        (total_coupons, active_coupons, total_used, total_quota)
+    let stats_memo = create_memo(move |_| {
+        let stats_data = stats.get();
+        (
+            stats_data.total_coupons,
+            stats_data.active_coupons,
+            stats_data.total_used,
+            stats_data.total_quota,
+        )
     });
 
     let render_coupon_row = Box::new(|coupon: &Coupon| {
@@ -397,10 +306,20 @@ pub fn CouponsPage() -> impl IntoView {
 
     let on_delete = Some(Rc::new(move |index: usize| {
         if let Some(coupon) = filtered_coupons.get_untracked().get(index) {
-            // 从原始数据中删除
-            coupons.update(|coupons| {
-                if let Some(pos) = coupons.iter().position(|c| c.id == coupon.id) {
-                    coupons.remove(pos);
+            let coupon_id = coupon.id;
+            let load_coupons = load_coupons.clone();
+
+            // 在实际应用中，这里应该显示确认对话框
+            spawn_local(async move {
+                match CouponService::delete_coupon(coupon_id).await {
+                    Ok(_) => {
+                        // 重新加载数据
+                        load_coupons.dispatch(());
+                    }
+                    Err(e) => {
+                        log::error!("删除优惠券失败: {}", e);
+                        // 在实际应用中，这里应该显示错误消息
+                    }
                 }
             });
         }
@@ -408,11 +327,47 @@ pub fn CouponsPage() -> impl IntoView {
 
     view! {
         <PageTemplate title="优惠券管理".to_string() subtitle="管理系统优惠券和促销活动".to_string()>
+            // 加载状态
+            {move || {
+                if loading.get() {
+                    view! {
+                        <div class="loading-container">
+                            <div class="loading-spinner">
+                                <span>"加载中..."</span>
+                            </div>
+                        </div>
+                    }.into_view()
+                } else {
+                    view! {}.into_view()
+                }
+            }}
+
+            // 错误状态
+            {move || {
+                if let Some(error_msg) = error.get() {
+                    view! {
+                        <div class="error-container">
+                            <div class="error-message">
+                                <span>"❌ 加载失败: "{error_msg}</span>
+                                <button
+                                    class="btn btn-primary"
+                                    on:click=move |_| load_coupons.dispatch(())
+                                >
+                                    "重试"
+                                </button>
+                            </div>
+                        </div>
+                    }.into_view()
+                } else {
+                    view! {}.into_view()
+                }
+            }}
+
             // 统计卡片
             <div class="stats-grid">
                 <StatsCard
                     title="总优惠券数".to_string()
-                    value=Signal::derive(move || stats.get().0.to_string())
+                    value=Signal::derive(move || stats_memo.get().0.to_string())
                     icon="🎫".to_string()
                     color="blue".to_string()
                     change=None
@@ -420,7 +375,7 @@ pub fn CouponsPage() -> impl IntoView {
                 />
                 <StatsCard
                     title="启用中".to_string()
-                    value=Signal::derive(move || stats.get().1.to_string())
+                    value=Signal::derive(move || stats_memo.get().1.to_string())
                     icon="✅".to_string()
                     color="green".to_string()
                     change=None
@@ -428,7 +383,7 @@ pub fn CouponsPage() -> impl IntoView {
                 />
                 <StatsCard
                     title="总使用次数".to_string()
-                    value=Signal::derive(move || stats.get().2.to_string())
+                    value=Signal::derive(move || stats_memo.get().2.to_string())
                     icon="📊".to_string()
                     color="purple".to_string()
                     change=None
@@ -437,7 +392,7 @@ pub fn CouponsPage() -> impl IntoView {
                 <StatsCard
                     title="总配额".to_string()
                     value=Signal::derive(move || {
-                        let total_quota = stats.get().3;
+                        let total_quota = stats_memo.get().3;
                         if total_quota > 0 {
                             total_quota.to_string()
                         } else {

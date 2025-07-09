@@ -263,4 +263,34 @@ impl CouponRepository {
         // 由于数据库表结构中没有 used_count 字段，直接返回优惠券信息
         self.find_by_id(id).await
     }
+
+    pub async fn get_stats(&self) -> Result<(i64, i64)> {
+        let now = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)?
+            .as_secs() as i32;
+
+        // 获取总优惠券数量
+        let total = sqlx::query_scalar!(
+            r#"
+            SELECT COUNT(*) as "count!" FROM purple_coupon
+            "#
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        // 获取有效且启用的优惠券数量
+        let active = sqlx::query_scalar!(
+            r#"
+            SELECT COUNT(*) as "count!" FROM purple_coupon
+            WHERE show = true
+            AND started_at <= $1
+            AND ended_at >= $1
+            "#,
+            now
+        )
+        .fetch_one(&self.pool)
+        .await?;
+
+        Ok((total, active))
+    }
 }

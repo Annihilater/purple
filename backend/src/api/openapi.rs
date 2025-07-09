@@ -2,6 +2,7 @@ use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
 use crate::api::{
+    admin::{AdminDashboard, AdminStats, AdminStatsQuery},
     health::HealthResponse,
     plan::BatchUpdatePlanStatusRequest,
     subscribe::{
@@ -44,6 +45,8 @@ use crate::models::{
         crate::api::health::health_check,
         crate::api::auth::register,
         crate::api::auth::login,
+        crate::api::admin::get_admin_dashboard,
+        crate::api::admin::get_admin_stats,
         crate::api::user::create_user,
         crate::api::user::get_users,
         crate::api::user::get_user,
@@ -77,6 +80,11 @@ use crate::models::{
     ),
     components(
         schemas(
+            // 管理员相关
+            AdminDashboard,
+            AdminStats,
+            AdminStatsQuery,
+
             // 用户相关
             User,
             CreateUserRequest,
@@ -171,6 +179,7 @@ use crate::models::{
         )
     ),
     tags(
+        (name = "admin", description = "Admin management endpoints"),
         (name = "project_info", description = "Project information endpoints"),
         (name = "health", description = "Health check endpoints"),
         (name = "users", description = "User management endpoints"),

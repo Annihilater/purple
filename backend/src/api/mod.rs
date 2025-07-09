@@ -1,3 +1,4 @@
+mod admin;
 mod auth;
 mod coupon;
 mod health;
@@ -10,6 +11,7 @@ mod subscribe;
 // mod ticket;    // 未实现仓库层，暂时注释
 pub mod user;
 
+pub use admin::{get_admin_dashboard, get_admin_stats};
 pub use auth::{login, register};
 pub use coupon::{
     create_coupon, delete_coupon, get_coupon, list_coupons, update_coupon, verify_coupon,
