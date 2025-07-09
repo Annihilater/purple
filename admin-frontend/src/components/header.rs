@@ -5,7 +5,7 @@ use leptos_router::*;
 #[component]
 pub fn Header() -> impl IntoView {
     let navigate = leptos_router::use_navigate();
-    
+
     let logout = move |_| {
         AuthService::remove_token();
         navigate("/", Default::default());
@@ -22,8 +22,8 @@ pub fn Header() -> impl IntoView {
                     </div>
                     <div style="display: flex; align-items: center; gap: 1rem;">
                         <span style="font-size: 0.875rem; color: #4a5568;">"管理员"</span>
-                        <button 
-                            class="btn-secondary" 
+                        <button
+                            class="btn-secondary"
                             style="padding: 0.5rem 1rem; font-size: 0.875rem;"
                             on:click=logout
                         >

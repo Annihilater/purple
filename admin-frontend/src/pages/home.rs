@@ -7,7 +7,7 @@ pub fn HomePage() -> impl IntoView {
             <div style="text-align: center; padding: 4rem 2rem;">
                 <h1 class="hero-title">"Purple 管理系统"</h1>
                 <p class="hero-subtitle">"现代化的企业级管理平台，助力您的业务增长"</p>
-                
+
                 // 登录注册按钮
                 <div style="margin: 3rem 0;">
                     <a href="/login" class="btn" style="margin-right: 1rem;">
@@ -68,7 +68,7 @@ pub fn HomePage() -> impl IntoView {
                     </p>
                 </div>
             </div>
-            
+
             // 底部行动区域
             <div style="text-align: center; margin-top: 4rem; padding: 2rem; background: rgba(255, 255, 255, 0.1); border-radius: 16px;">
                 <h2 style="font-size: 1.5rem; font-weight: 600; color: white; margin-bottom: 1rem;">
