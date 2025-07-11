@@ -30,6 +30,8 @@ pub fn configure_routes(cfg: &mut web::ServiceConfig) {
         .configure(configure_plan_routes)
         // 优惠券管理路由
         .configure(configure_coupon_routes)
+        // 服务器管理路由
+        .configure(configure_server_routes)
         // 订阅管理路由
         .configure(configure_subscribe_routes);
 }
@@ -93,6 +95,43 @@ fn configure_coupon_routes(cfg: &mut web::ServiceConfig) {
             .service(api::delete_coupon)
             .service(api::verify_coupon),
     );
+}
+
+/// 配置服务器管理路由（需要认证）
+fn configure_server_routes(cfg: &mut web::ServiceConfig) {
+    cfg
+        // 管理员服务器管理接口
+        .service(
+            web::scope("/api/admin/servers")
+                .wrap(Auth::new())
+                .service(api::create_server)
+                .service(api::get_servers)
+                .service(api::get_server)
+                .service(api::update_server)
+                .service(api::delete_server)
+                .service(api::copy_server)
+                .service(api::sort_servers),
+        )
+        // 服务器组管理
+        .service(
+            web::scope("/api/admin/servers")
+                .wrap(Auth::new())
+                .service(api::create_server_group)
+                .service(api::get_server_groups)
+                .service(api::update_server_group)
+                .service(api::delete_server_group),
+        )
+        // 路由规则管理
+        .service(
+            web::scope("/api/admin/servers")
+                .wrap(Auth::new())
+                .service(api::create_server_route)
+                .service(api::get_server_routes)
+                .service(api::update_server_route)
+                .service(api::delete_server_route),
+        )
+        // 用户获取服务器接口
+        .service(api::get_user_servers);
 }
 
 /// 配置订阅管理路由（需要认证）

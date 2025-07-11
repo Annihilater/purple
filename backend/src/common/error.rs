@@ -18,6 +18,8 @@ pub enum ErrorCode {
     DatabaseError = 1004,
     #[serde(rename = "NETWORK_ERROR")]
     NetworkError = 1005,
+    #[serde(rename = "NOT_FOUND")]
+    NotFound = 1006,
 
     // 认证相关错误 (2000-2999)
     #[serde(rename = "UNAUTHORIZED")]
@@ -124,6 +126,7 @@ impl ErrorCode {
             ErrorCode::ValidationError => "数据验证失败",
             ErrorCode::DatabaseError => "数据库操作失败",
             ErrorCode::NetworkError => "网络连接错误",
+            ErrorCode::NotFound => "资源不存在",
 
             // 认证相关错误
             ErrorCode::Unauthorized => "未授权访问",
@@ -190,6 +193,7 @@ impl ErrorCode {
             ErrorCode::ValidationError => "Data validation failed",
             ErrorCode::DatabaseError => "Database operation failed",
             ErrorCode::NetworkError => "Network connection error",
+            ErrorCode::NotFound => "Resource not found",
 
             // 认证相关错误
             ErrorCode::Unauthorized => "Unauthorized access",
@@ -274,6 +278,7 @@ impl fmt::Display for ErrorCode {
             ErrorCode::ValidationError => "VALIDATION_ERROR",
             ErrorCode::DatabaseError => "DATABASE_ERROR",
             ErrorCode::NetworkError => "NETWORK_ERROR",
+            ErrorCode::NotFound => "NOT_FOUND",
 
             // 认证相关错误
             ErrorCode::Unauthorized => "UNAUTHORIZED",

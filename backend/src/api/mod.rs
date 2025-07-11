@@ -7,6 +7,7 @@ mod info;
 // mod order;     // 未实现仓库层，暂时注释
 pub mod openapi;
 mod plan;
+pub mod server;
 mod subscribe;
 // mod ticket;    // 未实现仓库层，暂时注释
 pub mod user;
@@ -28,6 +29,12 @@ pub use info::get_project_info;
 pub use plan::{
     batch_update_plan_status, check_plan_availability, create_plan, delete_plan, get_enabled_plans,
     get_plan, get_plan_pricing, get_plan_stats, list_plans, update_plan,
+};
+pub use server::{
+    copy_server, create_server, create_server_group, create_server_route, delete_server,
+    delete_server_group, delete_server_route, get_server, get_server_groups, get_server_routes,
+    get_servers, get_user_servers, sort_servers, update_server, update_server_group,
+    update_server_route,
 };
 pub use subscribe::{
     get_nodes_status, get_subscribe_config, get_subscribe_info, get_subscribe_link,

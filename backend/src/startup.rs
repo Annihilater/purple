@@ -42,7 +42,7 @@ impl Application {
         let app_state = AppState::new(&database_config).await?;
 
         // 初始化管理员账户
-        initialize_admin_account(&app_state.db_pool, &config.admin).await?;
+        initialize_admin_account(&app_state.db, &config.admin).await?;
 
         // 记录启动信息
         log_startup_info(&config);

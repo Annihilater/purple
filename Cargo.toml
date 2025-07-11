@@ -44,11 +44,12 @@ tracing = "0.1"
 
 # 后端特定依赖
 actix-web = "4.11.0"
-sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid"] }
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "bigdecimal"] }
 utoipa = "3.5.0"
 utoipa-swagger-ui = { version = "3.1.5", features = ["actix-web"] }
 jsonwebtoken = "8.3"
 argon2 = "0.5"
+bigdecimal = { version = "0.3", features = ["serde"] }
 
 # 前端特定依赖
 leptos = { version = "0.6", features = ["csr"] }

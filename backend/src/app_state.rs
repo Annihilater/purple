@@ -4,7 +4,7 @@ use sqlx::PgPool;
 
 use crate::{
     config::DatabaseConfig,
-    repositories::{CouponRepository, PlanRepository, UserRepository},
+    repositories::{CouponRepository, PlanRepository, ServerRepository, UserRepository},
     services::AuthService,
 };
 
@@ -14,10 +14,11 @@ use crate::{
 /// 如数据库连接池、仓库实例、服务实例等
 #[derive(Clone)]
 pub struct AppState {
-    pub db_pool: PgPool,
+    pub db: PgPool, // 简化为 db，因为在 API 中使用 state.db.clone()
     pub user_repository: UserRepository,
     pub plan_repository: PlanRepository,
     pub coupon_repository: CouponRepository,
+    pub server_repository: ServerRepository,
     pub auth_service: AuthService,
 }
 
@@ -33,6 +34,7 @@ impl AppState {
         let user_repository = UserRepository::new(pool.clone());
         let plan_repository = PlanRepository::new(pool.clone());
         let coupon_repository = CouponRepository::new(pool.clone());
+        let server_repository = ServerRepository::new(pool.clone());
 
         // 创建服务实例
         let jwt_secret = std::env::var("JWT_SECRET")
@@ -40,10 +42,11 @@ impl AppState {
         let auth_service = AuthService::new(user_repository.clone(), jwt_secret);
 
         Ok(Self {
-            db_pool: pool.clone(),
+            db: pool,
             user_repository,
             plan_repository,
             coupon_repository,
+            server_repository,
             auth_service,
         })
     }

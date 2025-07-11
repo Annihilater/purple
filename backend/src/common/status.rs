@@ -33,7 +33,8 @@ impl ErrorCode {
             | ErrorCode::TicketNotFound
             | ErrorCode::NoticeNotFound
             | ErrorCode::KnowledgeNotFound
-            | ErrorCode::SubscribeNotFound => StatusCode::NOT_FOUND,
+            | ErrorCode::SubscribeNotFound
+            | ErrorCode::NotFound => StatusCode::NOT_FOUND,
 
             ErrorCode::UserAlreadyExists | ErrorCode::CouponUsed | ErrorCode::OrderAlreadyPaid => {
                 StatusCode::CONFLICT

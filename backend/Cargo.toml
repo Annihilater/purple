@@ -52,6 +52,8 @@ config = "0.15.11"
 futures-util = "0.3.31"
 actix-http = "3.11.0"
 actix-cors = "0.7.1"
+bigdecimal = { version = "0.3", features = ["serde"] }
+num-traits = "0.2"
 
 # 共享库依赖
 purple-shared = { path = "../shared" }
