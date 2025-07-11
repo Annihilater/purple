@@ -16,6 +16,16 @@ use crate::{
 // ========== 管理员接口 ==========
 
 /// 创建服务器
+#[utoipa::path(
+    post,
+    path = "/admin/servers",
+    tag = "servers",
+    request_body = CreateServerRequest,
+    responses(
+        (status = 200, description = "创建服务器成功"),
+        (status = 400, description = "创建服务器失败"),
+    )
+)]
 #[post("")]
 pub async fn create_server(
     state: web::Data<AppState>,
@@ -39,6 +49,15 @@ pub async fn create_server(
 }
 
 /// 获取所有服务器
+#[utoipa::path(
+    get,
+    path = "/admin/servers",
+    tag = "servers",
+    responses(
+        (status = 200, description = "获取服务器列表成功"),
+        (status = 400, description = "获取服务器列表失败"),
+    )
+)]
 #[get("")]
 pub async fn get_servers(state: web::Data<AppState>) -> Result<HttpResponse, ApiError> {
     let server_repo = ServerRepository::new(state.db.clone());
@@ -69,6 +88,18 @@ pub async fn get_servers(state: web::Data<AppState>) -> Result<HttpResponse, Api
 }
 
 /// 获取服务器详情
+#[utoipa::path(
+    get,
+    path = "/admin/servers/{id}",
+    tag = "servers",
+    params(
+        ("id" = u32, Path, description = "服务器 ID")
+    ),
+    responses(
+        (status = 200, description = "获取服务器详情成功"),
+        (status = 404, description = "服务器不存在"),
+    )
+)]
 #[get("/{id}")]
 pub async fn get_server(
     state: web::Data<AppState>,
@@ -100,6 +131,19 @@ pub async fn get_server(
 }
 
 /// 更新服务器
+#[utoipa::path(
+    put,
+    path = "/admin/servers/{id}",
+    tag = "servers",
+    params(
+        ("id" = u32, Path, description = "服务器 ID")
+    ),
+    request_body = UpdateServerRequest,
+    responses(
+        (status = 200, description = "更新服务器成功"),
+        (status = 404, description = "服务器不存在"),
+    )
+)]
 #[put("/{id}")]
 pub async fn update_server(
     state: web::Data<AppState>,
@@ -129,6 +173,18 @@ pub async fn update_server(
 }
 
 /// 删除服务器
+#[utoipa::path(
+    delete,
+    path = "/admin/servers/{id}",
+    tag = "servers",
+    params(
+        ("id" = u32, Path, description = "服务器 ID")
+    ),
+    responses(
+        (status = 200, description = "删除服务器成功"),
+        (status = 404, description = "服务器不存在"),
+    )
+)]
 #[delete("/{id}")]
 pub async fn delete_server(
     state: web::Data<AppState>,
@@ -426,6 +482,15 @@ pub async fn delete_server_route(
 // ========== 用户接口 ==========
 
 /// 获取用户可用服务器
+#[utoipa::path(
+    get,
+    path = "/user/servers",
+    tag = "servers",
+    responses(
+        (status = 200, description = "获取用户服务器列表成功"),
+        (status = 400, description = "获取用户服务器列表失败"),
+    )
+)]
 #[get("/user/servers")]
 pub async fn get_user_servers(
     state: web::Data<AppState>,

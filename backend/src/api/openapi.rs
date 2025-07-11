@@ -12,12 +12,15 @@ use crate::api::{
     user::{CreateUserRequest, GetUsersQuery, UpdateUserRequest, UpdateUserStatusRequest},
 };
 use crate::common::{
-    BatchUpdateApiResponse, BatchUpdateData, CouponApiResponse, CouponPageApiResponse,
-    CouponValidationApiResponse, CouponValidationData, EmptyApiResponse, ErrorCode,
-    HealthApiResponse, HealthData, PlanApiResponse, PlanAvailabilityApiResponse,
+    response_v2::{ErrorDetail, PaginationMeta, ResponseMeta},
+    BatchUpdateApiResponse, BatchUpdateData, BooleanApiResponse, CouponApiResponse,
+    CouponPageApiResponse, CouponValidationApiResponse, CouponValidationData, EmptyApiResponse,
+    ErrorCode, HealthApiResponse, HealthData, PlanApiResponse, PlanAvailabilityApiResponse,
     PlanAvailabilityData, PlanListApiResponse, PlanPageApiResponse, PlanPricingApiResponse,
     PlanPricingData, PlanStatsApiResponse, PlanStatsData, ProjectInfoApiResponse, ProjectInfoData,
-    TokenApiResponse, UserApiResponse, UserIdApiResponse, UserIdData, UserPageApiResponse,
+    ServerApiResponse, ServerGroupIdApiResponse, ServerGroupListApiResponse, ServerIdApiResponse,
+    ServerListApiResponse, ServerRouteIdApiResponse, ServerRouteListApiResponse, TokenApiResponse,
+    UserApiResponse, UserIdApiResponse, UserIdData, UserPageApiResponse, UserServerListApiResponse,
 };
 use crate::models::{
     auth::{Claims, LoginRequest, RegisterRequest, TokenResponse},
@@ -29,6 +32,12 @@ use crate::models::{
     plan::{
         CreatePlanRequest, Plan, PlanAvailability, PlanListResponse, PlanPricing, PlanResponse,
         PlanStats, PriceOption, UpdatePlanRequest,
+    },
+    server::{
+        CopyServerRequest, CreateServerGroupRequest, CreateServerRequest, CreateServerRouteRequest,
+        Server, ServerGroup, ServerProtocol, ServerResponse, ServerRoute, ServerSortItem,
+        ServerSortRequest, ServerStatus, UpdateServerGroupRequest, UpdateServerRequest,
+        UpdateServerRouteRequest, UserServerResponse,
     },
     subscribe::{
         ExpireInfo, LoginStats, PlanInfo, ResetTokenRequest, ResetTokenResponse, ServerNode,
@@ -69,6 +78,12 @@ use crate::models::{
         crate::api::coupon::update_coupon,
         crate::api::coupon::delete_coupon,
         crate::api::coupon::verify_coupon,
+        crate::api::server::create_server,
+        crate::api::server::get_servers,
+        crate::api::server::get_server,
+        crate::api::server::update_server,
+        crate::api::server::delete_server,
+        crate::api::server::get_user_servers,
         crate::api::subscribe::get_subscribe_info,
         crate::api::subscribe::get_subscribe_link,
         crate::api::subscribe::reset_subscribe_token,
@@ -119,6 +134,24 @@ use crate::models::{
             ValidateCouponResponse,
             CouponValidationData,
 
+            // 服务器相关
+            Server,
+            ServerProtocol,
+            ServerStatus,
+            CreateServerRequest,
+            UpdateServerRequest,
+            ServerResponse,
+            UserServerResponse,
+            CopyServerRequest,
+            ServerSortRequest,
+            ServerSortItem,
+            ServerGroup,
+            CreateServerGroupRequest,
+            UpdateServerGroupRequest,
+            ServerRoute,
+            CreateServerRouteRequest,
+            UpdateServerRouteRequest,
+
             // 认证相关
             RegisterRequest,
             LoginRequest,
@@ -132,6 +165,11 @@ use crate::models::{
             // 项目信息
             ProjectInfo,
             ProjectInfoData,
+
+            // 响应结构相关
+            ResponseMeta,
+            ErrorDetail,
+            PaginationMeta,
 
             // 错误和响应类型
             ErrorCode,
@@ -152,6 +190,15 @@ use crate::models::{
             CouponApiResponse,
             CouponPageApiResponse,
             CouponValidationApiResponse,
+            ServerIdApiResponse,
+            ServerApiResponse,
+            ServerListApiResponse,
+            UserServerListApiResponse,
+            ServerGroupIdApiResponse,
+            ServerGroupListApiResponse,
+            ServerRouteIdApiResponse,
+            ServerRouteListApiResponse,
+            BooleanApiResponse,
 
             // 订阅相关的Schema
             UserSubscribeInfo,
@@ -186,6 +233,7 @@ use crate::models::{
         (name = "plans", description = "Plan management endpoints"),
         (name = "coupons", description = "Coupon management endpoints"),
         (name = "auth", description = "Authentication endpoints"),
+        (name = "servers", description = "Server management endpoints"),
         (name = "subscribe", description = "Subscription management endpoints"),
     )
 )]

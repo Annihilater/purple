@@ -7,7 +7,13 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 
 use crate::common::response_v2::{ErrorDetail, PaginationMeta, ResponseMeta};
-use crate::models::{auth::TokenResponse, coupon::CouponResponse, plan::PlanResponse, user::User};
+use crate::models::{
+    auth::TokenResponse,
+    coupon::CouponResponse,
+    plan::PlanResponse,
+    server::{ServerGroup, ServerResponse, ServerRoute, UserServerResponse},
+    user::User,
+};
 
 /// 空响应（用于错误响应或无数据响应）
 #[derive(Debug, Serialize, Deserialize, ToSchema)]
@@ -299,4 +305,105 @@ pub struct CouponValidationData {
     pub discount_type: i32,
     /// 过期时间
     pub expires_at: i32,
+}
+
+// ========== 服务器相关响应类型 ==========
+
+/// 服务器 ID 响应
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ServerIdApiResponse {
+    /// 操作是否成功
+    pub success: bool,
+    /// 服务器 ID
+    pub data: u32,
+    /// 元数据
+    pub meta: ResponseMeta,
+}
+
+/// 单个服务器响应
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ServerApiResponse {
+    /// 操作是否成功
+    pub success: bool,
+    /// 服务器数据
+    pub data: ServerResponse,
+    /// 元数据
+    pub meta: ResponseMeta,
+}
+
+/// 服务器列表响应
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ServerListApiResponse {
+    /// 操作是否成功
+    pub success: bool,
+    /// 服务器列表
+    pub data: Vec<ServerResponse>,
+    /// 元数据
+    pub meta: ResponseMeta,
+}
+
+/// 用户服务器列表响应
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct UserServerListApiResponse {
+    /// 操作是否成功
+    pub success: bool,
+    /// 用户服务器列表
+    pub data: Vec<UserServerResponse>,
+    /// 元数据
+    pub meta: ResponseMeta,
+}
+
+/// 服务器组 ID 响应
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ServerGroupIdApiResponse {
+    /// 操作是否成功
+    pub success: bool,
+    /// 服务器组 ID
+    pub data: u32,
+    /// 元数据
+    pub meta: ResponseMeta,
+}
+
+/// 服务器组列表响应
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ServerGroupListApiResponse {
+    /// 操作是否成功
+    pub success: bool,
+    /// 服务器组列表
+    pub data: Vec<ServerGroup>,
+    /// 元数据
+    pub meta: ResponseMeta,
+}
+
+/// 服务器路由 ID 响应
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ServerRouteIdApiResponse {
+    /// 操作是否成功
+    pub success: bool,
+    /// 路由规则 ID
+    pub data: u32,
+    /// 元数据
+    pub meta: ResponseMeta,
+}
+
+/// 服务器路由列表响应
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ServerRouteListApiResponse {
+    /// 操作是否成功
+    pub success: bool,
+    /// 路由规则列表
+    pub data: Vec<ServerRoute>,
+    /// 元数据
+    pub meta: ResponseMeta,
+}
+
+/// 布尔值响应（用于更新/删除等操作）
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct BooleanApiResponse {
+    /// 操作是否成功
+    pub success: bool,
+    /// 操作结果
+    pub data: bool,
+    /// 元数据
+    pub meta: ResponseMeta,
 }
